@@ -107,7 +107,7 @@ async def test_flow_none_none_motion_bs_none() -> None:
 
     Expect: aggregator forwards motion and face streams unchanged to sinks.
     """
-    logger_cfg = {"logger_name": "test_bsa_none_none_bs_none", "console_level": logging.DEBUG}
+    logger_cfg = dict(logger_name="test_bsa_none_none_bs_none", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     aggregator = BlendshapesAggregator(queue_size=20, sleep_time=0.01, logger_cfg=logger_cfg)
 
     dag = DirectedAcyclicGraph("test_dag_1", {})
@@ -174,7 +174,9 @@ async def test_flow_none_none_motion_bs_present() -> None:
 
     Expect: aggregator strips blendshapes from motion but forwards face unchanged.
     """
-    logger_cfg = {"logger_name": "test_bsa_none_none_bs_present", "console_level": logging.DEBUG}
+    logger_cfg = dict(
+        logger_name="test_bsa_none_none_bs_present", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
     aggregator = BlendshapesAggregator(queue_size=20, sleep_time=0.01, logger_cfg=logger_cfg)
 
     dag = DirectedAcyclicGraph("test_dag_2", {})
@@ -247,7 +249,7 @@ async def test_flow_motion_first_only() -> None:
 
     Test before-zero branch by setting buffer_frame_idx to negative value.
     """
-    logger_cfg = {"logger_name": "test_bsa_motion_first_only", "console_level": logging.DEBUG}
+    logger_cfg = dict(logger_name="test_bsa_motion_first_only", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     aggregator = BlendshapesAggregator(
         motion_first_blendshape_names=["A", "B"],
         add_blendshape_names=None,
@@ -322,7 +324,7 @@ async def test_flow_motion_first_only() -> None:
 async def test_flow_add_only() -> None:
     """Only add_blendshape_names provided; aggregate after 0 with both
     streams."""
-    logger_cfg = {"logger_name": "test_bsa_add_only", "console_level": logging.DEBUG}
+    logger_cfg = dict(logger_name="test_bsa_add_only", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     aggregator = BlendshapesAggregator(
         motion_first_blendshape_names=None,
         add_blendshape_names=["A"],
@@ -402,7 +404,7 @@ async def test_flow_add_only() -> None:
 async def test_flow_both_lists() -> None:
     """Both motion_first and add lists provided; aggregate with both
     streams."""
-    logger_cfg = {"logger_name": "test_bsa_both_lists", "console_level": logging.DEBUG}
+    logger_cfg = dict(logger_name="test_bsa_both_lists", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     aggregator = BlendshapesAggregator(
         motion_first_blendshape_names=["A"],
         add_blendshape_names=["B"],

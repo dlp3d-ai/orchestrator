@@ -238,8 +238,7 @@ async def test_audio2face_streaming_client_wav():
             If the A2F stream processing times out.
     """
     logger_cfg = dict(
-        logger_name="test_audio2face_streaming_client_wav",
-        console_level=logging.DEBUG,
+        logger_name="test_audio2face_streaming_client_wav", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     a2f_cfg = dict(
         type="Audio2FaceStreamingClient",
@@ -340,8 +339,7 @@ async def test_audio2face_streaming_client_pcm():
             If the A2F stream processing times out.
     """
     logger_cfg = dict(
-        logger_name="test_audio2face_streaming_client_pcm",
-        console_level=logging.DEBUG,
+        logger_name="test_audio2face_streaming_client_pcm", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     a2f_cfg = dict(
         type="Audio2FaceStreamingClient",

@@ -86,10 +86,7 @@ async def test_xai_memory_client_call_llm(xai_memory_client: XAIMemoryClient):
     if not xai_api_key:
         pytest.skip("xai_api_key is not set, skipping test test_xai_memory_client_call_llm")
 
-    logger_cfg = dict(
-        logger_name="test_xai_memory_call_llm",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_xai_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log")
 
     # test data
     short_term_memories = [
@@ -152,8 +149,7 @@ async def test_sensenova_omni_memory_client_call_llm(sensenova_omni_memory_clien
         pytest.skip("sensenova_ak or sensenova_sk is not set, skipping test test_sensenova_omni_memory_client_call_llm")
 
     logger_cfg = dict(
-        logger_name="test_sensenova_omni_memory_call_llm",
-        console_level=logging.DEBUG,
+        logger_name="test_sensenova_omni_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
 
     # test data

@@ -154,8 +154,7 @@ async def test_sensetime_asr_client_stream():
         )
 
     logger_cfg = dict(
-        logger_name="test_sensetime_asr_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_sensetime_asr_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     asr_cfg = dict(
         type="SensetimeASRClient",
@@ -230,8 +229,7 @@ async def test_softsugar_asr_client_stream():
         pytest.skip("softsugar_app_id or softsugar_app_key is not set, skipping test test_softsugar_asr_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_softsugar_asr_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_softsugar_asr_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     asr_cfg = dict(
         type="SoftSugarASRClient",
@@ -311,8 +309,7 @@ async def test_openai_realtime_asr_client_stream():
         pytest.skip("openai_api_key is not set, skipping test test_openai_realtime_asr_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_openai_realtime_asr_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_openai_realtime_asr_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     asr_cfg = dict(
         type="OpenAIRealtimeASRClient",

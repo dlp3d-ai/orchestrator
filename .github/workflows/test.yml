@@ -10,17 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-        env:
-          REDIS_PASSWORD: CICDredisPWD
       mongodb:
         image: mongodb/mongodb-community-server:7.0-ubi8
         options: >-

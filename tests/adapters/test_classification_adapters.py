@@ -36,8 +36,7 @@ async def test_openai_classification_client_stream():
         pytest.skip("openai_api_key is not set, skipping test test_openai_classification_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_openai_classification_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_openai_classification_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     classification_client_cfg = dict(
         type="OpenAIClassificationClient",
@@ -115,8 +114,7 @@ async def test_xai_classification_client_stream():
         pytest.skip("xai_api_key is not set, skipping test test_xai_classification_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_xai_classification_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_xai_classification_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     classification_client_cfg = dict(
         type="XAIClassificationClient",
@@ -194,8 +192,7 @@ async def test_gemini_classification_client_stream():
         pytest.skip("gemini_api_key is not set, skipping test test_gemini_classification_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_gemini_classification_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_gemini_classification_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     classification_client_cfg = dict(
         type="GeminiClassificationClient",
@@ -279,7 +276,8 @@ async def test_sensenova_omni_classification_client_stream():
 
     logger_cfg = dict(
         logger_name="test_sensenova_omni_classification_client_stream",
-        console_level=logging.DEBUG,
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
     )
     classification_client_cfg = dict(
         type="SenseNovaOmniClassificationClient",

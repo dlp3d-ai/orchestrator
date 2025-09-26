@@ -191,10 +191,7 @@ async def test_openai_stream(
     if not sensenova_ak or not sensenova_sk or not openai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
 
-    logger_cfg = dict(
-        logger_name="test_openai_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_openai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     openai_client_cfg = dict(
         type="OpenAIConversationClient",
         name="openai_client",
@@ -285,10 +282,7 @@ async def test_gemini_stream(
     if not sensenova_ak or not sensenova_sk or not gemini_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or GEMINI_API_KEY is not set, skipping test_gemini_stream")
 
-    logger_cfg = dict(
-        logger_name="test_gemini_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_gemini_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     gemini_client_cfg = dict(
         type="GeminiConversationClient",
         name="gemini_client",
@@ -382,10 +376,7 @@ async def test_deepseek_stream(
     if not sensenova_ak or not sensenova_sk or not deepseek_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream")
 
-    logger_cfg = dict(
-        logger_name="test_deepseek_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_deepseek_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     deepseek_client_cfg = dict(
         type="DeepSeekConversationClient",
         name="deepseek_client",
@@ -475,10 +466,7 @@ async def test_xai_stream(
     if not sensenova_ak or not sensenova_sk or not xai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_xai_stream")
 
-    logger_cfg = dict(
-        logger_name="test_xai_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_xai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     xai_client_cfg = dict(
         type="XAIConversationClient",
         name="xai_client",
@@ -568,10 +556,7 @@ async def test_anthropic_stream(
     if not sensenova_ak or not sensenova_sk or not anthropic_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream")
 
-    logger_cfg = dict(
-        logger_name="test_anthropic_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_anthropic_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     anthropic_client_cfg = dict(
         type="AnthropicConversationClient",
         name="anthropic_client",
@@ -661,8 +646,7 @@ async def test_sensenova_omni_stream(
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_stream")
 
     logger_cfg = dict(
-        logger_name="test_sensenova_omni_streaming",
-        console_level=logging.DEBUG,
+        logger_name="test_sensenova_omni_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     sensenova_omni_client_cfg = dict(
         type="SenseNovaOmniConversationClient",
@@ -751,10 +735,7 @@ async def test_blank_input_stream(
     if not sensenova_ak or not sensenova_sk or not openai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
 
-    logger_cfg = dict(
-        logger_name="test_openai_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_openai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     openai_client_cfg = dict(
         type="OpenAIConversationClient",
         name="openai_client",
@@ -844,10 +825,7 @@ async def test_classification_input_stream(
     if not sensenova_ak or not sensenova_sk or not xai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_classification_input_stream")
 
-    logger_cfg = dict(
-        logger_name="test_xai_streaming",
-        console_level=logging.DEBUG,
-    )
+    logger_cfg = dict(logger_name="test_xai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     xai_client_cfg = dict(
         type="XAIConversationClient",
         name="xai_client",

@@ -27,8 +27,7 @@ async def test_sensetime_tts_client_stream():
         pytest.skip("ZOETROPE_TTS_WS_URL is not set, skipping test test_sensetime_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_sensetime_tts_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_sensetime_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="SensetimeTTSClient",
@@ -106,8 +105,7 @@ async def test_huoshan_tts_client_stream():
         pytest.skip("HUOSHAN_APPID or HUOSHAN_TOKEN is not set, skipping test test_huoshan_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_huoshan_tts_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_huoshan_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="HuoshanTTSClient",
@@ -195,8 +193,7 @@ async def test_softsugar_tts_client_stream():
         pytest.skip("SOFTSUGAR_APP_ID or SOFTSUGAR_APP_KEY is not set, skipping test test_softsugar_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_softsugar_tts_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_softsugar_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="SoftSugarTTSClient",
@@ -283,8 +280,7 @@ async def test_sensenova_tts_client_stream():
         pytest.skip("NOVATTS_API_KEY is not set, skipping test test_sensenova_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_sensenova_tts_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_sensenova_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="SensenovaTTSClient",
@@ -370,8 +366,7 @@ async def test_elevenlabs_tts_client_stream():
         pytest.skip("ELEVENLABS_API_KEY is not set, skipping test test_elevenlabs_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_elevenlabs_tts_client_non_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_elevenlabs_tts_client_non_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="ElevenLabsTTSClient",

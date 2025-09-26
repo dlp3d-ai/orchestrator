@@ -275,8 +275,7 @@ async def test_openai_audio_client_stream_pcm_16khz(
         )
 
     logger_cfg = dict(
-        logger_name="test_openai_audio_client_stream_pcm_16khz",
-        console_level=logging.DEBUG,
+        logger_name="test_openai_audio_client_stream_pcm_16khz", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
 
     test_memory_adapter = SenseNovaOmniMemoryClient(
@@ -388,8 +387,7 @@ async def test_openai_audio_client_stream_pcm_24khz(mongodb_memory_client: Mongo
         )
 
     logger_cfg = dict(
-        logger_name="test_openai_audio_client_stream_pcm_24khz",
-        console_level=logging.DEBUG,
+        logger_name="test_openai_audio_client_stream_pcm_24khz", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
 
     test_memory_adapter = SenseNovaOmniMemoryClient(

@@ -65,8 +65,7 @@ async def test_conversation_aggregator_accept(mongodb_memory_client: MongoDBMemo
     ACCEPT classification result.
     """
     logger_cfg = dict(
-        logger_name="test_conversation_aggregator_accept",
-        console_level=logging.DEBUG,
+        logger_name="test_conversation_aggregator_accept", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     memory = SenseNovaOmniMemoryClient(
         name="test_memory_adapter",
@@ -153,8 +152,7 @@ async def test_conversation_aggregator_reject(mongodb_memory_client: MongoDBMemo
     REJECT classification result.
     """
     logger_cfg = dict(
-        logger_name="test_conversation_aggregator_reject",
-        console_level=logging.DEBUG,
+        logger_name="test_conversation_aggregator_reject", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     memory = SenseNovaOmniMemoryClient(
         name="test_memory_adapter",
@@ -253,8 +251,7 @@ async def test_conversation_aggregator_leave(mongodb_memory_client: MongoDBMemor
     LEAVE classification result.
     """
     logger_cfg = dict(
-        logger_name="test_conversation_aggregator_leave",
-        console_level=logging.DEBUG,
+        logger_name="test_conversation_aggregator_leave", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     memory = SenseNovaOmniMemoryClient(
         name="test_memory_adapter",

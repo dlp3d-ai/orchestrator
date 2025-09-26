@@ -29,8 +29,7 @@ async def test_tts_reaction_aggregator_basic_flow():
     5. Verifying the DAG completes successfully within timeout
     """
     logger_cfg = dict(
-        logger_name="test_tts_reaction_aggregator_basic_flow",
-        console_level=logging.DEBUG,
+        logger_name="test_tts_reaction_aggregator_basic_flow", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     # Create aggregator and DAG
     aggregator = TTSReactionAggregator(queue_size=10, sleep_time=0.01)
@@ -104,7 +103,8 @@ async def test_tts_reaction_aggregator_misaligned_chunks():
     """
     logger_cfg = dict(
         logger_name="test_tts_reaction_aggregator_misaligned_chunks",
-        console_level=logging.DEBUG,
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
     )
     # Create aggregator and DAG
     aggregator = TTSReactionAggregator(queue_size=10, sleep_time=0.01)

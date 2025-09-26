@@ -35,8 +35,7 @@ async def test_speech2motion_client_stream_wav():
             If the Speech2Motion stream processing times out.
     """
     logger_cfg = dict(
-        logger_name="test_speech2motion_client_stream_wav",
-        console_level=logging.DEBUG,
+        logger_name="test_speech2motion_client_stream_wav", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     s2m_cfg = dict(
         type="Speech2MotionStreamingClient",
@@ -125,8 +124,7 @@ async def test_speech2motion_client_v2_stream_pcm():
             If the Speech2Motion stream processing times out.
     """
     logger_cfg = dict(
-        logger_name="test_speech2motion_client_v2_stream_pcm",
-        console_level=logging.DEBUG,
+        logger_name="test_speech2motion_client_v2_stream_pcm", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     s2m_cfg = dict(
         type="Speech2MotionStreamingClient",

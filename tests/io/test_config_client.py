@@ -10,7 +10,7 @@ from orchestrator.io.config.dynamodb_config_client import DynamoDBConfigClient, 
 from orchestrator.io.config.dynamodb_redis_config_client import DynamoDBRedisConfigClient
 from orchestrator.io.config.mongodb_config_client import MongoDBConfigClient
 
-LOGGER_CFG = {"logger_name": "test_config_client", "console_level": logging.DEBUG}
+LOGGER_CFG = dict(logger_name="test_config_client", file_level=logging.DEBUG, logger_path="logs/pytest.log")
 USER_ID = "a9ca656c-9091-70b9-007e-ac639f24845b"
 CHARACTER_ID = "6d4e9c50-452c-4540-825b-16b185f14f46"
 # MongoDB configurations

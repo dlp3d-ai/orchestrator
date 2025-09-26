@@ -105,8 +105,7 @@ async def test_openai_reaction_client_stream(
         )
 
     logger_cfg = dict(
-        logger_name="test_openai_reaction_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_openai_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     reaction_client_cfg = dict(
         type="OpenAIReactionClient",
@@ -214,8 +213,7 @@ async def test_xai_reaction_client_stream(
     if not xai_api_key:
         pytest.skip("XAI_API_KEY is not available")
     logger_cfg = dict(
-        logger_name="test_xai_reaction_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_xai_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     reaction_client_cfg = dict(
         type="XAIReactionClient",
@@ -325,8 +323,7 @@ async def test_gemini_reaction_client_stream(
     if not gemini_api_key:
         pytest.skip("GEMINI_API_KEY is not available")
     logger_cfg = dict(
-        logger_name="test_gemini_reaction_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_gemini_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     reaction_client_cfg = dict(
         type="GeminiReactionClient",
@@ -433,7 +430,8 @@ async def test_sensenova_omni_reaction_client_stream(
 
     logger_cfg = dict(
         logger_name="test_sensenova_omni_reaction_client_stream",
-        console_level=logging.DEBUG,
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
     )
     reaction_client_cfg = dict(
         type="SenseNovaOmniReactionClient",
@@ -533,8 +531,7 @@ async def test_dummy_reaction_client_stream(
             MongoDB client fixture for database operations.
     """
     logger_cfg = dict(
-        logger_name="test_dummy_reaction_client_stream",
-        console_level=logging.DEBUG,
+        logger_name="test_dummy_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     reaction_client_cfg = dict(
         type="DummyReactionClient",

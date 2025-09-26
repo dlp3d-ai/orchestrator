@@ -1,0 +1,728 @@
+[
+	{
+		"motion_record_id" : 4,
+		"motion_description" : "叉腰站立",
+		"speech_keywords_ch" : "哼,不服,凭什么,生气",
+		"motion_keywords_ch" : "叉腰,双手叉腰,叉腰站立"
+	},
+	{
+		"motion_record_id" : 10,
+		"motion_description" : "中立保底随机",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 12,
+		"motion_description" : "左右歪头，若有所思听",
+		"speech_keywords_ch" : "诶,为什么,什么意思,不懂,让我想想,等一下,唔,思考,分析,想想,怎么办",
+		"motion_keywords_ch" : "歪头,歪头思考,思考,倾听,侧耳倾听"
+	},
+	{
+		"motion_record_id" : 14,
+		"motion_description" : "转身边跑边回头招手",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 16,
+		"motion_description" : "（突然想到）握拳击掌",
+		"speech_keywords_ch" : "有了,想到了,想到啦,灵感,是这样,对了,妙,原来如此,好主意,明白了",
+		"motion_keywords_ch" : "跳起拍手,拍手,鼓掌,击掌,跳跃拍手,跳起击掌"
+	},
+	{
+		"motion_record_id" : 20,
+		"motion_description" : "单手叉腰",
+		"speech_keywords_ch" : "等待,快点啦,还没好吗,无聊,不过,哼,我可是,当然,身为",
+		"motion_keywords_ch" : "叉腰,单手叉腰,叉腰等待"
+	},
+	{
+		"motion_record_id" : 21,
+		"motion_description" : "手指在脸侧一点：对吧",
+		"speech_keywords_ch" : "嘿嘿,嘻嘻,逗,调皮,想到了,好主意,机智,对吧,有啦",
+		"motion_keywords_ch" : "灵光一闪,灵感乍现,机智手势,食指摇晃"
+	},
+	{
+		"motion_record_id" : 22,
+		"motion_description" : "单手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 23,
+		"motion_description" : "双手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 24,
+		"motion_description" : "双手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 25,
+		"motion_description" : "单手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 26,
+		"motion_description" : "抱胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 27,
+		"motion_description" : "双手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 28,
+		"motion_description" : "双手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 29,
+		"motion_description" : "抱胸",
+		"speech_keywords_ch" : "哼,不满,才没有呢,所以呢,你确定吗,凭什么,不服,我可是,当然",
+		"motion_keywords_ch" : "抱胸,双手抱胸,双臂交叉,环抱胸前,环抱"
+	},
+	{
+		"motion_record_id" : 30,
+		"motion_description" : "双手叉腰",
+		"speech_keywords_ch" : "哼,不过,不服,凭什么,生气,不开心,不高兴,不理你了,我可是,当然,身为",
+		"motion_keywords_ch" : "双手叉腰,叉腰,叉腰站立"
+	},
+	{
+		"motion_record_id" : 31,
+		"motion_description" : "抱胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 32,
+		"motion_description" : "抱胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 33,
+		"motion_description" : "单手叉腰",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 35,
+		"motion_description" : "双手背手",
+		"speech_keywords_ch" : "哼,不服,凭什么,生气,不开心,不高兴,不理你了",
+		"motion_keywords_ch" : "背手,双手背手,背手质问"
+	},
+	{
+		"motion_record_id" : 37,
+		"motion_description" : "端手",
+		"speech_keywords_ch" : "好的,收到,请说,嗯嗯,介绍,觉得,认为,虽然,但是",
+		"motion_keywords_ch" : "端手,双手端着,双手交叠,端手站着"
+	},
+	{
+		"motion_record_id" : 38,
+		"motion_description" : "抱胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 39,
+		"motion_description" : "端手",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 40,
+		"motion_description" : "捂胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 41,
+		"motion_description" : "托腮（同？）",
+		"speech_keywords_ch" : "期待,真的吗,好帅,帅气,好漂亮,快告诉我,人家,要是",
+		"motion_keywords_ch" : "双手捧脸,托脸期待,捧脸期待,双手托脸"
+	},
+	{
+		"motion_record_id" : 42,
+		"motion_description" : "端手",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 43,
+		"motion_description" : "捂胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 44,
+		"motion_description" : "捂胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 45,
+		"motion_description" : "捂胸",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 46,
+		"motion_description" : "托腮（同？）",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 47,
+		"motion_description" : "大幅鞠躬",
+		"speech_keywords_ch" : "谢谢,感谢,请多关照,对不起,抱歉,原谅,我的错",
+		"motion_keywords_ch" : "鞠躬,弯腰,行礼,低头行礼,道歉,抱歉,致歉,致谢"
+	},
+	{
+		"motion_record_id" : 50,
+		"motion_description" : "中幅鞠躬",
+		"speech_keywords_ch" : "谢谢,感谢,请多关照,荣幸,请多指教,感激,对不起,抱歉,原谅,我的错",
+		"motion_keywords_ch" : "鞠躬,弯腰,行礼,低头行礼,道歉,抱歉,致歉,致谢"
+	},
+	{
+		"motion_record_id" : 52,
+		"motion_description" : "托腮（同？）",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 55,
+		"motion_description" : "摊开双手：算了",
+		"speech_keywords_ch" : "算了,没办法,哎,唉,无奈,随便,只能,只好,咯,无能为力,就这样吧,罢了,勉为其难,妥协",
+		"motion_keywords_ch" : "摊开双手,耸肩,摊手,叹气,双手摊开,张开双手,双手一摊"
+	},
+	{
+		"motion_record_id" : 57,
+		"motion_description" : "双手交叉，手掌向上微翘：不行",
+		"speech_keywords_ch" : "不行,不可以,不同意,不接受,不能,不要,不可能,休想,不许",
+		"motion_keywords_ch" : "拒绝,手臂交叉,表达否定,双手交叉,拒绝手势,否定"
+	},
+	{
+		"motion_record_id" : 59,
+		"motion_description" : "双手合十哈腰致谢",
+		"speech_keywords_ch" : "谢谢,感激,感谢,你真好,拜托,你太好了,求求了,对不起,抱歉,原谅,我的错",
+		"motion_keywords_ch" : "合十感谢,合十抱歉,合十鞠躬,致谢"
+	},
+	{
+		"motion_record_id" : 61,
+		"motion_description" : "冷得蜷缩发抖",
+		"speech_keywords_ch" : "好冷,哆嗦,保暖,冻死了,下雪,风大,冰凉,冻僵了,瑟瑟发抖,害怕,怕怕",
+		"motion_keywords_ch" : "蜷缩,发抖,颤抖,缩成一团"
+	},
+	{
+		"motion_record_id" : 62,
+		"motion_description" : "指向天上",
+		"speech_keywords_ch" : "上面,抬头看,天空,头顶,往上看,飞得,仰望,星空,天上",
+		"motion_keywords_ch" : "指向天上,指向天空,抬头指天"
+	},
+	{
+		"motion_record_id" : 64,
+		"motion_description" : "用手背轻擦额头：“呼——”",
+		"speech_keywords_ch" : "好累,好热,紧张,好险,虚惊一场,幸好没事,累死了,热死了",
+		"motion_keywords_ch" : "手背擦额头,长舒一口气,轻拭,深呼吸"
+	},
+	{
+		"motion_record_id" : 68,
+		"motion_description" : "指向右侧",
+		"speech_keywords_ch" : "右边,往右,右转,看那边,右侧,右拐,那边,在那里",
+		"motion_keywords_ch" : "指向右侧,右指,往右指"
+	},
+	{
+		"motion_record_id" : 69,
+		"motion_description" : "指向左侧",
+		"speech_keywords_ch" : "左边,往左,左转,看那边,左侧,左拐,那边,在那里",
+		"motion_keywords_ch" : "指向左侧,左指,往左指"
+	},
+	{
+		"motion_record_id" : 71,
+		"motion_description" : "OK手势",
+		"speech_keywords_ch" : "好的,好呀,当然,明白,没问题,搞定,完美,OK,okay,nice",
+		"motion_keywords_ch" : "ok手势,OK手势,拇指食指圈,同意手势"
+	},
+	{
+		"motion_record_id" : 76,
+		"motion_description" : "双手头顶/面前/胸口/身侧比爱心",
+		"speech_keywords_ch" : "喜欢,爱你,心动,心心,么么哒,心动,甜甜的,比心",
+		"motion_keywords_ch" : "比心,双手比心,用手比心,比心手势"
+	},
+	{
+		"motion_record_id" : 77,
+		"motion_description" : "双手头顶/面前/胸口/身侧比爱心",
+		"speech_keywords_ch" : "喜欢,爱你,心动,心心,么么哒,心动,甜甜的,比心",
+		"motion_keywords_ch" : "比心,双手比心,用手比心,比心手势,头顶比心"
+	},
+	{
+		"motion_record_id" : 78,
+		"motion_description" : "双手头顶/面前/胸口/身侧比爱心",
+		"speech_keywords_ch" : "喜欢,爱你,心动,心心,么么哒,心动,甜甜的,比心",
+		"motion_keywords_ch" : "比心,双手比心,用手比心,比心手势"
+	},
+	{
+		"motion_record_id" : 79,
+		"motion_description" : "双手头顶/面前/胸口/身侧比爱心",
+		"speech_keywords_ch" : "喜欢,爱你,心动,心心,么么哒,心动,甜甜的,比心",
+		"motion_keywords_ch" : "比心,双手比心,用手比心,比心手势"
+	},
+	{
+		"motion_record_id" : 80,
+		"motion_description" : "扮鬼脸",
+		"speech_keywords_ch" : "逗你玩,略略,调皮,嘿嘿,嘻嘻,开玩笑的",
+		"motion_keywords_ch" : "扮鬼脸,做鬼脸,扭曲面部,夸张表情,搞怪表情,调皮"
+	},
+	{
+		"motion_record_id" : 81,
+		"motion_description" : "孙悟空式望远",
+		"speech_keywords_ch" : "我找找,你在哪,让我看看,远方,好远,风景真美,寻找,寻觅",
+		"motion_keywords_ch" : "眺望远方,孙悟空式远眺,远眺,手搭凉棚,望远"
+	},
+	{
+		"motion_record_id" : 82,
+		"motion_description" : "双手头顶大开，一脚前伸：好！",
+		"speech_keywords_ch" : "祝贺,好呀,surprise,哈喽,耶,胜利,恭喜,成功,好大,超级大",
+		"motion_keywords_ch" : "展示惊喜,高举双手表示开心"
+	},
+	{
+		"motion_record_id" : 83,
+		"motion_description" : "双手放在头顶做“兔耳朵”",
+		"speech_keywords_ch" : "可爱,萌萌哒,调皮,小兔子,卖萌,啾咪",
+		"motion_keywords_ch" : "兔耳朵手势,模仿兔子,可爱手势,卖萌"
+	},
+	{
+		"motion_record_id" : 87,
+		"motion_description" : "转圈",
+		"speech_keywords_ch" : "转圈,好看吗,漂亮吗,旋转,当当,看我,自由,去玩",
+		"motion_keywords_ch" : "转圈,旋转,转圈圈,原地转圈,原地旋转"
+	},
+	{
+		"motion_record_id" : 88,
+		"motion_description" : "双手两侧假装捏裙，下蹲表达谢谢",
+		"speech_keywords_ch" : "谢谢,感谢,请多关照,荣幸,请多指教,感激",
+		"motion_keywords_ch" : "行礼,表达感谢,提裙,致谢"
+	},
+	{
+		"motion_record_id" : 90,
+		"motion_description" : "双手头顶/面前/胸口/身侧比爱心",
+		"speech_keywords_ch" : "喜欢,爱你,心动,心心,么么哒,心动,甜甜的,比心",
+		"motion_keywords_ch" : "比心,双手比心,用手比心,比心手势"
+	},
+	{
+		"motion_record_id" : 91,
+		"motion_description" : "将手收拢夹住",
+		"speech_keywords_ch" : "惊讶,天哪,你说什么,怎么可能,吓到,不会吧,真的假的,太意外了,不可思议",
+		"motion_keywords_ch" : "捂嘴吃惊,惊讶,捂嘴笑,捂嘴偷笑"
+	},
+	{
+		"motion_record_id" : 92,
+		"motion_description" : "转圈",
+		"speech_keywords_ch" : "转圈,好看吗,漂亮吗,旋转,当当,看我,自由,去玩",
+		"motion_keywords_ch" : "转圈,旋转,转圈圈,原地转圈,原地旋转"
+	},
+	{
+		"motion_record_id" : 95,
+		"motion_description" : "得意叉腰，转圈锵锵",
+		"speech_keywords_ch" : "我可是,得意,自信,我厉害吧,看我的,锵锵,不愧是我,小菜一碟",
+		"motion_keywords_ch" : "叉腰转圈,得意,自得,骄傲,神气"
+	},
+	{
+		"motion_record_id" : 96,
+		"motion_description" : "开心踮脚",
+		"speech_keywords_ch" : "开心,快乐,高兴,期待,像梦,美好",
+		"motion_keywords_ch" : "踮脚期待,翘首以盼,开心踮脚"
+	},
+	{
+		"motion_record_id" : 100,
+		"motion_description" : "连续拍照姿势变换",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 103,
+		"motion_description" : "微微点头",
+		"speech_keywords_ch" : "好的,是的,可以,嗯嗯,同意,当然,收到,明白,好呀",
+		"motion_keywords_ch" : "点头,微微点头,点头同意"
+	},
+	{
+		"motion_record_id" : 104,
+		"motion_description" : "元气体操",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 107,
+		"motion_description" : "惊喜两侧抬手，胸前合手，难以置信地小幅摇头",
+		"speech_keywords_ch" : "天哪,不会吧,不可能,真的吗,不敢相信,不可思议,像做梦,惊喜",
+		"motion_keywords_ch" : "惊讶,难以置信,捂脸惊讶,惊讶摇头"
+	},
+	{
+		"motion_record_id" : 108,
+		"motion_description" : "惊喜上身前倾双手后摆",
+		"speech_keywords_ch" : "好奇,期待,真的吗,让我看看,然后呢,快告诉我,我来了,来啦",
+		"motion_keywords_ch" : "探身前倾,好奇向前跳,好奇探头"
+	},
+	{
+		"motion_record_id" : 109,
+		"motion_description" : "轻握双手感谢",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 111,
+		"motion_description" : "轻握双手感谢",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 112,
+		"motion_description" : "轻抚自己胸口",
+		"speech_keywords_ch" : "安慰,悲伤,呜呜呜,吓死我了",
+		"motion_keywords_ch" : "轻抚胸口,安慰,拍胸口,轻拍胸口"
+	},
+	{
+		"motion_record_id" : 115,
+		"motion_description" : "轻抚自己胸口",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 116,
+		"motion_description" : "歪头专注倾听",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 117,
+		"motion_description" : "轻握双手感谢",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 118,
+		"motion_description" : "双手比V",
+		"speech_keywords_ch" : "耶,胜利,开心,好开心,好耶,快乐,pose",
+		"motion_keywords_ch" : "右手比V,V字手势,胜利手势,表达胜利,摆pose"
+	},
+	{
+		"motion_record_id" : 119,
+		"motion_description" : "举手问问题",
+		"speech_keywords_ch" : "请问,我来,有个问题,请教,打扰一下,想问,想知道",
+		"motion_keywords_ch" : "举手,提问,举手示意,举手提问,举手回答"
+	},
+	{
+		"motion_record_id" : 120,
+		"motion_description" : "双手比V",
+		"speech_keywords_ch" : "耶,胜利,开心,好开心,好耶,快乐,pose",
+		"motion_keywords_ch" : "双手比V,V字手势,胜利手势,表达胜利,摆pose"
+	},
+	{
+		"motion_record_id" : 121,
+		"motion_description" : "轻抚自己胸口",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 122,
+		"motion_description" : "轻抚自己胸口",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 123,
+		"motion_description" : "轻抚自己胸口",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 124,
+		"motion_description" : "举手问问题",
+		"speech_keywords_ch" : "请问,我来,有个问题,请教,打扰一下,想问,想知道",
+		"motion_keywords_ch" : "举手,提问,举手示意,举手提问,举手回答"
+	},
+	{
+		"motion_record_id" : 125,
+		"motion_description" : "举手问问题",
+		"speech_keywords_ch" : "请问,我来,有个问题,请教,打扰一下,想问,想知道",
+		"motion_keywords_ch" : "举手,提问,举手示意,举手提问,举手回答"
+	},
+	{
+		"motion_record_id" : 126,
+		"motion_description" : "歪头专注倾听",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 128,
+		"motion_description" : "快速歪头：对吧",
+		"speech_keywords_ch" : "对吧,怎么样,嘻嘻,嘿嘿",
+		"motion_keywords_ch" : "歪头微笑,自信歪头,侧头表示得意"
+	},
+	{
+		"motion_record_id" : 129,
+		"motion_description" : "打响指潇洒转身离开",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 130,
+		"motion_description" : "小幅跳",
+		"speech_keywords_ch" : "好耶,高兴,好棒,开心,快乐,兴奋,激动,惊喜,耶,哇",
+		"motion_keywords_ch" : "开心蹦跳,小幅跳跃,轻跳,跳跃,跳起,蹦跳"
+	},
+	{
+		"motion_record_id" : 131,
+		"motion_description" : "握拳拍胸膛：交给我",
+		"speech_keywords_ch" : "交给我,没问题,包在我身上,放心,保证,一定,肯定,绝对,拿手,自信,身为",
+		"motion_keywords_ch" : "拍胸脯,保证,自信拍胸膛,轻拍胸口"
+	},
+	{
+		"motion_record_id" : 132,
+		"motion_description" : "走到镜头前，研究镜头",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 133,
+		"motion_description" : "伸手邀请（弯腰郑重）",
+		"speech_keywords_ch" : "有请,这边请,来吧,跟我来,请进,和我一起,跟我一起",
+		"motion_keywords_ch" : "侧身邀请,伸手示意,邀请手势,请进动作"
+	},
+	{
+		"motion_record_id" : 134,
+		"motion_description" : "用食指挠挠下巴",
+		"speech_keywords_ch" : "诶,为什么,什么意思,不懂,不过,让我想想,唔,思考,想想,怎么办,奇怪,让我猜猜,可能,如果,要是",
+		"motion_keywords_ch" : "挠下巴,思考,摸下巴,表达困惑"
+	},
+	{
+		"motion_record_id" : 135,
+		"motion_description" : "夹着手，小跑着迎接朋友",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 136,
+		"motion_description" : "托腮（同？）",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 137,
+		"motion_description" : "用食指挠挠额头",
+		"speech_keywords_ch" : "思考,挠头,为什么,疑惑,我想想,不明白,唔,难题,但是,虽然",
+		"motion_keywords_ch" : "挠额头,挠头,表达疑惑,思考"
+	},
+	{
+		"motion_record_id" : 138,
+		"motion_description" : "抬头捂胸想象中",
+		"speech_keywords_ch" : "天呐,期待,心跳,震撼,感动,动人,憧憬,要是",
+		"motion_keywords_ch" : "抬头捂胸想象,捂心口,憧憬,遐想"
+	},
+	{
+		"motion_record_id" : 140,
+		"motion_description" : "OK手势",
+		"speech_keywords_ch" : "好的,好呀,可以,当然,明白,没问题,搞定,完美,OK,okay,nice",
+		"motion_keywords_ch" : "ok手势,OK手势,拇指食指圈,同意手势"
+	},
+	{
+		"motion_record_id" : 141,
+		"motion_description" : "竖起拇指",
+		"speech_keywords_ch" : "好棒,不错,真棒,点赞,太棒了,厉害,好样的,完美,不错,顶呱呱,支持,优秀",
+		"motion_keywords_ch" : "竖起拇指,表示赞许,竖起大拇指,竖大拇指,竖拇指"
+	},
+	{
+		"motion_record_id" : 142,
+		"motion_description" : "用食指做“嘘”状",
+		"speech_keywords_ch" : "嘘,偷偷,安静,小声,别说话,轻一点,别吵,保密,悄悄话,嘀咕",
+		"motion_keywords_ch" : "安静手势,噤声手势,嘘声动作,示意安静"
+	},
+	{
+		"motion_record_id" : 144,
+		"motion_description" : "OK手势",
+		"speech_keywords_ch" : "好的,好呀,可以,当然,明白,没问题,搞定,完美,OK,okay,nice",
+		"motion_keywords_ch" : "ok手势,OK手势,拇指食指圈,同意手势"
+	},
+	{
+		"motion_record_id" : 146,
+		"motion_description" : "将手收拢夹住",
+		"speech_keywords_ch" : "人家,害羞,不要嘛,哎呀,撒娇,脸红",
+		"motion_keywords_ch" : "害羞,害羞捂脸,羞涩,脸红"
+	},
+	{
+		"motion_record_id" : 147,
+		"motion_description" : "指向自己：强调自己",
+		"speech_keywords_ch" : "我,是我,我吗,自己,本人,在下,本座,阿晴,我们,吾",
+		"motion_keywords_ch" : "指向自己,指自己,自我强调"
+	},
+	{
+		"motion_record_id" : 148,
+		"motion_description" : "后退手摆“不嘛”",
+		"speech_keywords_ch" : "不嘛,没有,不是,不行,不可以,不同意,不接受,不能,不要,不可能,休想,不许,才没有呢",
+		"motion_keywords_ch" : "摆手拒绝,拒绝,后退摆手"
+	},
+	{
+		"motion_record_id" : 149,
+		"motion_description" : "开心元气加油",
+		"speech_keywords_ch" : "加油,相信,冲呀,能行,努力,元气满满,活力满满",
+		"motion_keywords_ch" : "振作精神,握拳加油,振臂鼓劲"
+	},
+	{
+		"motion_record_id" : 151,
+		"motion_description" : "单腿后踢翘高",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 152,
+		"motion_description" : "上身前倾，五指尖轻拍",
+		"speech_keywords_ch" : "真好呀,恭喜你,你真棒,不可思议,敬佩你,我厉害吧,有意思",
+		"motion_keywords_ch" : "轻轻鼓掌,温柔鼓舞,轻拍双手"
+	},
+	{
+		"motion_record_id" : 153,
+		"motion_description" : "横比V，winkle",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 154,
+		"motion_description" : "手背掩眼哭泣",
+		"speech_keywords_ch" : "好难过,呜呜,伤心,好绝望,请帮帮我",
+		"motion_keywords_ch" : "哭泣,抽泣,擦泪"
+	},
+	{
+		"motion_record_id" : 155,
+		"motion_description" : "小拳拳锤胸口",
+		"speech_keywords_ch" : "讨厌啦,别这样,看我厉害,锤死你",
+		"motion_keywords_ch" : "小拳拳锤胸口,任性撒娇,轻捶胸口,撒娇打闹"
+	},
+	{
+		"motion_record_id" : 156,
+		"motion_description" : "耸肩后仰点头",
+		"speech_keywords_ch" : "不会吧,真的吗,真让人意外,不可思议,难以置信",
+		"motion_keywords_ch" : "惊讶,大吃一惊,后退惊讶,身体后仰"
+	},
+	{
+		"motion_record_id" : 157,
+		"motion_description" : "抱胸摇头叹气",
+		"speech_keywords_ch" : "唉,哎,无奈,别管我,真没用,没有机会,没有办法",
+		"motion_keywords_ch" : "摇头无奈,抱胸摇头,叹气失望"
+	},
+	{
+		"motion_record_id" : 158,
+		"motion_description" : "缩手紧缩侧头后退",
+		"speech_keywords_ch" : "好可怕,别过来,快逃,离我远点,好吓人",
+		"motion_keywords_ch" : "害怕后退,退缩,畏畏缩缩"
+	},
+	{
+		"motion_record_id" : 159,
+		"motion_description" : "假装生气轻轻跺脚",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 160,
+		"motion_description" : "委屈手指对戳",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 161,
+		"motion_description" : "生气扭头，傲娇回头偷看",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 162,
+		"motion_description" : "单手叉腰脚尖频繁拍地",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 163,
+		"motion_description" : "扭头不顾频繁回首",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 164,
+		"motion_description" : "捏拳空挥大喊跺脚",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 165,
+		"motion_description" : "一级害羞：摸后脑勺，躯干扭捏",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 166,
+		"motion_description" : "二级害羞:挥手讨厌啦",
+		"speech_keywords_ch" : "讨厌啦,真让人不好意思,别夸我,烦死啦",
+		"motion_keywords_ch" : "甩手撒娇,撒娇拒绝,害羞拒绝,难为情"
+	},
+	{
+		"motion_record_id" : 167,
+		"motion_description" : "一级害羞：用手轻轻捏住耳垂",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 168,
+		"motion_description" : "双手握拳托在下巴下，轻轻蹦跳",
+		"speech_keywords_ch" : "开心,高兴,快乐,好开心,超开心,哇,期待,激动,等不及了,快开始,兴奋",
+		"motion_keywords_ch" : "踮脚蹦蹦跳跳,手舞足蹈,轻快跳跃,蹦跳,期待"
+	},
+	{
+		"motion_record_id" : 169,
+		"motion_description" : "摊手叹气",
+		"speech_keywords_ch" : "没办法,失败了,放弃了,无药可救,没有希望,真让人失望,事已至此",
+		"motion_keywords_ch" : "摊开双手,垂头丧气,无奈摊手"
+	},
+	{
+		"motion_record_id" : 170,
+		"motion_description" : "双手挥拳，生气地跺脚",
+		"speech_keywords_ch" : "怎么办,急死了,快想想办法,不可以这样,快回来,你别走,陪陪我,怎么可以这样,不可以这样,气死我了",
+		"motion_keywords_ch" : "握拳跺脚,生气,愤怒,不满"
+	},
+	{
+		"motion_record_id" : 171,
+		"motion_description" : "歪头打量，摇头",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 172,
+		"motion_description" : "惊喜捏下巴翘手指",
+		"speech_keywords_ch" : "好奇,让我看看,好有趣,这是什么,神秘,让我猜猜,想知道",
+		"motion_keywords_ch" : "捏下巴翘腿,惊喜,表达开心"
+	},
+	{
+		"motion_record_id" : 173,
+		"motion_description" : "双手抱肩，小幅旋转",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 174,
+		"motion_description" : "双手抱臂，歪头撒娇",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	},
+	{
+		"motion_record_id" : 177,
+		"motion_description" : "单腿后踢翘高",
+		"speech_keywords_ch" : null,
+		"motion_keywords_ch" : null
+	}
+]

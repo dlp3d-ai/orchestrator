@@ -426,8 +426,8 @@ async def test_sensenova_omni_reaction_client_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenova_ak = os.environ["SENSENOVA_AK"]
-    sensenova_sk = os.environ["SENSENOVA_SK"]
+    sensenova_ak = os.environ.get("SENSENOVA_AK")
+    sensenova_sk = os.environ.get("SENSENOVA_SK")
     if not sensenova_ak or not sensenova_sk:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_reaction_client_stream")
 

@@ -17,8 +17,8 @@ from orchestrator.profile.motion_stream_profile import MotionStreamProfile
 from orchestrator.utils.log import logging
 
 VERIFY = False
-WS_URL = os.environ.get("S2M_WS_URL", None)
-pytestmark = pytest.mark.skipif(WS_URL is None, reason="S2M_WS_URL is not set, skipping test")
+WS_URL = os.environ.get("S2M_WS_URL", "")
+pytestmark = pytest.mark.skipif(WS_URL == "", reason="S2M_WS_URL is not set, skipping test")
 # TODO: Restore non-streaming S2M tests when needed
 
 

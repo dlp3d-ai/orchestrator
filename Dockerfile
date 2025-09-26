@@ -1,4 +1,4 @@
-FROM registry.sensetime.com/zoetrope/library/ubuntu:20.04
+FROM ubuntu:20.04
 
 # Install apt packages
 RUN apt-get update && \

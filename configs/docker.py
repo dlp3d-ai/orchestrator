@@ -170,12 +170,6 @@ proxy = dict(
         timeout=10.0,
     ),
     asr_adapters=dict(
-        zoetrope=dict(
-            type="SensetimeASRClient",
-            name="zoetrope_asr_client",
-            ws_url=os.environ.get("ZOETROPE_ASR_WS_URL", ""),
-            queue_size=5000,
-        ),
         softsugar=dict(
             type="SoftSugarASRClient",
             name="softsugar_asr_client",
@@ -198,11 +192,6 @@ proxy = dict(
         timeout=20.0,
     ),
     tts_adapters=dict(
-        zoetrope=dict(
-            type="SensetimeTTSClient",
-            name="zoetrope_tts_client",
-            tts_ws_url=os.environ.get("ZOETROPE_TTS_WS_URL", ""),
-        ),
         huoshan=dict(
             type="HuoshanTTSClient",
             name="huoshan_tts_client",

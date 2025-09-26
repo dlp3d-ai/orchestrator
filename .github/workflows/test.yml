@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    container:
+      image: dockersenseyang/dlp3d_orchestrator:latest
+      options: --entrypoint ""
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Download test input
+      run: |
+        mkdir -p input
+        cd input
+        curl -LjO https://github.com/LazyBusyYang/CatStream/releases/download/orchestrator_cicd_files/test_audio_16kHz.wav
+        curl -LjO https://github.com/LazyBusyYang/CatStream/releases/download/orchestrator_cicd_files/test_audio_24kHz.wav
+        cp test_audio_16kHz.wav test_audio.wav
+        cd ..
+        ls input -la
+    - name: Run tests
+      run: |
+        pwd
+        bash -c "/opt/venv/bin/pip install . && PYTHONPATH=/__w/audio2face/audio2face /opt/venv/bin/python -m pytest tests --log-cli-level=ERROR"
+    - name: Cat pytest log
+      run: |
+        cat logs/pytest.log

@@ -22,4 +22,4 @@ jobs:
 
     - name: Run docstring check
       run: |
-        interrogate -vinmMI --ignore-init-method --ignore-module --ignore-nested-functions --ignore-regex "__repr__" -f 60 orchestrator/
+        interrogate -vinmMI --ignore-init-method --ignore-module --ignore-nested-functions --ignore-regex "__repr__" -f 90 orchestrator/

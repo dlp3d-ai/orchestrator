@@ -83,4 +83,4 @@ ENV ZOETROPE_TTS_WS_URL=
 WORKDIR /workspace/orchestrator
 
 # Set entrypoint
-ENTRYPOINT ["/opt/venv/bin/python", "main.py --config_path configs/docker.py"]
+ENTRYPOINT ["/opt/venv/bin/python", "main.py", "--config_path", "configs/docker.py"]

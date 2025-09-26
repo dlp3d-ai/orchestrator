@@ -61,14 +61,16 @@ RUN cd /workspace/orchestrator && \
 # required environment variables
 ENV MONGODB_HOST=
 ENV MONGODB_PORT=27017
-ENV MONGODB_USER=orchestrator
-ENV MONGODB_PASSWORD=orchestrator_password
-ENV MONGODB_MEMORY_DB=memory
-ENV MONGODB_WEB_DB=web
-ENV A2F_WS_URL=
-ENV S2M_WS_URL=
+ENV MONGODB_MEMORY_DB=memory_database
+ENV MONGODB_MEMORY_USER=memory_user
+ENV MONGODB_MEMORY_PASSWORD=memory_password
+ENV MONGODB_WEB_DB=web_database
+ENV MONGODB_WEB_USER=web_user
+ENV MONGODB_WEB_PASSWORD=web_password
 ENV MONGODB_ADMIN_USERNAME=admin
 ENV MONGODB_ADMIN_PASSWORD=
+ENV A2F_WS_URL=
+ENV S2M_WS_URL=
 ENV ORCHESTRATOR_CONFIG_PATH=configs/docker.py
 # optional environment variables
 ENV ZOETROPE_ASR_WS_URL=
@@ -80,32 +82,5 @@ ENV ZOETROPE_TTS_WS_URL=
 # Set working directory
 WORKDIR /workspace/orchestrator
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Run MongoDB setup script\n\
-echo "Setting up MongoDB..."\n\
-/opt/venv/bin/python tools/ensure_memory_mongodb.py \\\n\
-    --host "$MONGODB_HOST" \\\n\
-    --port "$MONGODB_PORT" \\\n\
-    --admin_username "$MONGODB_ADMIN_USERNAME" \\\n\
-    --admin_password "$MONGODB_ADMIN_PASSWORD" \\\n\
-    --web_database "$MONGODB_WEB_DB" \\\n\
-    --memory_database "$MONGODB_MEMORY_DB" \\\n\
-    --orchestrator_username "$MONGODB_USER" \\\n\
-    --orchestrator_password "$MONGODB_PASSWORD"\n\
-\n\
-# Check if MongoDB setup was successful\n\
-if [ $? -eq 0 ]; then\n\
-    echo "MongoDB setup completed successfully"\n\
-    echo "Starting orchestrator..."\n\
-    exec /opt/venv/bin/python main.py --config_path "$ORCHESTRATOR_CONFIG_PATH"\n\
-else\n\
-    echo "MongoDB setup failed"\n\
-    exit 1\n\
-fi' > /opt/startup.sh && \
-    chmod +x /opt/startup.sh
-
 # Set entrypoint
-ENTRYPOINT ["/opt/startup.sh"]
+ENTRYPOINT ["/opt/venv/bin/python", "main.py --config_path configs/docker.py"]

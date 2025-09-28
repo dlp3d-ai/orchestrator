@@ -26,7 +26,7 @@ Orchestrator 是一个实时智能对话系统，用于构建个性化多模态 
 ### 技术特性
 - **多模态交互**：语音交互、文本对话、3D 动画生成
 - **实时流式处理**：实时数据流处理，低延迟响应
-- **多 AI 服务商支持**：集成 SenseNova Omni、OpenAI、Anthropic、Gemini、xAI、DeepSeek、ElevenLabs、火山引擎等主流 AI 服务
+- **多 AI 服务商支持**：集成 SenseNova、OpenAI、Anthropic、Gemini、xAI、DeepSeek、ElevenLabs、火山引擎等主流 AI 服务
 - **智能记忆管理**：多级对话记忆、关系状态、情绪状态管理
 - **情感智能分析**：实时分析角色的情绪变化、关系变化和触发动作
 - **高度可扩展架构**：模块化设计，易于添加新的 AI 服务和定制功能
@@ -127,14 +127,14 @@ orchestrator/
 - **功能**: 将文本转换为自然语音，支持多种音色和情感表达
 - **核心组件**:
   - `TextToSpeechAdapter`: TTS 适配器基类，处理流式音频生成
-  - 支持服务商: ElevenLabs、火山引擎、商汤、软糖等
+  - 支持服务商: ElevenLabs、火山引擎、商汤、Softsugar 等
 - **特性**: 多音色、多情感、多语言支持、实时合成
 
 #### 3. 语音识别模块 (ASR)
 - **功能**: 实时语音识别，支持多语言和实时处理
 - **核心组件**:
   - `ASRAdapter`: ASR 适配器基类，处理流式语音识别
-  - 支持服务商: OpenAI、商汤、软糖等
+  - 支持服务商: OpenAI、商汤、Softsugar 等
 - **特性**: 多语言支持、流式识别
 
 #### 4. 记忆管理模块 (Memory)
@@ -245,46 +245,59 @@ orchestrator/
 - **响应**: `{"status": "healthy"}`
 
 #### 2. 日志相关
+
+**查看日志**
 - **端点**: `GET /tail_log/{n_lines}` 或 `GET /api/v1/tail_log/{n_lines}`
 - **描述**: 获取日志文件的最后N行
 - **参数**: `n_lines` - 要获取的行数
 - **响应**: HTML格式的日志内容
 
+**下载日志**
 - **端点**: `GET /download_log_file`
 - **描述**: 下载完整的日志文件
 - **响应**: 二进制日志文件
 
 #### 3. 适配器选择
+
+**ASR 适配器**
 - **端点**: `GET /api/v1/asr_adapter_choices`
 - **描述**: 获取可用的 ASR（语音识别）适配器列表
 - **响应**: `AdapterChoicesResponse`
 
+**TTS 适配器**
 - **端点**: `GET /api/v1/tts_adapter_choices`
 - **描述**: 获取可用的 TTS（语音合成）适配器列表
 - **响应**: `AdapterChoicesResponse`
 
+**对话适配器**
 - **端点**: `GET /api/v1/conversation_adapter_choices`
 - **描述**: 获取可用的 LLM 适配器列表
 - **响应**: `AdapterChoicesResponse`
 
+**反应适配器**
 - **端点**: `GET /api/v1/reaction_adapter_choices`
 - **描述**: 获取可用的反应适配器列表
 - **响应**: `AdapterChoicesResponse`
 
+**分类适配器**
 - **端点**: `GET /api/v1/classification_adapter_choices`
 - **描述**: 获取可用的分类适配器列表
 - **响应**: `AdapterChoicesResponse`
 
+**记忆适配器**
 - **端点**: `GET /api/v1/memory_adapter_choices`
 - **描述**: 获取可用的记忆适配器列表
 - **响应**: `AdapterChoicesResponse`
 
 #### 4. 语音和设置
+
+**音色管理**
 - **端点**: `GET /api/v1/tts_voice_names/{tts_adapter_key}`
 - **描述**: 获取指定 TTS 适配器的可用音色列表
 - **参数**: `tts_adapter_key` - TTS 适配器标识
 - **响应**: `VoiceNamesResponse`
 
+**用户设置**
 - **端点**: `GET /api/v4/get_voice_settings/{user_id}/{character_id}`
 - **描述**: 获取指定用户和角色的语音设置
 - **参数**:
@@ -292,6 +305,7 @@ orchestrator/
   - `character_id` - 角色 ID
 - **响应**: `VoiceSettingsResponse`
 
+**动作设置**
 - **端点**: `GET /api/v4/get_motion_settings/{user_id}/{character_id}`
 - **描述**: 获取指定用户和角色的动作设置
 - **参数**:
@@ -310,12 +324,12 @@ orchestrator/
 | DeepSeek | `DeepSeekConversationClient` | `deepseek-chat` |
 | xAI | `XAIConversationClient` | `grok-3` |
 | SenseNova | `SenseNovaOmniConversationClient` | `SenseNova Omni` |
-| OpenAI | `OpenAIAudioClient` | `grok-3` |
+| OpenAI | `OpenAIAudioClient` | `gpt-4o-mini-realtime-preview-2024-12-17` |
 
 ### ASR
 | 服务商 | 适配器类 |
 |--------|----------|
-| SoftSugar | `SoftSugarASRClient` |
+| Softsugar | `SoftSugarASRClient` |
 | OpenAI | `OpenAIRealtimeASRClient` |
 | SenseTime | `SensetimeASRClient` |
 
@@ -323,7 +337,7 @@ orchestrator/
 | 服务商 | 适配器类 |
 |--------|----------|
 | 火山引擎 | `HuoshanTTSClient` |
-| SoftSugar | `SoftSugarTTSClient` |
+| Softsugar | `SoftSugarTTSClient` |
 | SenseNova | `SensenovaTTSClient` |
 | ElevenLabs | `ElevenLabsTTSClient` |
 | SenseTime | `SensetimeTTSClient` |

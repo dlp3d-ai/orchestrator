@@ -96,11 +96,11 @@ class SensetimeTTSClient(TextToSpeechAdapter):
         """
         voice_names = {
             "keqing_0807": "刻晴-音色克隆",
-            "funingna_0808_genera": "芙宁娜-音色克隆",
+            "funingna_0808_general": "芙宁娜-音色克隆",
             "hutao_0819_general": "胡桃-音色克隆",
             "baimianmian": "白绵绵",
             "xiaotao": "小桃",
-            "xiaoyu": "小羽",
+            "yuanqishaonv": "元气少女",
             "xiaoning": "小宁",
         }
         return voice_names

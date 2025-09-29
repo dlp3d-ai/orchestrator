@@ -346,7 +346,7 @@ orchestrator/
 | 服务商 | 适配器类 | 默认模型 |
 |--------|----------|------|
 | xAI | `XAIMemoryClient` | `Grok-3` |
-| SenseTime | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
 
 ### Classification
 | 服务商 | 适配器类 | 默认模型 |

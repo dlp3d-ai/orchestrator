@@ -561,7 +561,7 @@ async def test_anthropic_stream(
         type="AnthropicConversationClient",
         name="anthropic_client",
         agent_prompts_file="configs/agent_prompts.yaml",
-        anthropic_model_name="claude-sonnet-4-20250514",
+        anthropic_model_name="claude-sonnet-4-5-20250929",
         proxy_url=os.environ.get("PROXY_URL", None),
         logger_cfg=logger_cfg,
     )

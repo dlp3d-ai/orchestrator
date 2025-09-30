@@ -60,7 +60,7 @@ proxy = dict(
             type="AnthropicConversationClient",
             name="anthropic_agent_client",
             agent_prompts_file="configs/agent_prompts.yaml",
-            anthropic_model_name="claude-sonnet-4-20250514",
+            anthropic_model_name="claude-sonnet-4-5-20250929",
             proxy_url=__proxy_url__,
         ),
         openai_agent=dict(

@@ -28,7 +28,7 @@ class AnthropicConversationClient(ConversationAdapter):
         self,
         name: str,
         agent_prompts_file: str,
-        anthropic_model_name: str = "claude-sonnet-4-20250514",
+        anthropic_model_name: str = "claude-sonnet-4-5-20250929",
         proxy_url: Union[None, str] = None,
         request_timeout: float = 20.0,
         queue_size: int = 100,
@@ -50,7 +50,7 @@ class AnthropicConversationClient(ConversationAdapter):
                 The path to the agent prompts file.
             anthropic_model_name (str, optional):
                 The name of the Anthropic model to use.
-                Defaults to "claude-sonnet-4-20250514".
+                Defaults to "claude-sonnet-4-5-20250929".
             proxy_url (Union[None, str], optional):
                 The proxy URL for the conversation.
                 Defaults to None.

@@ -31,5 +31,4 @@ async def failure_callback(msg: str, callback_bytes_fn: Callable) -> None:
     pb_response.class_name = "FailedResponse"
     pb_response.message = msg
     pb_response_bytes = pb_response.SerializeToString()
-    print(f"Sending failure response: {msg}")
     await callback_bytes_fn(pb_response_bytes)

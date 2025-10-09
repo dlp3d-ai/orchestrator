@@ -214,7 +214,7 @@ Please follow the [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/
 
 If you need to run the Orchestrator service independently or configure advanced options, please refer to the [Docker Configuration Guide](docs/docker.md) for detailed setup instructions, environment variables, and configuration options.
 
-## Environment Setup
+### Environment Setup
 
 For local development and deployment, please follow the detailed installation guide:
 

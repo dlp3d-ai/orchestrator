@@ -10,8 +10,8 @@ import jwt
 import websockets
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..utils.executor_registry import ExecutorRegistry
 from ..utils.exception import MissingAPIKeyException
+from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
 

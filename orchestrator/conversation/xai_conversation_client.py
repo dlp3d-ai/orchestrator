@@ -8,6 +8,7 @@ import httpx
 import openai
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
@@ -127,7 +128,7 @@ class XAIConversationClient(ConversationAdapter):
         if not xai_api_key:
             msg = "XAI API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         self.input_buffer[request_id]["chat_task"]["llm_client"] = openai.AsyncOpenAI(
             api_key=xai_api_key,

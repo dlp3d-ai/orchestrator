@@ -10,6 +10,7 @@ from typing import Any, Dict, Union
 import httpx
 import websockets
 
+from ...utils.exception import MissingAPIKeyException
 from .tts_adapter import TextToSpeechAdapter
 
 
@@ -264,7 +265,7 @@ class SoftSugarTTSClient(TextToSpeechAdapter):
         if not app_id or not app_key:
             msg = "SoftSugar app ID or app key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         response = await self.get_response(app_id, app_key)
         if not response or "data" not in response or "accessToken" not in response["data"]:

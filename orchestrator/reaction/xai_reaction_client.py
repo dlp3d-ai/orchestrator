@@ -7,6 +7,7 @@ import httpx
 import openai
 
 from ..data_structures.reaction import ReactionDelta
+from ..utils.exception import MissingAPIKeyException
 from .reaction_adapter import ReactionAdapter
 
 
@@ -72,7 +73,7 @@ class XAIReactionClient(ReactionAdapter):
         if not xai_api_key:
             msg = "XAI API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
             api_key=xai_api_key,

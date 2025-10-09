@@ -6,6 +6,7 @@ import httpx
 import openai
 
 from ..data_structures.classification import ClassificationType
+from ..utils.exception import MissingAPIKeyException
 from .classification_adapter import ClassificationAdapter
 
 
@@ -67,7 +68,7 @@ class GeminiClassificationClient(ClassificationAdapter):
         if not gemini_api_key:
             msg = "Gemini API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
             api_key=gemini_api_key,

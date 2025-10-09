@@ -8,6 +8,7 @@ import anthropic
 import httpx
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
@@ -126,7 +127,7 @@ class AnthropicConversationClient(ConversationAdapter):
         if not anthropic_api_key:
             msg = "Anthropic API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         self.input_buffer[request_id]["chat_task"]["llm_client"] = anthropic.AsyncAnthropic(
             api_key=anthropic_api_key,

@@ -17,6 +17,7 @@ from google.protobuf.internal import builder as _builder
 
 from ...data_structures.audio_chunk import AudioWithSubtitleChunkBody
 from ...data_structures.process_flow import DAGStatus
+from ...utils.exception import MissingAPIKeyException
 from .tts_adapter import TextToSpeechAdapter
 
 _sym_db = _symbol_database.Default()
@@ -426,6 +427,10 @@ class SensenovaTTSClient(TextToSpeechAdapter):
                 - `duration` (float): Total audio duration in seconds
         """
         apikey = self.input_buffer[request_id].get("api_keys", {}).get("nova_tts_api_key", None)
+        if not apikey:
+            msg = "Sensenova API key is not found in the API keys."
+            self.logger.error(msg)
+            raise MissingAPIKeyException(msg)
         headers = {"apikey": apikey}
         ret_dict = dict()
         audio_io = io.BytesIO()

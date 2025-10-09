@@ -7,6 +7,7 @@ import httpx
 from elevenlabs import VoiceSettings
 from elevenlabs.client import AsyncElevenLabs
 
+from ...utils.exception import MissingAPIKeyException
 from .tts_adapter import TextToSpeechAdapter
 
 
@@ -137,7 +138,7 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
         if not elevenlabs_api_key:
             msg = "ElevenLabs API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
         elevenlabs_client = AsyncElevenLabs(
             api_key=elevenlabs_api_key,
             httpx_client=self.http_client,

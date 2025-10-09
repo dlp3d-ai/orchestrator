@@ -10,6 +10,7 @@ import jwt
 import websockets
 
 from ..data_structures.classification import ClassificationType
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .classification_adapter import ClassificationAdapter
 
@@ -246,7 +247,7 @@ class SenseNovaOmniClassificationClient(ClassificationAdapter):
         if not iss or not secret:
             msg = "SenseNova API key or secret key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         try:
             loop = asyncio.get_running_loop()

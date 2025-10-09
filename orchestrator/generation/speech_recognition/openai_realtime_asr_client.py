@@ -1,6 +1,5 @@
 import asyncio
 import base64
-import io
 import json
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -11,6 +10,7 @@ import websockets
 from ...data_structures.process_flow import DAGStatus
 from ...data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
 from ...utils.audio import resample_pcm
+from ...utils.exception import MissingAPIKeyException
 from ...utils.executor_registry import ExecutorRegistry
 from .asr_adapter import AutomaticSpeechRecognitionAdapter
 
@@ -121,7 +121,7 @@ class OpenAIRealtimeASRClient(AutomaticSpeechRecognitionAdapter):
         if not openai_api_key:
             msg = "OpenAI API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
         language = self.input_buffer[request_id].get("language", "zh")
         additional_headers = {
             "Authorization": f"Bearer {openai_api_key}",

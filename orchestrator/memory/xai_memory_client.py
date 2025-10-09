@@ -5,6 +5,7 @@ import httpx
 import openai
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
+from ..utils.exception import MissingAPIKeyException
 from .memory_adapter import BaseMemoryAdapter
 
 
@@ -113,7 +114,9 @@ class XAIMemoryClient(BaseMemoryAdapter):
                 raise ValueError("api_keys is required for XAI LLM calls")
             xai_api_key = api_keys.get("xai_api_key", "")
             if not xai_api_key:
-                raise ValueError("xai_api_key not found in api_keys")
+                msg = "XAI API key is not found in the API keys."
+                self.logger.error(msg)
+                raise MissingAPIKeyException(msg)
 
             xai_client = openai.AsyncOpenAI(
                 api_key=xai_api_key,

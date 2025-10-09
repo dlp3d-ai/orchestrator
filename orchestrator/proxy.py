@@ -751,6 +751,11 @@ class Proxy(Super):
                 + f"please choose among {list(self.reaction_adapters.keys())}."
             )
             self.logger.error(msg)
+            pb_response = orchestrator_pb2.OrchestratorV4Response()
+            pb_response.class_name = "FailedResponse"
+            pb_response.message = msg
+            pb_response_bytes = pb_response.SerializeToString()
+            await callback_bytes_fn(pb_response_bytes)
             raise AdapterNotFoundError(msg)
         reaction_adapter = self.reaction_adapters[reaction_adapter_key]
         reaction_node = DAGNode(
@@ -1347,6 +1352,11 @@ class Proxy(Super):
                 + f"please choose among {list(self.reaction_adapters.keys())}."
             )
             self.logger.error(msg)
+            pb_response = orchestrator_pb2.OrchestratorV4Response()
+            pb_response.class_name = "FailedResponse"
+            pb_response.message = msg
+            pb_response_bytes = pb_response.SerializeToString()
+            await callback_bytes_fn(pb_response_bytes)
             raise AdapterNotFoundError(msg)
         reaction_adapter = self.reaction_adapters[reaction_adapter_key]
         reaction_node = DAGNode(
@@ -1723,7 +1733,7 @@ class Proxy(Super):
                 Dictionary containing available voice names and their properties.
         """
         if tts_adapter_key not in self.tts_adapters:
-            msg = f"TTS adapter {tts_adapter_key} not found,please choose among {list(self.tts_adapters.keys())}."
+            msg = f"TTS adapter {tts_adapter_key} not found, please choose among {list(self.tts_adapters.keys())}."
             self.logger.error(msg)
             raise AdapterNotFoundError(msg)
         tts_adapter = self.tts_adapters[tts_adapter_key]

@@ -9,7 +9,7 @@ RUN apt-get update && \
     apt-get autoclean
 
 # Set timezone
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -yq tzdata && \
     dpkg-reconfigure -f noninteractive tzdata && \
@@ -24,7 +24,7 @@ RUN apt-get update && \
     apt-get install -y \
         python3.10 \
         python3.10-dev \
-        python3.10-venv \
+        python3.10-distutils \
         python3-pip && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/*

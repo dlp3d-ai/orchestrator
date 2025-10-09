@@ -205,7 +205,39 @@ orchestrator/
 
 ### 使用 Docker
 
-### 本地安装
+#### 推荐：使用 Docker Compose 启动完整的后端服务
+
+为了获得最佳体验，我们推荐使用 Docker Compose 启动完整的 DLP3D 后端服务，包括 Orchestrator 以及所有必需的依赖项（MongoDB、Audio2Face、Speech2Motion 等）。
+
+请按照 [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) 文档来设置和运行整个后端基础设施。
+
+#### 独立 Orchestrator 服务
+
+如果您需要独立运行 Orchestrator 服务或配置高级选项，请参考 [Docker 配置指南](docker.md) 获取详细的设置说明、环境变量和配置选项。
+
+## 环境设置
+
+对于本地开发和部署，请按照详细的安装指南操作：
+
+📖 **[完整安装指南](install.md)**
+
+安装指南提供了以下步骤说明：
+- 设置 Python 3.10+ 环境
+- 安装 Protocol Buffers 编译器
+- 配置开发环境
+- 安装项目依赖
+
+### 本地开发
+
+按照安装指南完成环境设置后，您可以在本地启动服务：
+
+```bash
+# 激活 conda 环境
+conda activate orchestrator
+
+# 启动服务
+python main.py --config_path configs/local.py
+```
 
 
 ## AI 服务

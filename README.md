@@ -214,8 +214,29 @@ Please follow the [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/
 
 If you need to run the Orchestrator service independently or configure advanced options, please refer to the [Docker Configuration Guide](docs/docker.md) for detailed setup instructions, environment variables, and configuration options.
 
-### Local Installation
+## Environment Setup
 
+For local development and deployment, please follow the detailed installation guide:
+
+📖 **[Complete Installation Guide](docs/install.md)**
+
+The installation guide provides step-by-step instructions for:
+- Setting up Python 3.10+ environment
+- Installing Protocol Buffers compiler
+- Configuring the development environment
+- Installing project dependencies
+
+### Local Development
+
+After completing the environment setup as described in the installation guide, you can start the service locally:
+
+```bash
+# Activate the conda environment
+conda activate orchestrator
+
+# Start the service
+python main.py --config_path configs/local.py
+```
 
 ## AI Services
 

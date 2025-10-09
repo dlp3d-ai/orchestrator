@@ -1,6 +1,6 @@
 # Orchestrator
 
-> **English Documentation** | [中文文档](docs/README_CN.md)
+> **English Documentation** | [中文文档](README_CN.md)
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)

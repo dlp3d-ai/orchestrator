@@ -1,7 +1,7 @@
 import asyncio
 import time
 import traceback
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.exception import failure_callback
@@ -165,7 +165,7 @@ class MemoryManager(Super):
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
         unix_timestamp: Optional[float] = None,
-        callback_bytes_fn: Optional[Any] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle user entry behavior.
 
@@ -182,7 +182,7 @@ class MemoryManager(Super):
                 Memory model override. Defaults to None.
             unix_timestamp (Optional[float], optional):
                 Unix timestamp for the entry. Defaults to None.
-            callback_bytes_fn (Optional[Any], optional):
+            callback_bytes_fn (Optional[Callable], optional):
                 Callback function for sending failure responses. Defaults to None.
         """
         # Ensure task processing loop is started
@@ -228,7 +228,11 @@ class MemoryManager(Super):
             await self.task_manager.create_task(
                 task_type=TaskType.MEDIUM_TERM_COMPRESSION,
                 character_id=character_id,
-                params={"cascade_memories": cascade_memories},
+                params={
+                    "cascade_memories": cascade_memories,
+                    "api_keys": api_keys,
+                    "model_override": memory_model_override,
+                },
                 callback_bytes_fn=callback_bytes_fn,
             )
 
@@ -241,7 +245,7 @@ class MemoryManager(Super):
         relationship: Optional[Tuple[str, int]] = None,
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
-        callback_bytes_fn: Optional[Any] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle normal conversation.
 

@@ -2,7 +2,7 @@ import asyncio
 import time
 import uuid
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from ..utils.super import Super
 
@@ -70,7 +70,7 @@ class MemoryTask:
         character_id: str,
         params: Dict[str, Any],
         max_retries: int = 3,
-        callback_bytes_fn: Optional[Any] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ):
         """Initialize a memory task.
 
@@ -85,7 +85,7 @@ class MemoryTask:
                 Task parameters and data.
             max_retries (int, optional):
                 Maximum number of retry attempts. Defaults to 3.
-            callback_bytes_fn (Optional[Any], optional):
+            callback_bytes_fn (Optional[Callable], optional):
                 Callback function for sending failure responses. Defaults to None.
         """
         self.task_id = task_id
@@ -231,7 +231,7 @@ class TaskManager(Super):
         character_id: str,
         params: Dict[str, Any],
         max_retries: int = 3,
-        callback_bytes_fn: Optional[Any] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> Optional[str]:
         """Create a new task, returns None if there is already a running task
         in the same category.
@@ -245,7 +245,7 @@ class TaskManager(Super):
                 Task parameters and data.
             max_retries (int, optional):
                 Maximum number of retry attempts. Defaults to 3.
-            callback_bytes_fn (Optional[Any], optional):
+            callback_bytes_fn (Optional[Callable], optional):
                 Callback function for sending failure responses. Defaults to None.
 
         Returns:

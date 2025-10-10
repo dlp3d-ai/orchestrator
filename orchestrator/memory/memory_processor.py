@@ -146,10 +146,7 @@ class MemoryProcessor(Super):
                 self.logger.error(msg)
                 # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    try:
-                        await self._send_failure_callback(msg, task.callback_bytes_fn)
-                    except Exception as callback_error:
-                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                    await self._send_failure_callback(msg, task.callback_bytes_fn)
                 # Mark task as failed and don't retry for API key errors
                 task.fail(msg)
                 return False
@@ -246,10 +243,7 @@ class MemoryProcessor(Super):
                 self.logger.error(msg)
                 # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    try:
-                        await self._send_failure_callback(msg, task.callback_bytes_fn)
-                    except Exception as callback_error:
-                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                    await self._send_failure_callback(msg, task.callback_bytes_fn)
                 # Mark task as failed and don't retry for API key errors
                 task.fail(msg)
                 return False
@@ -334,10 +328,7 @@ class MemoryProcessor(Super):
                 self.logger.error(msg)
                 # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    try:
-                        await self._send_failure_callback(msg, task.callback_bytes_fn)
-                    except Exception as callback_error:
-                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                    await self._send_failure_callback(msg, task.callback_bytes_fn)
                 # Mark task as failed and don't retry for API key errors
                 task.fail(msg)
                 return False
@@ -422,10 +413,7 @@ class MemoryProcessor(Super):
                 self.logger.error(msg)
                 # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    try:
-                        await self._send_failure_callback(msg, task.callback_bytes_fn)
-                    except Exception as callback_error:
-                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                    await self._send_failure_callback(msg, task.callback_bytes_fn)
                 # Mark task as failed and don't retry for API key errors
                 task.fail(msg)
                 return False
@@ -559,10 +547,7 @@ class MemoryProcessor(Super):
                 self.logger.error(msg)
                 # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    try:
-                        await self._send_failure_callback(msg, task.callback_bytes_fn)
-                    except Exception as callback_error:
-                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                    await self._send_failure_callback(msg, task.callback_bytes_fn)
                 # Mark task as failed and don't retry for API key errors
                 task.fail(msg)
                 return False

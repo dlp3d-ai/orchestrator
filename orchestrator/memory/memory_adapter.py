@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.super import Super
@@ -220,7 +220,7 @@ class BaseMemoryAdapter(Super):
         relationship: Optional[Tuple[str, int]] = None,
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
-        callback_bytes_fn: Optional[Any] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle conversation based on input type and call appropriate
         processing logic.

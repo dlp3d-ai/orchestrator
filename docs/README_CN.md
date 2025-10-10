@@ -176,30 +176,24 @@ orchestrator/
 ### DAG 工作流架构
 系统采用有向无环图（DAG）架构来管理复杂的 AI 交互流程。每个对话请求都会创建一个 DAG 实例，包含多个处理节点和依赖关系。
 
-- **完整音频对话流程** (`audio_chat_with_text_llm_v4`)
-   ```
-   Audio input -> ASR -> Classification -> Conversation -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+**图例说明：**
+- **实线箭头** (→): 表示在单个生成请求中两个节点之间的一次性完整数据传输
+- **虚线箭头** (⇢): 表示在单个生成请求中两个节点之间的流式数据传输
 
-- **快速音频对话流程** (`audio_chat_with_audio_llm_v4`)
-   ```
-   Audio input -> Audio Conversation -> A2F/S2M -> Callback
-   ```
+- **完整版音频对话流程** (`audio_chat_with_text_llm_v4`)
+   ![完整版音频对话流程](en/source/_static/dags/audio_chat_with_text_llm_v4.svg)
 
-- **完整文本对话流程** (`text_chat_with_text_llm_v4`)
-   ```
-   Text input -> Classification -> Conversation -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+- **极速版音频对话流程** (`audio_chat_with_audio_llm_v4`)
+   ![极速版音频对话流程](en/source/_static/dags/audio_chat_with_audio_llm_v4.svg)
 
-- **快速文本对话流程** (`text_chat_with_audio_llm_v4`)
-   ```
-   Text input -> TTS -> Audio conversation -> A2F/S2M -> Callback
-   ```
+- **完整版文本对话流程** (`text_chat_with_text_llm_v4`)
+   ![完整版文本对话流程](en/source/_static/dags/text_chat_with_text_llm_v4.svg)
+
+- **极速版文本对话流程** (`text_chat_with_audio_llm_v4`)
+   ![极速版文本对话流程](en/source/_static/dags/text_chat_with_audio_llm_v4.svg)
 
 - **直接生成流程** (`direct_generation_v4`)
-   ```
-   Text input -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+   ![直接生成流程](en/source/_static/dags/direct_generation_v4.svg)
 
 ## 快速开始
 

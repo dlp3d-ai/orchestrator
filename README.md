@@ -175,30 +175,24 @@ orchestrator/
 ### DAG Workflow Architecture
 The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI interaction workflows. Each conversation request creates a DAG instance containing multiple processing nodes and dependencies.
 
-- **Complete Audio Conversation Flow** (`audio_chat_with_text_llm_v4`)
-   ```
-   Audio input -> ASR -> Classification -> Conversation -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+**Diagram Legend:**
+- **Solid arrows** (→): One-time complete data transmission between nodes in a single generation request
+- **Dashed arrows** (⇢): Streaming data transmission between nodes in a single generation request
 
-- **Fast Audio Conversation Flow** (`audio_chat_with_audio_llm_v4`)
-   ```
-   Audio input -> Audio Conversation -> A2F/S2M -> Callback
-   ```
+- **Complete Audio Conversation Flow** (`audio_chat_with_text_llm_v4`)
+   ![Complete Audio Conversation Flow](docs/en/source/_static/dags/audio_chat_with_text_llm_v4.svg)
+
+- **Express Audio Conversation Flow** (`audio_chat_with_audio_llm_v4`)
+   ![Express Audio Conversation Flow](docs/en/source/_static/dags/audio_chat_with_audio_llm_v4.svg)
 
 - **Complete Text Conversation Flow** (`text_chat_with_text_llm_v4`)
-   ```
-   Text input -> Classification -> Conversation -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+   ![Complete Text Conversation Flow](docs/en/source/_static/dags/text_chat_with_text_llm_v4.svg)
 
-- **Fast Text Conversation Flow** (`text_chat_with_audio_llm_v4`)
-   ```
-   Text input -> TTS -> Audio conversation -> A2F/S2M -> Callback
-   ```
+- **Express Text Conversation Flow** (`text_chat_with_audio_llm_v4`)
+   ![Express Text Conversation Flow](docs/en/source/_static/dags/text_chat_with_audio_llm_v4.svg)
 
 - **Direct Generation Flow** (`direct_generation_v4`)
-   ```
-   Text input -> TTS -> Reaction -> A2F/S2M -> Callback
-   ```
+   ![Direct Generation Flow](docs/en/source/_static/dags/direct_generation_v4.svg)
 
 ## Quick Start
 

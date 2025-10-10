@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.super import Super
@@ -220,6 +220,7 @@ class BaseMemoryAdapter(Super):
         relationship: Optional[Tuple[str, int]] = None,
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle conversation based on input type and call appropriate
         processing logic.
@@ -239,11 +240,18 @@ class BaseMemoryAdapter(Super):
                 API keys for the LLM. Defaults to None.
             memory_model_override (Optional[str], optional):
                 Memory model override. Defaults to None.
+            callback_bytes_fn (Optional[Any], optional):
+                Callback function for sending failure responses. Defaults to None.
         """
         memory_manager = self.get_memory_manager()
         if memory_manager.is_user_entry(user_input):
             await memory_manager.handle_user_entry(
-                character_id, profile_memory, cascade_memories, api_keys, memory_model_override
+                character_id,
+                profile_memory,
+                cascade_memories,
+                api_keys,
+                memory_model_override,
+                callback_bytes_fn=callback_bytes_fn,
             )
         else:
             await memory_manager.handle_normal_conversation(
@@ -254,4 +262,5 @@ class BaseMemoryAdapter(Super):
                 relationship=relationship,
                 api_keys=api_keys,
                 memory_model_override=memory_model_override,
+                callback_bytes_fn=callback_bytes_fn,
             )

@@ -1,6 +1,5 @@
 import asyncio
 import io
-import re
 import time
 import traceback
 from abc import abstractmethod
@@ -13,6 +12,7 @@ from ...data_structures.audio_chunk import (
 )
 from ...data_structures.process_flow import DAGStatus
 from ...data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
+from ...utils.exception import MissingAPIKeyException, failure_callback
 from ...utils.log import setup_logger
 from ...utils.sentence_splitter import SentenceSplitter
 from ...utils.streamable import ChunkWithoutStartError, Streamable
@@ -151,6 +151,7 @@ class TextToSpeechAdapter(Streamable):
         request_id = chunk.request_id
         # Initialize buffer state using sentence splitter
         buffer_state = self.sentence_splitter.create_buffer_state()
+        callback_bytes_fn = chunk.dag.conf.get("callback_bytes_fn", None)
         self.input_buffer[request_id] = {
             "dag_start_time": dag_start_time,
             "start_time": cur_time,
@@ -166,6 +167,7 @@ class TextToSpeechAdapter(Streamable):
             "downstream_warned": False,
             "chunk_n_char_lowerbound": chunk_n_char_lowerbound,
             "chunk_n_char_lowerbound_en": chunk_n_char_lowerbound_en,
+            "callback_bytes_fn": callback_bytes_fn,
             **buffer_state,  # Merge sentence splitter buffer state
         }
         asyncio.create_task(self._send_stream_start_task(request_id))
@@ -348,6 +350,16 @@ class TextToSpeechAdapter(Streamable):
                     latency = cur_time - dag_start_time
                     msg = msg[:-1] + f", delay {latency:.2f}s from dag start."
                 self.logger.debug(msg)
+        except MissingAPIKeyException as e:
+            msg = f"Missing API key during TTS generation: {e}"
+            msg = msg + f" for request {request_id}"
+            self.logger.error(msg)
+            callback_bytes_fn = self.input_buffer[request_id].get("callback_bytes_fn", None)
+            if callback_bytes_fn:
+                await failure_callback(msg, callback_bytes_fn)
+            dag = self.input_buffer[request_id]["dag"]
+            dag.set_status(DAGStatus.FAILED)
+            return
         except Exception as e:
             msg = f"Error in streaming TTS: {e}"
             msg = msg + f" for request {request_id}"

@@ -12,6 +12,7 @@ import jwt
 import websockets
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import ConversationAdapter
 
@@ -133,7 +134,7 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
         if not iss or not secret:
             msg = "SenseNova API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         payload = {"iss": iss, "exp": int(time.time()) + 3600}  # 1 hour expiration
         return jwt.encode(payload, secret, algorithm="HS256")

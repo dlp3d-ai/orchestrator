@@ -9,6 +9,7 @@ from fastapi.utils import is_body_allowed_for_status_code
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from ..proxy import AdapterNotFoundError
 from ..utils.log import get_logger
 
 
@@ -88,6 +89,28 @@ async def validation_exception_handler(request: Request, exc):
     )
 
 
+async def adapter_not_found_exception_handler(request: Request, exc: AdapterNotFoundError):
+    """Adapter not found exception handler.
+
+    Args:
+        request (Request): The request object.
+        exc (AdapterNotFoundError): The adapter not found exception.
+
+    Returns:
+        JSONResponse: The JSON response with 404 status code.
+    """
+    content = APIErrorMessage(
+        message="Adapter Not Found",
+        code=404,
+        detail={"error": str(exc)},
+    )
+    return JSONResponse(
+        content=content.model_dump(),
+        status_code=404,
+        headers=request.headers,
+    )
+
+
 async def exception_handler(request: Request, exc):
     """Exception handler.
 
@@ -121,4 +144,5 @@ def register_error_handlers(app: FastAPI):
     """
     app.add_exception_handler(StarletteHTTPException, http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
+    app.add_exception_handler(AdapterNotFoundError, adapter_not_found_exception_handler)
     app.add_exception_handler(Exception, exception_handler)

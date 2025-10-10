@@ -11,6 +11,7 @@ import jwt
 import websockets
 
 from ..data_structures.reaction import ReactionDelta
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .reaction_adapter import ReactionAdapter
 
@@ -309,7 +310,7 @@ class SenseNovaOmniReactionClient(ReactionAdapter):
         if not iss or not secret:
             msg = "SenseNova API key or secret key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         try:
             user_message_parts = [f"<user_input>: {user_input}"]

@@ -2,7 +2,7 @@ import asyncio
 import time
 import uuid
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from ..utils.super import Super
 
@@ -64,7 +64,13 @@ class MemoryTask:
     """
 
     def __init__(
-        self, task_id: str, task_type: TaskType, character_id: str, params: Dict[str, Any], max_retries: int = 3
+        self,
+        task_id: str,
+        task_type: TaskType,
+        character_id: str,
+        params: Dict[str, Any],
+        max_retries: int = 3,
+        callback_bytes_fn: Optional[Callable] = None,
     ):
         """Initialize a memory task.
 
@@ -79,6 +85,8 @@ class MemoryTask:
                 Task parameters and data.
             max_retries (int, optional):
                 Maximum number of retry attempts. Defaults to 3.
+            callback_bytes_fn (Optional[Callable], optional):
+                Callback function for sending failure responses. Defaults to None.
         """
         self.task_id = task_id
         self.task_type = task_type
@@ -92,6 +100,7 @@ class MemoryTask:
         self.completed_at: Optional[float] = None
         self.error_message: Optional[str] = None
         self.result: Optional[Any] = None
+        self.callback_bytes_fn = callback_bytes_fn
 
     @property
     def category(self) -> TaskCategory:
@@ -217,7 +226,12 @@ class TaskManager(Super):
         return False
 
     async def create_task(
-        self, task_type: TaskType, character_id: str, params: Dict[str, Any], max_retries: int = 3
+        self,
+        task_type: TaskType,
+        character_id: str,
+        params: Dict[str, Any],
+        max_retries: int = 3,
+        callback_bytes_fn: Optional[Callable] = None,
     ) -> Optional[str]:
         """Create a new task, returns None if there is already a running task
         in the same category.
@@ -231,6 +245,8 @@ class TaskManager(Super):
                 Task parameters and data.
             max_retries (int, optional):
                 Maximum number of retry attempts. Defaults to 3.
+            callback_bytes_fn (Optional[Callable], optional):
+                Callback function for sending failure responses. Defaults to None.
 
         Returns:
             Optional[str]:
@@ -252,7 +268,12 @@ class TaskManager(Super):
             # Create new task
             task_id = str(uuid.uuid4())
             task = MemoryTask(
-                task_id=task_id, task_type=task_type, character_id=character_id, params=params, max_retries=max_retries
+                task_id=task_id,
+                task_type=task_type,
+                character_id=character_id,
+                params=params,
+                max_retries=max_retries,
+                callback_bytes_fn=callback_bytes_fn,
             )
             self.tasks[task_id] = task
             self.logger.info(f"Created task {task_id} of type {task_type.value} for character {character_id}")

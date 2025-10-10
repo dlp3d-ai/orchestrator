@@ -8,6 +8,7 @@ from typing import Any, Dict, Union
 
 import websockets
 
+from ...utils.exception import MissingAPIKeyException
 from .tts_adapter import TextToSpeechAdapter
 
 
@@ -116,7 +117,7 @@ class HuoshanTTSClient(TextToSpeechAdapter):
         if not app_id or not token:
             msg = "Huoshan app ID or token is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         audio_dict = {
             "voice_type": voice_type,

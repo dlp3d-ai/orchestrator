@@ -7,6 +7,7 @@ import httpx
 import openai
 
 from ..data_structures.reaction import ReactionDelta
+from ..utils.exception import MissingAPIKeyException
 from .reaction_adapter import ReactionAdapter
 
 
@@ -73,7 +74,7 @@ class GeminiReactionClient(ReactionAdapter):
         if not gemini_api_key:
             msg = "Gemini API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
             api_key=gemini_api_key,

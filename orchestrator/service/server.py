@@ -11,10 +11,10 @@ from fastapi.templating import Jinja2Templates
 
 from ..data_structures import orchestrator_v4_pb2 as orchestrator_pb2
 from ..data_structures.process_flow import DAGStatus
-from ..proxy import AdapterNotFoundError, Proxy
+from ..proxy import Proxy
 from ..utils.executor_registry import ExecutorRegistry
 from .base_fast_api_service import BaseFastAPIService
-from .exceptions import OPENAPI_RESPONSE_400, OPENAPI_RESPONSE_500
+from .exceptions import OPENAPI_RESPONSE_404, OPENAPI_RESPONSE_500
 from .requests import (
     AudioChatCompleteStartRequestV4,
     AudioChatExpressStartRequestV4,
@@ -647,17 +647,11 @@ class OrchestratorProxyServer(BaseFastAPIService):
                 Response containing the list of available voice names.
 
         Raises:
-            HTTPException:
+            AdapterNotFoundError:
                 When the specified TTS adapter is not found.
         """
-        try:
-            voice_names = await self.proxy.get_tts_voice_names(tts_adapter_key)
-            return VoiceNamesResponse(voice_names=voice_names)
-        except AdapterNotFoundError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=str(e),
-            ) from e
+        voice_names = await self.proxy.get_tts_voice_names(tts_adapter_key)
+        return VoiceNamesResponse(voice_names=voice_names)
 
     async def conversation_adapter_choices(self) -> AdapterChoicesResponse:
         """Get available conversation adapter choices.
@@ -842,7 +836,7 @@ class OrchestratorProxyServer(BaseFastAPIService):
                 200: {
                     "model": VoiceNamesResponse,
                 },
-                **OPENAPI_RESPONSE_400,
+                **OPENAPI_RESPONSE_404,
             },
         )
         router.add_api_route(

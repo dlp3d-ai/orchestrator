@@ -427,7 +427,6 @@ class BlendshapesAggregator(Streamable):
                     self.logger.debug(f"Sent face chunk body {face_chunk_body.seq_number} for request {request_id}")
             else:
                 if isinstance(chunk, FaceChunkBody):
-                    self.logger.info("waiting for FaceChunkBody sent")
                     for node in dag_node.downstreams:
                         payload = node.payload
                         await payload.feed_stream(chunk)
@@ -435,7 +434,6 @@ class BlendshapesAggregator(Streamable):
                         f"Sent face chunk body {chunk.seq_number} without aggregate for request {request_id}"
                     )
                 else:
-                    self.logger.info("waiting for MotionChunkBody sent")
                     if self.input_buffer[request_id]["motion_blendshape_names"] is not None:
                         motion_data_wo_bs = await loop.run_in_executor(
                             self.thread_pool_executor, self._remove_blendshape_from_motion, request_id, chunk.data

@@ -10,6 +10,7 @@ import jwt
 import websockets
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
@@ -261,7 +262,9 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
             iss = api_keys.get("sensenova_ak", "")
             secret = api_keys.get("sensenova_sk", "")
             if not iss or not secret:
-                raise ValueError("sensenova api keys not found in api_keys")
+                msg = "SenseNova API keys are not found in the API keys."
+                self.logger.error(msg)
+                raise MissingAPIKeyException(msg)
 
             loop = asyncio.get_running_loop()
             jwt_token = await loop.run_in_executor(self.executor, self._gen_token, iss, secret)

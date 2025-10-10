@@ -1,10 +1,8 @@
 import asyncio
 import hashlib
-import io
 import json
 import socket
 import time
-import wave
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Union
 
@@ -14,6 +12,7 @@ import websockets
 from ...data_structures.process_flow import DAGStatus
 from ...data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
 from ...utils.audio import resample_pcm
+from ...utils.exception import MissingAPIKeyException
 from ...utils.executor_registry import ExecutorRegistry
 from .asr_adapter import AutomaticSpeechRecognitionAdapter
 
@@ -190,7 +189,7 @@ class SoftSugarASRClient(AutomaticSpeechRecognitionAdapter):
         if not softsugar_app_id or not softsugar_app_key:
             msg = "SoftSugar app ID or app key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
         language = self.input_buffer[request_id].get("language", "zh")
         try:
             await self._ensure_token_valid(softsugar_app_id, softsugar_app_key, cur_time)

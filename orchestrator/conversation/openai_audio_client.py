@@ -17,6 +17,7 @@ from ..data_structures.audio_chunk import (
 )
 from ..data_structures.process_flow import DAGStatus
 from ..utils.audio import resample_pcm
+from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
 from .audio_conversation_adapter import AudioConversationAdapter
 
@@ -149,7 +150,7 @@ class OpenAIAudioClient(AudioConversationAdapter):
         if not openai_api_key:
             msg = "OpenAI API key is not found in the API keys."
             self.logger.error(msg)
-            raise ValueError(msg)
+            raise MissingAPIKeyException(msg)
 
         headers = {
             "Authorization": f"Bearer {openai_api_key}",

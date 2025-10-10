@@ -14,6 +14,7 @@ from ..data_structures.classification import (
 )
 from ..data_structures.process_flow import DAGStatus
 from ..data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
+from ..utils.exception import MissingAPIKeyException, failure_callback
 from ..utils.log import setup_logger
 from ..utils.streamable import ChunkWithoutStartError, Streamable
 from .prompts import CLASSIFICATION_PROMPT_EN, CLASSIFICATION_PROMPT_ZH, RESPONSE_FORMAT, TAG_PROMPT
@@ -150,6 +151,7 @@ class ClassificationAdapter(Streamable):
         language = chunk.dag.conf.get("language", "zh")
         classification_model_override = chunk.dag.conf.get("classification_model_override", "")
         api_keys = chunk.dag.conf.get("user_settings", {})
+        callback_bytes_fn = chunk.dag.conf.get("callback_bytes_fn", None)
         self.input_buffer[request_id] = {
             "start_time": cur_time,
             "last_update_time": cur_time,
@@ -160,8 +162,47 @@ class ClassificationAdapter(Streamable):
             "classification_model_override": classification_model_override,
             "api_keys": api_keys,
             "text_segments": "",
+            "callback_bytes_fn": callback_bytes_fn,
         }
-        asyncio.create_task(self._init_llm_client(request_id))
+        task = asyncio.create_task(self._init_llm_client(request_id))
+        task.add_done_callback(lambda t: self._handle_init_task_exception(t, request_id))
+
+    def _handle_init_task_exception(self, task: asyncio.Task, request_id: str) -> None:
+        """Handle exceptions from the initialization task.
+
+        Args:
+            task (asyncio.Task): The completed task.
+            request_id (str): The request ID associated with the task.
+        """
+        if task.exception() is not None:
+            exception = task.exception()
+            if isinstance(exception, MissingAPIKeyException):
+                msg = f"Missing API key during LLM client initialization: {exception}"
+                self.logger.error(msg)
+                # Create an async task to handle the failure callback
+                asyncio.create_task(self._send_failure_callback(msg, request_id))
+            else:
+                msg = f"Unexpected error during LLM client initialization: {exception}"
+                self.logger.error(msg)
+                # Create an async task to handle the failure callback for other exceptions too
+                asyncio.create_task(self._send_failure_callback(f"Unexpected error: {exception}", request_id))
+
+    async def _send_failure_callback(self, msg: str, request_id: str) -> None:
+        """Send failure callback asynchronously.
+
+        Args:
+            msg (str): The error message to send.
+            request_id (str): The request ID to get the callback function.
+        """
+        try:
+            if request_id in self.input_buffer:
+                callback_bytes_fn = self.input_buffer[request_id].get("callback_bytes_fn")
+                if callback_bytes_fn:
+                    await failure_callback(msg, callback_bytes_fn)
+            else:
+                self.logger.warning(f"Request {request_id} not found in input buffer")
+        except Exception as e:
+            self.logger.error(f"Failed to send failure callback for request {request_id}: {e}")
 
     async def _handle_body(self, chunk: TextChunkBody, cur_time: float) -> None:
         """Handle the body chunk for text classification.

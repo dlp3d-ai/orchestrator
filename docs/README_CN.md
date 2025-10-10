@@ -180,6 +180,8 @@ orchestrator/
 - **实线箭头** (→): 表示在单个生成请求中两个节点之间的一次性完整数据传输
 - **虚线箭头** (⇢): 表示在单个生成请求中两个节点之间的流式数据传输
 
+**流程图：**
+
 - **完整版音频对话流程** (`audio_chat_with_text_llm_v4`)
    ![完整版音频对话流程](en/source/_static/dags/audio_chat_with_text_llm_v4.svg)
 

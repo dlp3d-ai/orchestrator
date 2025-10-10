@@ -179,6 +179,8 @@ The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI
 - **Solid arrows** (→): One-time complete data transmission between nodes in a single generation request
 - **Dashed arrows** (⇢): Streaming data transmission between nodes in a single generation request
 
+**Workflow Diagrams:**
+
 - **Complete Audio Conversation Flow** (`audio_chat_with_text_llm_v4`)
    ![Complete Audio Conversation Flow](docs/en/source/_static/dags/audio_chat_with_text_llm_v4.svg)
 

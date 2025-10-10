@@ -211,6 +211,8 @@ orchestrator/
 
 请按照 [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) 文档来设置和运行整个后端基础设施。
 
+> **注意：** 上述链接将跳转到 [web_backend 仓库](https://github.com/dlp3d-ai/web_backend) 获取完整的后端设置说明。
+
 #### 独立 Orchestrator 服务
 
 如果您需要独立运行 Orchestrator 服务或配置高级选项，请参考 [Docker 配置指南](docker.md) 获取详细的设置说明、环境变量和配置选项。

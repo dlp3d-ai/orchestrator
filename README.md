@@ -210,6 +210,8 @@ For the best experience, we recommend using Docker Compose to start the complete
 
 Please follow the [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) documentation to set up and run the entire backend infrastructure.
 
+> **Note:** The above link will redirect you to the [web_backend repository](https://github.com/dlp3d-ai/web_backend) for complete backend setup instructions.
+
 #### Standalone Orchestrator Service
 
 If you need to run the Orchestrator service independently or configure advanced options, please refer to the [Docker Configuration Guide](docs/docker.md) for detailed setup instructions, environment variables, and configuration options.

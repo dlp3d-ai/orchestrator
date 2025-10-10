@@ -454,6 +454,7 @@ class ConversationAdapter(Streamable):
                 )
 
             # memory manager
+            callback_bytes_fn = task_space.get("callback_bytes_fn")
             asyncio.create_task(
                 memory_adapter.handle_conversation(
                     character_id,
@@ -463,6 +464,7 @@ class ConversationAdapter(Streamable):
                     relationship,
                     api_keys,
                     memory_model_override,
+                    callback_bytes_fn,
                 )
             )
 

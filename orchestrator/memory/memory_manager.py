@@ -4,6 +4,7 @@ import traceback
 from typing import Any, Dict, Optional, Tuple
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
+from ..utils.exception import failure_callback
 from ..utils.super import Super
 from .memory_adapter import BaseMemoryAdapter
 from .memory_processor import MemoryProcessor
@@ -164,6 +165,7 @@ class MemoryManager(Super):
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
         unix_timestamp: Optional[float] = None,
+        callback_bytes_fn: Optional[Any] = None,
     ) -> None:
         """Handle user entry behavior.
 
@@ -180,6 +182,8 @@ class MemoryManager(Super):
                 Memory model override. Defaults to None.
             unix_timestamp (Optional[float], optional):
                 Unix timestamp for the entry. Defaults to None.
+            callback_bytes_fn (Optional[Any], optional):
+                Callback function for sending failure responses. Defaults to None.
         """
         # Ensure task processing loop is started
         self._start_task_processing()
@@ -191,6 +195,7 @@ class MemoryManager(Super):
             task_type=TaskType.CREATE_MEDIUM_TERM_MEMORY,
             character_id=character_id,
             params={"unix_timestamp": unix_timestamp},
+            callback_bytes_fn=callback_bytes_fn,
         )
 
         # 2. Trigger round conversation summary task
@@ -202,6 +207,7 @@ class MemoryManager(Super):
                 "api_keys": api_keys,
                 "model_override": memory_model_override,
             },
+            callback_bytes_fn=callback_bytes_fn,
         )
 
         # 3. Trigger user profile update task
@@ -214,6 +220,7 @@ class MemoryManager(Super):
                 "api_keys": api_keys,
                 "model_override": memory_model_override,
             },
+            callback_bytes_fn=callback_bytes_fn,
         )
 
         # 4. Check if medium-term memory needs compression
@@ -222,6 +229,7 @@ class MemoryManager(Super):
                 task_type=TaskType.MEDIUM_TERM_COMPRESSION,
                 character_id=character_id,
                 params={"cascade_memories": cascade_memories},
+                callback_bytes_fn=callback_bytes_fn,
             )
 
     async def handle_normal_conversation(
@@ -233,6 +241,7 @@ class MemoryManager(Super):
         relationship: Optional[Tuple[str, int]] = None,
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
+        callback_bytes_fn: Optional[Any] = None,
     ) -> None:
         """Handle normal conversation.
 
@@ -251,6 +260,8 @@ class MemoryManager(Super):
                 API keys for the LLM. Defaults to None.
             memory_model_override (Optional[str], optional):
                 Memory model override. Defaults to None.
+            callback_bytes_fn (Optional[Any], optional):
+                Callback function for sending failure responses. Defaults to None.
         """
         # Ensure task processing loop is started
         self._start_task_processing()
@@ -265,6 +276,7 @@ class MemoryManager(Super):
                     "api_keys": api_keys,
                     "model_override": memory_model_override,
                 },
+                callback_bytes_fn=callback_bytes_fn,
             )
 
         # 2. Check if multi-level memory character count needs compression
@@ -282,6 +294,7 @@ class MemoryManager(Super):
                     "api_keys": api_keys,
                     "model_override": memory_model_override,
                 },
+                callback_bytes_fn=callback_bytes_fn,
             )
 
     async def _clean_completed_tasks(self) -> None:
@@ -346,3 +359,15 @@ class MemoryManager(Super):
         }
 
         return user_input.strip() in entry_signals
+
+    async def _send_failure_callback(self, msg: str, callback_bytes_fn) -> None:
+        """Send failure callback asynchronously.
+
+        Args:
+            msg (str): The error message to send.
+            callback_bytes_fn: The callback function that will send the protobuf response bytes.
+        """
+        try:
+            await failure_callback(msg, callback_bytes_fn)
+        except Exception as e:
+            self.logger.error(f"Failed to send failure callback: {e}")

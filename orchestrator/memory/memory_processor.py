@@ -1,8 +1,9 @@
-import json
+import asyncio
 import traceback
 from typing import Any, Dict, List, Optional, Union
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
+from ..utils.exception import MissingAPIKeyException, failure_callback
 from ..utils.super import Super
 from .memory_adapter import BaseMemoryAdapter
 from .prompt import (
@@ -138,6 +139,15 @@ class MemoryProcessor(Super):
             error_msg = f"Failed to process turn level summary: {str(e)}"
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
+
+            # Handle MissingAPIKeyException
+            if isinstance(e, MissingAPIKeyException):
+                msg = f"Missing API key during memory processing: {e}"
+                self.logger.error(msg)
+                # If callback function exists, send failure callback
+                if task.callback_bytes_fn:
+                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+
             task.fail(error_msg + "\n" + traceback_str)
             return False
 
@@ -223,6 +233,17 @@ class MemoryProcessor(Super):
             error_msg = f"Failed to process profile memory update: {str(e)}"
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
+
+            # Handle MissingAPIKeyException
+            if isinstance(e, MissingAPIKeyException):
+                msg = f"Missing API key during memory processing: {e}"
+                self.logger.error(msg)
+                # If callback function exists, send failure callback
+                if task.callback_bytes_fn:
+                    import asyncio
+
+                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+
             task.fail(error_msg + "\n" + traceback_str)
             return False
 
@@ -261,7 +282,7 @@ class MemoryProcessor(Super):
             api_keys = params.get("api_keys")
             model_override = params.get("model_override")
 
-            cascade_memories = params.get("cascade_memories")
+            cascade_memories = params.get("cascade_memories", {})
 
             medium_term_memories = cascade_memories.get("medium_term_memories", [])
             long_term_memory = cascade_memories.get("long_term_memory", {})
@@ -296,6 +317,15 @@ class MemoryProcessor(Super):
             error_msg = f"Failed to process medium term compression: {str(e)}"
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
+
+            # Handle MissingAPIKeyException
+            if isinstance(e, MissingAPIKeyException):
+                msg = f"Missing API key during memory processing: {e}"
+                self.logger.error(msg)
+                # If callback function exists, send failure callback
+                if task.callback_bytes_fn:
+                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+
             task.fail(error_msg + "\n" + traceback_str)
             return False
 
@@ -334,7 +364,7 @@ class MemoryProcessor(Super):
             api_keys = params.get("api_keys")
             model_override = params.get("model_override")
 
-            cascade_memories = params.get("cascade_memories")
+            cascade_memories = params.get("cascade_memories", {})
 
             short_term_memories = cascade_memories.get("short_term_memories", [])
             medium_term_memories = cascade_memories.get("medium_term_memories", [])
@@ -369,6 +399,17 @@ class MemoryProcessor(Super):
             error_msg = f"Failed to process short term compression: {str(e)}"
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
+
+            # Handle MissingAPIKeyException
+            if isinstance(e, MissingAPIKeyException):
+                msg = f"Missing API key during memory processing: {e}"
+                self.logger.error(msg)
+                # If callback function exists, send failure callback
+                if task.callback_bytes_fn:
+                    import asyncio
+
+                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+
             task.fail(error_msg + "\n" + traceback_str)
             return False
 
@@ -421,7 +462,7 @@ class MemoryProcessor(Super):
             api_keys = params.get("api_keys")
             model_override = params.get("model_override")
 
-            cascade_memories = params.get("cascade_memories")
+            cascade_memories = params.get("cascade_memories", {})
 
             profile_memory = params.get("profile_memory")
             user_input = params.get("user_input")
@@ -491,6 +532,15 @@ class MemoryProcessor(Super):
             error_msg = f"Failed to process short term char compression: {str(e)}"
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
+
+            # Handle MissingAPIKeyException
+            if isinstance(e, MissingAPIKeyException):
+                msg = f"Missing API key during memory processing: {e}"
+                self.logger.error(msg)
+                # If callback function exists, send failure callback
+                if task.callback_bytes_fn:
+                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+
             task.fail(error_msg + "\n" + traceback_str)
             return False
 
@@ -686,3 +736,15 @@ class MemoryProcessor(Super):
             total_chars += len(user_message)
 
         return total_chars
+
+    async def _send_failure_callback(self, msg: str, callback_bytes_fn) -> None:
+        """Send failure callback asynchronously.
+
+        Args:
+            msg (str): The error message to send.
+            callback_bytes_fn: The callback function that will send the protobuf response bytes.
+        """
+        try:
+            await failure_callback(msg, callback_bytes_fn)
+        except Exception as e:
+            self.logger.error(f"Failed to send failure callback: {e}")

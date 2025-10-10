@@ -280,8 +280,9 @@ class MemoryManager(Super):
             )
 
         # 2. Check if multi-level memory character count needs compression
+        relationship_stage = relationship[0] if relationship else None
         if await self.memory_processor.need_short_term_char_compression(
-            cascade_memories, profile_memory, user_input, relationship
+            cascade_memories, profile_memory, user_input, relationship_stage
         ):
             await self.task_manager.create_task(
                 task_type=TaskType.SHORT_TERM_CHAR_COMPRESSION,
@@ -325,6 +326,12 @@ class MemoryManager(Super):
             all_tasks = list(self.task_manager.tasks.values())
             for task in all_tasks:
                 if task.status == TaskStatus.FAILED:
+                    # Check if this is an API key error - don't retry these
+                    if task.error_message and "Missing API key" in task.error_message:
+                        self.logger.error(f"Task {task.task_id} failed due to missing API key: {task.error_message}")
+                        await self.task_manager.remove_task(task.task_id)
+                        continue
+
                     if task.can_retry():
                         # Retry task
                         task.retry()

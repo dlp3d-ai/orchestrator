@@ -140,13 +140,19 @@ class MemoryProcessor(Super):
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
 
-            # Handle MissingAPIKeyException
+            # Handle MissingAPIKeyException - send failure callback immediately
             if isinstance(e, MissingAPIKeyException):
                 msg = f"Missing API key during memory processing: {e}"
                 self.logger.error(msg)
-                # If callback function exists, send failure callback
+                # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+                    try:
+                        await self._send_failure_callback(msg, task.callback_bytes_fn)
+                    except Exception as callback_error:
+                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                # Mark task as failed and don't retry for API key errors
+                task.fail(msg)
+                return False
 
             task.fail(error_msg + "\n" + traceback_str)
             return False
@@ -234,15 +240,19 @@ class MemoryProcessor(Super):
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
 
-            # Handle MissingAPIKeyException
+            # Handle MissingAPIKeyException - send failure callback immediately
             if isinstance(e, MissingAPIKeyException):
                 msg = f"Missing API key during memory processing: {e}"
                 self.logger.error(msg)
-                # If callback function exists, send failure callback
+                # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    import asyncio
-
-                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+                    try:
+                        await self._send_failure_callback(msg, task.callback_bytes_fn)
+                    except Exception as callback_error:
+                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                # Mark task as failed and don't retry for API key errors
+                task.fail(msg)
+                return False
 
             task.fail(error_msg + "\n" + traceback_str)
             return False
@@ -318,13 +328,19 @@ class MemoryProcessor(Super):
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
 
-            # Handle MissingAPIKeyException
+            # Handle MissingAPIKeyException - send failure callback immediately
             if isinstance(e, MissingAPIKeyException):
                 msg = f"Missing API key during memory processing: {e}"
                 self.logger.error(msg)
-                # If callback function exists, send failure callback
+                # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+                    try:
+                        await self._send_failure_callback(msg, task.callback_bytes_fn)
+                    except Exception as callback_error:
+                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                # Mark task as failed and don't retry for API key errors
+                task.fail(msg)
+                return False
 
             task.fail(error_msg + "\n" + traceback_str)
             return False
@@ -400,15 +416,19 @@ class MemoryProcessor(Super):
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
 
-            # Handle MissingAPIKeyException
+            # Handle MissingAPIKeyException - send failure callback immediately
             if isinstance(e, MissingAPIKeyException):
                 msg = f"Missing API key during memory processing: {e}"
                 self.logger.error(msg)
-                # If callback function exists, send failure callback
+                # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    import asyncio
-
-                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+                    try:
+                        await self._send_failure_callback(msg, task.callback_bytes_fn)
+                    except Exception as callback_error:
+                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                # Mark task as failed and don't retry for API key errors
+                task.fail(msg)
+                return False
 
             task.fail(error_msg + "\n" + traceback_str)
             return False
@@ -533,13 +553,19 @@ class MemoryProcessor(Super):
             traceback_str = traceback.format_exc()
             self.logger.error(error_msg + "\n" + traceback_str)
 
-            # Handle MissingAPIKeyException
+            # Handle MissingAPIKeyException - send failure callback immediately
             if isinstance(e, MissingAPIKeyException):
                 msg = f"Missing API key during memory processing: {e}"
                 self.logger.error(msg)
-                # If callback function exists, send failure callback
+                # If callback function exists, send failure callback immediately
                 if task.callback_bytes_fn:
-                    asyncio.create_task(self._send_failure_callback(msg, task.callback_bytes_fn))
+                    try:
+                        await self._send_failure_callback(msg, task.callback_bytes_fn)
+                    except Exception as callback_error:
+                        self.logger.error(f"Failed to send failure callback: {callback_error}")
+                # Mark task as failed and don't retry for API key errors
+                task.fail(msg)
+                return False
 
             task.fail(error_msg + "\n" + traceback_str)
             return False

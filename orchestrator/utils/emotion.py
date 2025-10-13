@@ -86,7 +86,7 @@ def get_emotion_list(
         threshold = emotion_thresholds[key]
         if score > threshold:
             emotion_list.append(key)
-    max_score = 0 if len(emotion_list) == 0 else sorted_emotions[emotion_list[0]]
+    max_score = 0 if len(emotion_list) == 0 else emotion_scores[emotion_list[0]]
     if max_score <= neutral_threshold:
         emotion_list.append("Neutral")
     return emotion_list

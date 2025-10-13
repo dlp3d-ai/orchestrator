@@ -1703,6 +1703,47 @@ class Proxy(Super):
         """
         return await self.db_config_client.get_motion_settings(user_id, character_id)
 
+    async def get_relationship(self, character_id: str) -> Union[None, Tuple[str, int]]:
+        """Get relationship record.
+
+        Queries relationship record for the specified character.
+
+        Args:
+            character_id (str):
+                Character ID for querying the relationship record.
+
+        Returns:
+            Union[None, Tuple[str, int]]:
+                If relationship record is found, returns tuple of (relationship_type, relationship_score);
+                if no record is found, returns None.
+        """
+        relationship = await self.db_memory_client.get_relationship(character_id)
+        return relationship
+
+    async def get_emotion(self, character_id: str) -> Union[None, Dict[str, int]]:
+        """Get emotion record.
+
+        Queries emotion record for the specified character.
+
+        Args:
+            character_id (str):
+                Character ID for querying the emotion record.
+
+        Returns:
+            Union[None, Dict[str, int]]:
+                If emotion record is found, returns dictionary containing emotion values with the following fields:
+                - happiness (int): Happiness level
+                - sadness (int): Sadness level
+                - fear (int): Fear level
+                - anger (int): Anger level
+                - disgust (int): Disgust level
+                - surprise (int): Surprise level
+                - shyness (int): Shyness level
+                If no record is found, returns None.
+        """
+        emotion = await self.db_memory_client.get_emotion(character_id)
+        return emotion
+
     async def get_asr_adapter_choices(self) -> List[str]:
         """Get available ASR adapter choices.
 

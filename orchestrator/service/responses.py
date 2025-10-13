@@ -55,3 +55,22 @@ class MotionSettingsResponse(BaseModel):
     """Motion settings response."""
 
     avatar: str
+
+
+class RelationshipResponse(BaseModel):
+    """Relationship response."""
+
+    relationship: str
+    score: int
+
+
+class EmotionResponse(BaseModel):
+    """Emotion response."""
+
+    happiness: int
+    sadness: int
+    fear: int
+    anger: int
+    disgust: int
+    surprise: int
+    shyness: int

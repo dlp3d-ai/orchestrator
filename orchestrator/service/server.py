@@ -22,7 +22,14 @@ from .requests import (
     TextChatCompleteRequestV4,
     TextChatExpressRequestV4,
 )
-from .responses import AdapterChoicesResponse, MotionSettingsResponse, VoiceNamesResponse, VoiceSettingsResponse
+from .responses import (
+    AdapterChoicesResponse,
+    EmotionResponse,
+    MotionSettingsResponse,
+    RelationshipResponse,
+    VoiceNamesResponse,
+    VoiceSettingsResponse,
+)
 
 
 class OrchestratorProxyServer(BaseFastAPIService):
@@ -615,6 +622,49 @@ class OrchestratorProxyServer(BaseFastAPIService):
         resp = await loop.run_in_executor(self.executor, MotionSettingsResponse.model_validate, settings_dict)
         return resp
 
+    async def get_relationship(self, character_id: str) -> RelationshipResponse:
+        """Get the relationship status for a specific character.
+
+        Args:
+            character_id (str):
+                Unique identifier for the character.
+
+        Returns:
+            RelationshipResponse:
+                Response containing the relationship status and score.
+
+        Raises:
+            HTTPException:
+                When the relationship is not found for the specified character_id.
+        """
+        relationship = await self.proxy.get_relationship(character_id)
+        if relationship is None:
+            raise HTTPException(status_code=404, detail=f"Relationship not found for character_id: {character_id}")
+        resp = RelationshipResponse(relationship=relationship[0], score=relationship[1])
+        return resp
+
+    async def get_emotion(self, character_id: str) -> EmotionResponse:
+        """Get the emotion status for a specific character.
+
+        Args:
+            character_id (str):
+                Unique identifier for the character.
+
+        Returns:
+            EmotionResponse:
+                Response containing the emotion status and related data.
+
+        Raises:
+            HTTPException:
+                When the emotion is not found for the specified character_id.
+        """
+        emotion = await self.proxy.get_emotion(character_id)
+        loop = asyncio.get_running_loop()
+        if emotion is None:
+            raise HTTPException(status_code=404, detail=f"Emotion not found for character_id: {character_id}")
+        resp = await loop.run_in_executor(self.executor, EmotionResponse.model_validate, emotion)
+        return resp
+
     async def asr_adapter_choices(self) -> AdapterChoicesResponse:
         """Get available ASR (Automatic Speech Recognition) adapter choices.
 
@@ -880,6 +930,20 @@ class OrchestratorProxyServer(BaseFastAPIService):
             methods=["GET"],
             status_code=200,
             response_model=MotionSettingsResponse,
+        )
+        router.add_api_route(
+            "/api/v4/get_relationship/{character_id}",
+            self.get_relationship,
+            methods=["GET"],
+            status_code=200,
+            response_model=RelationshipResponse,
+        )
+        router.add_api_route(
+            "/api/v4/get_emotion/{character_id}",
+            self.get_emotion,
+            methods=["GET"],
+            status_code=200,
+            response_model=EmotionResponse,
         )
         # WebSocket
         router.add_api_websocket_route(

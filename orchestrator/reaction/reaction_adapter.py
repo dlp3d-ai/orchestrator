@@ -20,6 +20,7 @@ from ..data_structures.reaction import (
     ReactionLLM,
     Relationship,
 )
+from ..utils.emotion import get_emotion_list
 from ..utils.exception import MissingAPIKeyException, failure_callback
 from ..utils.log import setup_logger
 from ..utils.sentence_splitter import SentenceSplitter
@@ -684,35 +685,27 @@ class ReactionAdapter(Streamable):
             Reaction:
                 Structured reaction object.
         """
-        # threshold dictionary
-        threshold_dict = {
-            "Neutral": self.input_buffer[request_id]["neutral_threshold"],
-            "Happiness": self.input_buffer[request_id]["happiness_threshold"],
-            "Sadness": self.input_buffer[request_id]["sadness_threshold"],
-            "Fear": self.input_buffer[request_id]["fear_threshold"],
-            "Anger": self.input_buffer[request_id]["anger_threshold"],
-            "Disgust": self.input_buffer[request_id]["disgust_threshold"],
-            "Surprise": self.input_buffer[request_id]["surprise_threshold"],
-            "Shyness": self.input_buffer[request_id]["shyness_threshold"],
-        }
-
         # label expression
         relationship_str = reaction_llm.relationship.stage
-        emotion_list = []
         emotion_scores = reaction_llm.emotion.model_dump()
 
-        # Sort by score from high to low, only add emotions above threshold, ensure first value is strongest non-neutral emotion
-        sorted_emotions = sorted(emotion_scores.items(), key=lambda x: x[1], reverse=True)
-        for key, score in sorted_emotions:
-            threshold = threshold_dict[key]
-            if score > threshold:
-                emotion_list.append(key)
-
-        # If all emotions are below neutral_threshold, add neutral
-        # neutral_threshold = 100 // 7 + neutral_epsilon
-        if all(score <= threshold_dict["Neutral"] for score in emotion_scores.values()):
-            emotion_list.append("Neutral")
-
+        emotion_list = get_emotion_list(
+            happiness_score=emotion_scores["Happiness"],
+            happiness_threshold=self.input_buffer[request_id]["happiness_threshold"],
+            sadness_score=emotion_scores["Sadness"],
+            sadness_threshold=self.input_buffer[request_id]["sadness_threshold"],
+            fear_score=emotion_scores["Fear"],
+            fear_threshold=self.input_buffer[request_id]["fear_threshold"],
+            anger_score=emotion_scores["Anger"],
+            anger_threshold=self.input_buffer[request_id]["anger_threshold"],
+            disgust_score=emotion_scores["Disgust"],
+            disgust_threshold=self.input_buffer[request_id]["disgust_threshold"],
+            surprise_score=emotion_scores["Surprise"],
+            surprise_threshold=self.input_buffer[request_id]["surprise_threshold"],
+            shyness_score=emotion_scores["Shyness"],
+            shyness_threshold=self.input_buffer[request_id]["shyness_threshold"],
+            neutral_threshold=self.input_buffer[request_id]["neutral_threshold"],
+        )
         emotion_str = " | ".join(emotion_list)
         label_expression = f"({relationship_str}) & ({emotion_str})"
 

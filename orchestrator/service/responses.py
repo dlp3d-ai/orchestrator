@@ -67,10 +67,4 @@ class RelationshipResponse(BaseModel):
 class EmotionResponse(BaseModel):
     """Emotion response."""
 
-    happiness: int
-    sadness: int
-    fear: int
-    anger: int
-    disgust: int
-    surprise: int
-    shyness: int
+    emotions: List[str]

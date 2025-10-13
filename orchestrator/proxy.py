@@ -34,6 +34,7 @@ from .memory.builder import build_memory_adapter
 from .memory.memory_adapter import INITIAL_EMOTION_STATE, INITIAL_RELATIONSHIP_STATE
 from .memory.memory_manager import MemoryManager
 from .reaction.builder import ReactionAdapter, build_reaction_adapter
+from .utils.emotion import get_emotion_list
 from .utils.executor_registry import ExecutorRegistry
 from .utils.super import Super
 
@@ -1720,29 +1721,48 @@ class Proxy(Super):
         relationship = await self.db_memory_client.get_relationship(character_id)
         return relationship
 
-    async def get_emotion(self, character_id: str) -> Union[None, Dict[str, int]]:
-        """Get emotion record.
+    async def get_emotion(self, user_id: str, character_id: str) -> List[str]:
+        """Get the current emotion list for a specific character.
 
-        Queries emotion record for the specified character.
+        Retrieves emotion scores from the database and character settings,
+        then processes them through the emotion analysis algorithm to
+        determine the current emotional state of the character.
 
         Args:
+            user_id (str):
+                Unique identifier for the user.
             character_id (str):
-                Character ID for querying the emotion record.
+                Unique identifier for the character.
 
         Returns:
-            Union[None, Dict[str, int]]:
-                If emotion record is found, returns dictionary containing emotion values with the following fields:
-                - happiness (int): Happiness level
-                - sadness (int): Sadness level
-                - fear (int): Fear level
-                - anger (int): Anger level
-                - disgust (int): Disgust level
-                - surprise (int): Surprise level
-                - shyness (int): Shyness level
-                If no record is found, returns None.
+            List[str]:
+                List of emotion names sorted by intensity in descending order.
+                Returns empty list if no emotion scores are found for the character.
         """
-        emotion = await self.db_memory_client.get_emotion(character_id)
-        return emotion
+        emotion_scores = await self.db_memory_client.get_emotion(character_id)
+        emotion_thresholds = await self.db_config_client.get_character_settings(user_id, character_id)
+        emotions = (
+            get_emotion_list(
+                happiness_score=emotion_scores["happiness"],
+                happiness_threshold=emotion_thresholds["happiness_threshold"],
+                sadness_score=emotion_scores["sadness"],
+                sadness_threshold=emotion_thresholds["sadness_threshold"],
+                fear_score=emotion_scores["fear"],
+                fear_threshold=emotion_thresholds["fear_threshold"],
+                anger_score=emotion_scores["anger"],
+                anger_threshold=emotion_thresholds["anger_threshold"],
+                disgust_score=emotion_scores["disgust"],
+                disgust_threshold=emotion_thresholds["disgust_threshold"],
+                surprise_score=emotion_scores["surprise"],
+                surprise_threshold=emotion_thresholds["surprise_threshold"],
+                shyness_score=emotion_scores["shyness"],
+                shyness_threshold=emotion_thresholds["shyness_threshold"],
+                neutral_threshold=emotion_thresholds["neutral_threshold"],
+            )
+            if emotion_scores is not None
+            else []
+        )
+        return emotions
 
     async def get_asr_adapter_choices(self) -> List[str]:
         """Get available ASR adapter choices.

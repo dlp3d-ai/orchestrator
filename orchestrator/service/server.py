@@ -643,26 +643,25 @@ class OrchestratorProxyServer(BaseFastAPIService):
         resp = RelationshipResponse(relationship=relationship[0], score=relationship[1])
         return resp
 
-    async def get_emotion(self, character_id: str) -> EmotionResponse:
+    async def get_emotion(self, user_id: str, character_id: str) -> EmotionResponse:
         """Get the emotion status for a specific character.
 
         Args:
+            user_id (str):
+                Unique identifier for the user.
             character_id (str):
                 Unique identifier for the character.
 
         Returns:
             EmotionResponse:
-                Response containing the emotion status and related data.
+                Response containing the emotion status.
 
         Raises:
             HTTPException:
                 When the emotion is not found for the specified character_id.
         """
-        emotion = await self.proxy.get_emotion(character_id)
-        loop = asyncio.get_running_loop()
-        if emotion is None:
-            raise HTTPException(status_code=404, detail=f"Emotion not found for character_id: {character_id}")
-        resp = await loop.run_in_executor(self.executor, EmotionResponse.model_validate, emotion)
+        emotions = await self.proxy.get_emotion(user_id, character_id)
+        resp = EmotionResponse(emotions=emotions)
         return resp
 
     async def asr_adapter_choices(self) -> AdapterChoicesResponse:
@@ -939,7 +938,7 @@ class OrchestratorProxyServer(BaseFastAPIService):
             response_model=RelationshipResponse,
         )
         router.add_api_route(
-            "/api/v4/get_emotion/{character_id}",
+            "/api/v4/get_emotion/{user_id}/{character_id}",
             self.get_emotion,
             methods=["GET"],
             status_code=200,

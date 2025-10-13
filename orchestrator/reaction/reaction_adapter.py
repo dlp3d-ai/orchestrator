@@ -1079,10 +1079,12 @@ class ReactionAdapter(Streamable):
                         f"Request {request_id}, seq_number {seq_number}: normal LLM processing with timeout {remaining_time:.2f}s"
                     )
                 except Exception as e:
+                    traceback_str = traceback.format_exc()
                     self.logger.error(
                         f"{e} Error in getting reaction for request {request_id}, "
                         + f"seq_number {seq_number}, text_segment {text_segment}, "
                         + "using empty reaction as default."
+                        + f"\n{traceback_str}"
                     )
                     reaction = await self.get_empty_reaction(
                         request_id,

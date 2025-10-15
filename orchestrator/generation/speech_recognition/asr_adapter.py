@@ -198,24 +198,24 @@ class AutomaticSpeechRecognitionAdapter(Streamable):
             "callback_bytes_fn": callback_bytes_fn,
         }
         task = asyncio.create_task(self._create_connection(request_id, cur_time))
-        task.add_done_callback(lambda t: self._handle_init_task_exception(t, request_id))
+        task.add_done_callback(lambda t: self._handle_task_exception(t, request_id))
 
-    def _handle_init_task_exception(self, task: asyncio.Task, request_id: str) -> None:
+    def _handle_task_exception(self, task: asyncio.Task, request_id: str) -> None:
         """Handle exceptions from the initialization task.
 
         Args:
             task (asyncio.Task): The completed task.
             request_id (str): The request ID associated with the task.
         """
-        if task.exception() is not None:
-            exception = task.exception()
+        exception = task.exception()
+        if exception is not None:
             if isinstance(exception, MissingAPIKeyException):
                 msg = f"Missing API key during ASR client initialization: {exception}"
                 self.logger.error(msg)
                 # Create an async task to handle the failure callback
                 asyncio.create_task(self._send_failure_callback(msg, request_id))
             else:
-                msg = f"Unexpected error during ASR client initialization: {exception}"
+                msg = f"Unexpected error during ASR client task: {exception}"
                 self.logger.error(msg)
                 # Create an async task to handle the failure callback for other exceptions too
                 asyncio.create_task(self._send_failure_callback(f"Unexpected error: {exception}", request_id))
@@ -258,7 +258,8 @@ class AutomaticSpeechRecognitionAdapter(Streamable):
         if dag.status == DAGStatus.RUNNING:
             seq_number = self.input_buffer[request_id]["chunk_received_from_upstream"]
             self.input_buffer[request_id]["chunk_received_from_upstream"] += 1
-            asyncio.create_task(self._send_pcm_task(request_id, pcm_io.getvalue(), seq_number))
+            task = asyncio.create_task(self._send_pcm_task(request_id, pcm_io.getvalue(), seq_number))
+            task.add_done_callback(lambda t: self._handle_task_exception(t, request_id))
         self.input_buffer[request_id]["last_update_time"] = cur_time
 
     async def _handle_end(self, chunk: AudioChunkEnd, cur_time: float) -> None:
@@ -278,7 +279,8 @@ class AutomaticSpeechRecognitionAdapter(Streamable):
         self.input_buffer[request_id]["last_update_time"] = cur_time
         dag = self.input_buffer[request_id]["dag"]
         if dag.status == DAGStatus.RUNNING:
-            asyncio.create_task(self._send_to_downstream_and_clean(request_id))
+            task = asyncio.create_task(self._send_to_downstream_and_clean(request_id))
+            task.add_done_callback(lambda t: self._handle_task_exception(t, request_id))
 
     @abstractmethod
     async def _create_connection(self, request_id: str, cur_time: float) -> None:

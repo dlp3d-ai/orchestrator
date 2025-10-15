@@ -197,12 +197,12 @@ class AudioConversationAdapter(Streamable, ABC):
         if task.exception() is not None:
             exception = task.exception()
             if isinstance(exception, MissingAPIKeyException):
-                msg = f"Missing API key during LLM client initialization: {exception}"
+                msg = f"Missing API key during LLM audio conversation client initialization: {exception}"
                 self.logger.error(msg)
                 # Create an async task to handle the failure callback
                 asyncio.create_task(self._send_failure_callback(msg, request_id))
             else:
-                msg = f"Unexpected error during LLM client initialization: {exception}"
+                msg = f"Unexpected error during LLM audio conversation client initialization: {exception}"
                 self.logger.error(msg)
                 # Create an async task to handle the failure callback for other exceptions too
                 asyncio.create_task(self._send_failure_callback(f"Unexpected error: {exception}", request_id))

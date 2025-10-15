@@ -366,7 +366,7 @@ class MemoryManager(Super):
         # Collection of entry signals in various languages
         entry_signals = {
             "用户已进入对话",
-            "The user entered the chat",
+            "The user has entered the chat",
         }
 
         return user_input.strip() in entry_signals

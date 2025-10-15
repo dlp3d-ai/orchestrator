@@ -219,6 +219,9 @@ class AutomaticSpeechRecognitionAdapter(Streamable):
                 self.logger.error(msg)
                 # Create an async task to handle the failure callback for other exceptions too
                 asyncio.create_task(self._send_failure_callback(f"Unexpected error: {exception}", request_id))
+            dag = self.input_buffer[request_id]["dag"]
+            if dag is not None:
+                dag.set_status(DAGStatus.FAILED)
 
     async def _send_failure_callback(self, msg: str, request_id: str) -> None:
         """Send failure callback asynchronously.

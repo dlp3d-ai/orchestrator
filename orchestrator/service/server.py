@@ -828,7 +828,7 @@ class OrchestratorProxyServer(BaseFastAPIService):
             response_model=str,
         )
         router.add_api_route(
-            "/api/v1/tail_log/{n_lines}",
+            "/api/v4/tail_log/{n_lines}",
             self.tail_log,
             methods=["GET"],
             status_code=200,
@@ -852,7 +852,7 @@ class OrchestratorProxyServer(BaseFastAPIService):
             },
         )
         router.add_api_route(
-            "/api/v1/health",
+            "/api/v4/health",
             self.health,
             methods=["GET"],
             status_code=200,
@@ -862,21 +862,21 @@ class OrchestratorProxyServer(BaseFastAPIService):
             },
         )
         router.add_api_route(
-            "/api/v1/asr_adapter_choices",
+            "/api/v4/asr_adapter_choices",
             self.asr_adapter_choices,
             methods=["GET"],
             status_code=200,
             response_model=AdapterChoicesResponse,
         )
         router.add_api_route(
-            "/api/v1/tts_adapter_choices",
+            "/api/v4/tts_adapter_choices",
             self.tts_adapter_choices,
             methods=["GET"],
             status_code=200,
             response_model=AdapterChoicesResponse,
         )
         router.add_api_route(
-            "/api/v1/tts_voice_names/{tts_adapter_key}",
+            "/api/v4/tts_voice_names/{tts_adapter_key}",
             self.tts_voice_names,
             methods=["GET"],
             status_code=200,
@@ -889,28 +889,28 @@ class OrchestratorProxyServer(BaseFastAPIService):
             },
         )
         router.add_api_route(
-            "/api/v1/conversation_adapter_choices",
+            "/api/v4/conversation_adapter_choices",
             self.conversation_adapter_choices,
             methods=["GET"],
             status_code=200,
             response_model=AdapterChoicesResponse,
         )
         router.add_api_route(
-            "/api/v1/reaction_adapter_choices",
+            "/api/v4/reaction_adapter_choices",
             self.reaction_adapter_choices,
             methods=["GET"],
             status_code=200,
             response_model=AdapterChoicesResponse,
         )
         router.add_api_route(
-            "/api/v1/classification_adapter_choices",
+            "/api/v4/classification_adapter_choices",
             self.classification_adapter_choices,
             methods=["GET"],
             status_code=200,
             response_model=AdapterChoicesResponse,
         )
         router.add_api_route(
-            "/api/v1/memory_adapter_choices",
+            "/api/v4/memory_adapter_choices",
             self.memory_adapter_choices,
             methods=["GET"],
             status_code=200,

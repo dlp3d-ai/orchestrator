@@ -30,14 +30,14 @@
 ## HTTP Endpoints
 
 ### 1. Health Check
-- **Endpoint**: `GET /health` or `GET /api/v1/health`
+- **Endpoint**: `GET /health` or `GET /api/v4/health`
 - **Description**: Check service health status
 - **Response**: `{"status": "healthy"}`
 
 ### 2. Logging
 
 **View Logs**
-- **Endpoint**: `GET /tail_log/{n_lines}` or `GET /api/v1/tail_log/{n_lines}`
+- **Endpoint**: `GET /tail_log/{n_lines}` or `GET /api/v4/tail_log/{n_lines}`
 - **Description**: Get the last N lines of the log file
 - **Parameters**: `n_lines` - Number of lines to retrieve
 - **Response**: HTML formatted log content
@@ -50,39 +50,39 @@
 ### 3. Adapter Selection
 
 **ASR Adapter**
-- **Endpoint**: `GET /api/v1/asr_adapter_choices`
+- **Endpoint**: `GET /api/v4/asr_adapter_choices`
 - **Description**: Get available ASR (Speech Recognition) adapter list
 - **Response**: `AdapterChoicesResponse`
 
 **TTS Adapter**
-- **Endpoint**: `GET /api/v1/tts_adapter_choices`
+- **Endpoint**: `GET /api/v4/tts_adapter_choices`
 - **Description**: Get available TTS (Text-to-Speech) adapter list
 - **Response**: `AdapterChoicesResponse`
 
 **Conversation Adapter**
-- **Endpoint**: `GET /api/v1/conversation_adapter_choices`
+- **Endpoint**: `GET /api/v4/conversation_adapter_choices`
 - **Description**: Get available LLM adapter list
 - **Response**: `AdapterChoicesResponse`
 
 **Reaction Adapter**
-- **Endpoint**: `GET /api/v1/reaction_adapter_choices`
+- **Endpoint**: `GET /api/v4/reaction_adapter_choices`
 - **Description**: Get available reaction adapter list
 - **Response**: `AdapterChoicesResponse`
 
 **Classification Adapter**
-- **Endpoint**: `GET /api/v1/classification_adapter_choices`
+- **Endpoint**: `GET /api/v4/classification_adapter_choices`
 - **Description**: Get available classification adapter list
 - **Response**: `AdapterChoicesResponse`
 
 **Memory Adapter**
-- **Endpoint**: `GET /api/v1/memory_adapter_choices`
+- **Endpoint**: `GET /api/v4/memory_adapter_choices`
 - **Description**: Get available memory adapter list
 - **Response**: `AdapterChoicesResponse`
 
 ### 4. Voice and Settings
 
 **Voice Management**
-- **Endpoint**: `GET /api/v1/tts_voice_names/{tts_adapter_key}`
+- **Endpoint**: `GET /api/v4/tts_voice_names/{tts_adapter_key}`
 - **Description**: Get available voice list for specified TTS adapter
 - **Parameters**: `tts_adapter_key` - TTS adapter identifier
 - **Response**: `VoiceNamesResponse`

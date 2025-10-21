@@ -24,7 +24,7 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: admin_password
 
     container:
-      image: dockersenseyang/dlp3d_orchestrator:latest
+      image: dlp3d/orchestrator:latest
       options: --entrypoint ""
 
     env:

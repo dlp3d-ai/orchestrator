@@ -34,7 +34,7 @@ docker run -it \
   -e BACKEND_URL=http://127.0.0.1:18080/api/v1/motion_keywords \
   -e A2F_WS_URL=ws://127.0.0.1:18083/api/v1/streaming_audio2face/ws \
   -e S2M_WS_URL=ws://127.0.0.1:18084/api/v3/streaming_speech2motion/ws \
-  dockersenseyang/dlp3d_orchestrator:latest
+  dlp3d/orchestrator:latest
 ```
 
 ### Prerequisites

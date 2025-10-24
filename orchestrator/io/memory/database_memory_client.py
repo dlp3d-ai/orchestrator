@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Literal, Tuple, Union
 
 import pytz
 
+from ...utils.log import logging, setup_logger
 from ...utils.super import Super
 
 
@@ -23,6 +24,8 @@ class DatabaseMemoryClient(Super, ABC):
     database operations.
     """
 
+    logger: logging.Logger = setup_logger(logger_name="DatabaseMemoryClient")
+
     def __init__(
         self,
         logger_cfg: Union[None, Dict[str, Any]] = None,
@@ -35,6 +38,7 @@ class DatabaseMemoryClient(Super, ABC):
                 Logger name will use the class name. Defaults to None.
         """
         Super.__init__(self, logger_cfg)
+        self.__class__.logger = self.logger
 
     async def get_cascade_memories(
         self,
@@ -543,6 +547,7 @@ class DatabaseMemoryClient(Super, ABC):
     def convert_unix_timestamp_to_str(
         cls,
         unix_timestamp: float,
+        timezone: str = "Asia/Shanghai",
     ) -> str:
         """Convert Unix timestamp to string.
 
@@ -554,6 +559,11 @@ class DatabaseMemoryClient(Super, ABC):
             str:
                 Timestamp string in Beijing timezone format "YYYY-MM-DD HH:MM:SS,mmm".
         """
-        shanghai_tz = pytz.timezone("Asia/Shanghai")
+        if timezone not in pytz.all_timezones:
+            cls.logger.warning(
+                f"Timezone name {timezone} not found in pytz.all_timezones" + ", using default timezone Asia/Shanghai"
+            )
+            timezone = "Asia/Shanghai"
+        shanghai_tz = pytz.timezone(timezone)
         time_str = datetime.fromtimestamp(unix_timestamp, shanghai_tz).strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
         return time_str

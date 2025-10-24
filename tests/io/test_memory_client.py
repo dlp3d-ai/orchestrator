@@ -82,6 +82,25 @@ class TestMongoDBMemoryClient:
         assert mongodb_memory_client.port == MONGODB_PORT
         assert mongodb_memory_client.database_name is not None
 
+    def test_convert_unix_timestamp_to_str(self):
+        """Test convert_unix_timestamp_to_str method."""
+        test_timestamp_float = 1761276706.296444
+        test_timestamp_shanghai_str = "2025-10-24 11:31:46,296"
+        test_timestamp_tokyo_str = "2025-10-24 12:31:46,296"
+        assert MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float) == test_timestamp_shanghai_str
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="Asia/Shanghai")
+            == test_timestamp_shanghai_str
+        )
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="Asia/Tokyo")
+            == test_timestamp_tokyo_str
+        )
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="NoSuchPlace")
+            == test_timestamp_shanghai_str
+        )
+
     @pytest.mark.asyncio
     async def test_emotion_table_operations(self, mongodb_memory_client: MongoDBMemoryClient):
         """Test emotion table operations: set, get, remove."""
@@ -593,6 +612,25 @@ class TestDynamoDBMemoryClient:
         assert dynamodb_memory_client.aws_access_key_id == AWS_ACCESS_KEY_ID
         assert dynamodb_memory_client.aws_secret_access_key == AWS_SECRET_ACCESS_KEY
         assert dynamodb_memory_client.session is not None
+
+    def test_convert_unix_timestamp_to_str(self):
+        """Test convert_unix_timestamp_to_str method."""
+        test_timestamp_float = 1761276706.296444
+        test_timestamp_shanghai_str = "2025-10-24 11:31:46,296"
+        test_timestamp_tokyo_str = "2025-10-24 12:31:46,296"
+        assert MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float) == test_timestamp_shanghai_str
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="Asia/Shanghai")
+            == test_timestamp_shanghai_str
+        )
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="Asia/Tokyo")
+            == test_timestamp_tokyo_str
+        )
+        assert (
+            MongoDBMemoryClient.convert_unix_timestamp_to_str(test_timestamp_float, timezone="NoSuchPlace")
+            == test_timestamp_shanghai_str
+        )
 
     @pytest.mark.asyncio
     async def test_emotion_table_operations(self, dynamodb_memory_client: DynamoDBMemoryClient):

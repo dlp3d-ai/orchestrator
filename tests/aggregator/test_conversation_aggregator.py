@@ -28,13 +28,13 @@ from orchestrator.profile.classified_text_stream_profile import ClassifiedStream
 
 # Test character ID
 TEST_CHARACTER_ID = "88801af2-6d2e-48f0-a413-c0058a448a26"
-# MongoDB
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "memory_test"
-MONGODB_AUTH_DATABASE = "memory_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_MEMORY_DB = os.environ.get("MONGODB_MEMORY_DB")
+MONGODB_AUTH_DATABASE = MONGODB_MEMORY_DB
+MONGODB_MEMORY_USER = os.environ.get("MONGODB_MEMORY_USER")
+MONGODB_MEMORY_PASSWORD = os.environ.get("MONGODB_MEMORY_PASSWORD")
 
 
 @pytest.fixture(scope="session")
@@ -48,9 +48,9 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_MEMORY_USER,
+        password=MONGODB_MEMORY_PASSWORD,
+        database=MONGODB_MEMORY_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"console_level": logging.DEBUG},
     )

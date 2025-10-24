@@ -24,13 +24,13 @@ from orchestrator.profile.text_stream_profile import TextStreamProfile
 
 # Test character ID
 TEST_CHARACTER_ID = "88801af2-6d2e-48f0-a413-c0058a448a26"
-# MongoDB
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "memory_test"
-MONGODB_AUTH_DATABASE = "memory_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_MEMORY_DB = os.environ.get("MONGODB_MEMORY_DB")
+MONGODB_AUTH_DATABASE = MONGODB_MEMORY_DB
+MONGODB_MEMORY_USER = os.environ.get("MONGODB_MEMORY_USER")
+MONGODB_MEMORY_PASSWORD = os.environ.get("MONGODB_MEMORY_PASSWORD")
 
 
 @pytest.fixture(scope="session")
@@ -44,9 +44,9 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_MEMORY_USER,
+        password=MONGODB_MEMORY_PASSWORD,
+        database=MONGODB_MEMORY_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"console_level": logging.DEBUG},
     )
@@ -190,6 +190,8 @@ async def test_openai_stream(
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not sensenova_ak or not sensenova_sk or not openai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_openai_stream")
 
     logger_cfg = dict(logger_name="test_openai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     openai_client_cfg = dict(
@@ -281,6 +283,8 @@ async def test_gemini_stream(
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
     if not sensenova_ak or not sensenova_sk or not gemini_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or GEMINI_API_KEY is not set, skipping test_gemini_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_gemini_stream")
 
     logger_cfg = dict(logger_name="test_gemini_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     gemini_client_cfg = dict(
@@ -375,6 +379,8 @@ async def test_deepseek_stream(
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not sensenova_ak or not sensenova_sk or not deepseek_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_stream")
 
     logger_cfg = dict(logger_name="test_deepseek_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     deepseek_client_cfg = dict(
@@ -465,6 +471,8 @@ async def test_xai_stream(
     xai_api_key = os.environ.get("XAI_API_KEY")
     if not sensenova_ak or not sensenova_sk or not xai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_xai_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_xai_stream")
 
     logger_cfg = dict(logger_name="test_xai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     xai_client_cfg = dict(
@@ -555,6 +563,8 @@ async def test_anthropic_stream(
     anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not sensenova_ak or not sensenova_sk or not anthropic_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_anthropic_stream")
 
     logger_cfg = dict(logger_name="test_anthropic_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     anthropic_client_cfg = dict(
@@ -644,6 +654,8 @@ async def test_sensenova_omni_stream(
     sensenova_sk = os.environ.get("SENSENOVA_SK")
     if not sensenova_ak or not sensenova_sk:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_stream")
 
     logger_cfg = dict(
         logger_name="test_sensenova_omni_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log"
@@ -734,6 +746,8 @@ async def test_blank_input_stream(
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not sensenova_ak or not sensenova_sk or not openai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_blank_input_stream")
 
     logger_cfg = dict(logger_name="test_openai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     openai_client_cfg = dict(
@@ -824,6 +838,8 @@ async def test_classification_input_stream(
     xai_api_key = os.environ.get("XAI_API_KEY")
     if not sensenova_ak or not sensenova_sk or not xai_api_key:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_classification_input_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_classification_input_stream")
 
     logger_cfg = dict(logger_name="test_xai_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
     xai_client_cfg = dict(

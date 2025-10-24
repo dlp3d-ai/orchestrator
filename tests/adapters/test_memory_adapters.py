@@ -12,13 +12,13 @@ from orchestrator.utils.log import logging
 
 # Test character ID
 TEST_CHARACTER_ID = "88801af2-6d2e-48f0-a413-c0058a448a26"
-# MongoDB
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "memory_test"
-MONGODB_AUTH_DATABASE = "memory_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_MEMORY_DB = os.environ.get("MONGODB_MEMORY_DB")
+MONGODB_AUTH_DATABASE = MONGODB_MEMORY_DB
+MONGODB_MEMORY_USER = os.environ.get("MONGODB_MEMORY_USER")
+MONGODB_MEMORY_PASSWORD = os.environ.get("MONGODB_MEMORY_PASSWORD")
 
 
 @pytest.fixture(scope="session")
@@ -32,9 +32,9 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_MEMORY_USER,
+        password=MONGODB_MEMORY_PASSWORD,
+        database=MONGODB_MEMORY_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"console_level": logging.DEBUG},
     )
@@ -85,6 +85,8 @@ async def test_xai_memory_client_call_llm(xai_memory_client: XAIMemoryClient):
     xai_api_key = os.environ.get("XAI_API_KEY")
     if not xai_api_key:
         pytest.skip("xai_api_key is not set, skipping test test_xai_memory_client_call_llm")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_xai_memory_client_call_llm")
 
     logger_cfg = dict(logger_name="test_xai_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log")
 
@@ -147,6 +149,8 @@ async def test_sensenova_omni_memory_client_call_llm(sensenova_omni_memory_clien
     sensenova_sk = os.environ.get("SENSENOVA_SK")
     if not sensenova_ak or not sensenova_sk:
         pytest.skip("sensenova_ak or sensenova_sk is not set, skipping test test_sensenova_omni_memory_client_call_llm")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_memory_client_call_llm")
 
     logger_cfg = dict(
         logger_name="test_sensenova_omni_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log"

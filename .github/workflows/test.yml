@@ -28,8 +28,14 @@ jobs:
       options: --entrypoint ""
 
     env:
-      MONGODB_HOST: localhost
+      MONGODB_HOST: mongodb
       MONGODB_PORT: 27017
+      MONGODB_MEMORY_DB: memory_test
+      MONGODB_MEMORY_PASSWORD: orchestrator_password
+      MONGODB_MEMORY_USER: orchestrator
+      MONGODB_WEB_DB: web_test
+      MONGODB_WEB_PASSWORD: orchestrator_password
+      MONGODB_WEB_USER: orchestrator
 
     steps:
     - name: Checkout code
@@ -50,7 +56,7 @@ jobs:
         /opt/venv/bin/pip install .
     - name: Init mongodb
       run: |
-        /opt/venv/bin/python tools/setup_mongodb_for_test.py --host mongodb --port 27017 --admin_username admin --admin_password admin_password --web_database web_test --memory_database memory_test --orchestrator_username orchestrator --orchestrator_password orchestrator_password
+        /opt/venv/bin/python tools/setup_mongodb_for_test.py --host $MONGODB_HOST --port $MONGODB_PORT --admin_username admin --admin_password admin_password --web_database $MONGODB_WEB_DB --memory_database $MONGODB_MEMORY_DB --orchestrator_username $MONGODB_MEMORY_USER --orchestrator_password $MONGODB_MEMORY_PASSWORD
     - name: Run tests
       run: |
         mkdir -p logs

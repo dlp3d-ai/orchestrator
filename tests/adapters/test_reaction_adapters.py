@@ -22,13 +22,13 @@ from orchestrator.utils.log import logging
 
 # Test character ID
 TEST_CHARACTER_ID = "88801af2-6d2e-48f0-a413-c0058a448a26"
-# MongoDB
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "memory_test"
-MONGODB_AUTH_DATABASE = "memory_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_MEMORY_DB = os.environ.get("MONGODB_MEMORY_DB")
+MONGODB_AUTH_DATABASE = MONGODB_MEMORY_DB
+MONGODB_MEMORY_USER = os.environ.get("MONGODB_MEMORY_USER")
+MONGODB_MEMORY_PASSWORD = os.environ.get("MONGODB_MEMORY_PASSWORD")
 
 
 @pytest.fixture(scope="session")
@@ -42,9 +42,9 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_MEMORY_USER,
+        password=MONGODB_MEMORY_PASSWORD,
+        database=MONGODB_MEMORY_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"console_level": logging.DEBUG},
     )
@@ -103,6 +103,8 @@ async def test_openai_reaction_client_stream(
         pytest.skip(
             "SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream"
         )
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_openai_reaction_client_stream")
 
     logger_cfg = dict(
         logger_name="test_openai_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
@@ -212,6 +214,8 @@ async def test_xai_reaction_client_stream(
 
     if not xai_api_key:
         pytest.skip("XAI_API_KEY is not available")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_xai_reaction_client_stream")
     logger_cfg = dict(
         logger_name="test_xai_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
@@ -322,6 +326,8 @@ async def test_gemini_reaction_client_stream(
 
     if not gemini_api_key:
         pytest.skip("GEMINI_API_KEY is not available")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_gemini_reaction_client_stream")
     logger_cfg = dict(
         logger_name="test_gemini_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
@@ -427,6 +433,8 @@ async def test_sensenova_omni_reaction_client_stream(
     sensenova_sk = os.environ.get("SENSENOVA_SK")
     if not sensenova_ak or not sensenova_sk:
         pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_reaction_client_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_reaction_client_stream")
 
     logger_cfg = dict(
         logger_name="test_sensenova_omni_reaction_client_stream",

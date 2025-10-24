@@ -262,7 +262,7 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
                 Unique identifier for the request.
         """
         loop = asyncio.get_running_loop()
-        if self.verify:
+        if self.verify or self.ws_url.startswith("ws://"):
             ssl_context = None
         else:
             if self.__class__._ssl_context_cache is None:

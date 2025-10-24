@@ -14,12 +14,13 @@ LOGGER_CFG = dict(logger_name="test_config_client", file_level=logging.DEBUG, lo
 USER_ID = "a9ca656c-9091-70b9-007e-ac639f24845b"
 CHARACTER_ID = "6d4e9c50-452c-4540-825b-16b185f14f46"
 # MongoDB configurations
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "web_test"
-MONGODB_AUTH_DATABASE = "web_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_WEB_DB = os.environ.get("MONGODB_WEB_DB")
+MONGODB_AUTH_DATABASE = MONGODB_WEB_DB
+MONGODB_WEB_USER = os.environ.get("MONGODB_WEB_USER")
+MONGODB_WEB_PASSWORD = os.environ.get("MONGODB_WEB_PASSWORD")
 # DynamoDB configurations
 REGION_NAME = "ap-southeast-1"
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", None)
@@ -97,9 +98,9 @@ def mongodb_config_client() -> MongoDBConfigClient:
     return MongoDBConfigClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_WEB_USER,
+        password=MONGODB_WEB_PASSWORD,
+        database=MONGODB_WEB_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         user_config_collection_name=USER_CONFIG_TABLE_NAME,
         character_config_collection_name=CHARACTER_CONFIG_TABLE_NAME,
@@ -132,12 +133,12 @@ class TestMongoDBConfigClient:
             client = MongoClient(
                 host=MONGODB_HOST,
                 port=MONGODB_PORT,
-                username=MONGODB_USER,
-                password=MONGODB_PASSWORD,
+                username=MONGODB_WEB_USER,
+                password=MONGODB_WEB_PASSWORD,
                 authSource=MONGODB_AUTH_DATABASE,
             )
 
-            db = client[MONGODB_DB]
+            db = client[MONGODB_WEB_DB]
 
             # Load character config data
             with open("data/character_config_sample.json", "r", encoding="utf-8") as f:
@@ -179,9 +180,9 @@ class TestMongoDBConfigClient:
             pytest.skip("MongoDB not available")
         assert mongodb_config_client.host == MONGODB_HOST
         assert mongodb_config_client.port == MONGODB_PORT
-        assert mongodb_config_client.username == MONGODB_USER
-        assert mongodb_config_client.password == MONGODB_PASSWORD
-        assert mongodb_config_client.database_name == MONGODB_DB
+        assert mongodb_config_client.username == MONGODB_WEB_USER
+        assert mongodb_config_client.password == MONGODB_WEB_PASSWORD
+        assert mongodb_config_client.database_name == MONGODB_WEB_DB
         assert mongodb_config_client.user_config_collection_name == USER_CONFIG_TABLE_NAME
         assert mongodb_config_client.character_config_collection_name == CHARACTER_CONFIG_TABLE_NAME
 

@@ -9,13 +9,13 @@ from orchestrator.io.memory.database_memory_client import NoMatchingMediumTermMe
 from orchestrator.io.memory.dynamodb_memory_client import DynamoDBMemoryClient
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
 
-# MongoDB
-MONGODB_HOST = "mongodb"
-MONGODB_PORT = 27017
-MONGODB_DB = "memory_test"
-MONGODB_USER = "orchestrator"
-MONGODB_PASSWORD = "orchestrator_password"
-MONGODB_AUTH_DATABASE = "memory_test"
+# MongoDB connection configuration
+MONGODB_HOST = os.environ.get("MONGODB_HOST")
+MONGODB_PORT = int(os.environ.get("MONGODB_PORT", 27017))
+MONGODB_MEMORY_DB = os.environ.get("MONGODB_MEMORY_DB")
+MONGODB_AUTH_DATABASE = MONGODB_MEMORY_DB
+MONGODB_MEMORY_USER = os.environ.get("MONGODB_MEMORY_USER")
+MONGODB_MEMORY_PASSWORD = os.environ.get("MONGODB_MEMORY_PASSWORD")
 # DynamoDB
 REGION_NAME = "ap-southeast-1"
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", None)
@@ -58,9 +58,9 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
-        username=MONGODB_USER,
-        password=MONGODB_PASSWORD,
-        database=MONGODB_DB,
+        username=MONGODB_MEMORY_USER,
+        password=MONGODB_MEMORY_PASSWORD,
+        database=MONGODB_MEMORY_DB,
         auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"logger_name": "test_mongodb_memory_client", "console_level": logging.DEBUG},
     )

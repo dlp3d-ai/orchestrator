@@ -124,6 +124,7 @@ class ConversationAdapter(Streamable):
         memory_adapter = conf.get("memory_adapter", None)
         memory_db_client = conf.get("memory_db_client", None)
         memory_model_override = conf.get("memory_model_override", "")
+        timezone = conf.get("timezone", None)
         self.input_buffer[request_id] = {
             "last_update_time": cur_time,
             "chat_task": dict(),
@@ -157,6 +158,7 @@ class ConversationAdapter(Streamable):
                 "classification_result": "",
                 "message": "",
                 "callback_bytes_fn": callback_bytes_fn,
+                "timezone": timezone,
             }
             self.input_buffer[request_id][task_type]["start_chunk_classes"].add(chunk_class_str)
         task = asyncio.create_task(self._init_llm_client(request_id))
@@ -440,6 +442,7 @@ class ConversationAdapter(Streamable):
             memory_adapter = task_space["memory_adapter"]
             api_keys = task_space["api_keys"]
             memory_model_override = task_space["memory_model_override"]
+            timezone = task_space["timezone"]
 
             # user prompt
             conversation_context = await memory_adapter.build_chat_context(profile_memory, cascade_memories)
@@ -450,26 +453,32 @@ class ConversationAdapter(Streamable):
                 self.logger.warning(f"Request {request_id} has no chat message")
             else:
                 message = await memory_adapter.build_user_message(
-                    task_space["text_segments"], start_time, relationship_stage
+                    message=task_space["text_segments"],
+                    start_time=start_time,
+                    relationship_stage=relationship_stage,
+                    timezone=timezone,
                 )
 
             # memory manager
             callback_bytes_fn = task_space.get("callback_bytes_fn")
+            timezone = task_space["timezone"]
             asyncio.create_task(
                 memory_adapter.handle_conversation(
-                    character_id,
-                    task_space["text_segments"],
-                    profile_memory,
-                    cascade_memories,
-                    relationship,
-                    api_keys,
-                    memory_model_override,
-                    callback_bytes_fn,
+                    character_id=character_id,
+                    user_input=task_space["text_segments"],
+                    profile_memory=profile_memory,
+                    cascade_memories=cascade_memories,
+                    relationship=relationship,
+                    api_keys=api_keys,
+                    memory_model_override=memory_model_override,
+                    timezone=timezone,
+                    callback_bytes_fn=callback_bytes_fn,
                 )
             )
 
             # append user history
             memory_db_client = task_space["memory_db_client"]
+            timezone = task_space["timezone"]
             asyncio.create_task(
                 memory_db_client.append_chat_history(
                     character_id=character_id,
@@ -477,6 +486,7 @@ class ConversationAdapter(Streamable):
                     role="user",
                     content=task_space["text_segments"],
                     relationship=relationship_stage,
+                    timezone=timezone,
                 )
             )
             # Prepare downstream start chunk
@@ -540,11 +550,13 @@ class ConversationAdapter(Streamable):
             end_time = time.time()
             if not aggregator_downstream:
                 memory_db_client = task_space["memory_db_client"]
+                timezone = task_space["timezone"]
                 await memory_db_client.append_chat_history(
                     character_id=character_id,
                     unix_timestamp=end_time,
                     role="assistant",
                     content=chat_rsp,
+                    timezone=timezone,
                     **emotion,
                 )
             self.logger.debug(f"Chat response: {chat_rsp}")
@@ -576,13 +588,14 @@ class ConversationAdapter(Streamable):
             start_time = time.time()
             task_space = self.input_buffer[request_id]["reject_task"]
             language = task_space["language"]
-            cascade_memories = task_space["cascade_memories"]
             relationship = task_space["relationship"]
-
+            timezone = task_space["timezone"]
             # user prompt
             memory_adapter = task_space["memory_adapter"]
             relationship_stage = relationship[0]
-            user_message = await memory_adapter.build_user_message(message, start_time, relationship_stage)
+            user_message = await memory_adapter.build_user_message(
+                message=message, start_time=start_time, relationship_stage=relationship_stage, timezone=timezone
+            )
 
             # Prepare downstream start chunk
             dag = task_space["dag"]

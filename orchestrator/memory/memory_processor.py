@@ -169,9 +169,10 @@ class MemoryProcessor(Super):
             character_id = task.character_id
             params = task.params
             unix_timestamp = params.get("unix_timestamp")
+            timezone = params.get("timezone")
 
             # Create medium-term memory space for this round
-            current_timestamp = self.db_client.convert_unix_timestamp_to_str(unix_timestamp)
+            current_timestamp = self.db_client.convert_unix_timestamp_to_str(unix_timestamp, timezone)
             await self.db_client.append_medium_term_memory(character_id=character_id, start_timestamp=current_timestamp)
 
             task.complete("Medium term memory space created")

@@ -153,7 +153,8 @@ class AudioConversationAdapter(Streamable, ABC):
         emotion = conf.get("emotion")
         relationship = conf.get("relationship")
         user_prompt = conf.get("user_prompt")
-        callback_bytes_fn = chunk.dag.conf.get("callback_bytes_fn", None)
+        callback_bytes_fn = conf.get("callback_bytes_fn", None)
+        timezone = conf.get("timezone", None)
         self.input_buffer[request_id] = {
             "dag_start_time": dag_start_time,
             "start_time": cur_time,
@@ -179,6 +180,7 @@ class AudioConversationAdapter(Streamable, ABC):
             "input_chunk_received": 0,
             "input_chunk_sent": 0,
             "callback_bytes_fn": callback_bytes_fn,
+            "timezone": timezone,
         }
         if chunk.audio_type == "pcm":
             self.input_buffer[request_id]["n_channels"] = chunk.n_channels

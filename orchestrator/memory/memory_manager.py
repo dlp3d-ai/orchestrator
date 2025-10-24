@@ -165,6 +165,7 @@ class MemoryManager(Super):
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
         unix_timestamp: Optional[float] = None,
+        timezone: Optional[str] = None,
         callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle user entry behavior.
@@ -182,6 +183,8 @@ class MemoryManager(Super):
                 Memory model override. Defaults to None.
             unix_timestamp (Optional[float], optional):
                 Unix timestamp for the entry. Defaults to None.
+            timezone (Optional[str], optional):
+                Timezone name. Defaults to None.
             callback_bytes_fn (Optional[Callable], optional):
                 Callback function for sending failure responses. Defaults to None.
         """
@@ -194,7 +197,10 @@ class MemoryManager(Super):
         await self.task_manager.create_task(
             task_type=TaskType.CREATE_MEDIUM_TERM_MEMORY,
             character_id=character_id,
-            params={"unix_timestamp": unix_timestamp},
+            params={
+                "unix_timestamp": unix_timestamp,
+                "timezone": timezone,
+            },
             callback_bytes_fn=callback_bytes_fn,
         )
 

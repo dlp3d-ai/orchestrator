@@ -88,6 +88,7 @@ class DynamoDBMemoryClient(DatabaseMemoryClient):
         disgust: Union[int, None] = None,
         surprise: Union[int, None] = None,
         shyness: Union[int, None] = None,
+        timezone: Union[str, None] = None,
     ) -> None:
         """Append chat history record.
 
@@ -119,12 +120,14 @@ class DynamoDBMemoryClient(DatabaseMemoryClient):
                 Surprise value, only valid for assistant role. Defaults to None.
             shyness (Union[int, None], optional):
                 Shyness value, only valid for assistant role. Defaults to None.
+            timezone (Union[str, None], optional):
+                Timezone name. Defaults to None.
 
         Raises:
             ValueError:
                 When role type does not match the provided parameters.
         """
-        timestamp_str = self.__class__.convert_unix_timestamp_to_str(unix_timestamp)
+        timestamp_str = self.__class__.convert_unix_timestamp_to_str(unix_timestamp, timezone)
         emotion_none_count = sum(1 for x in [happiness, sadness, fear, anger, disgust, surprise, shyness] if x is None)
         if role == "user":
             if relationship is None:

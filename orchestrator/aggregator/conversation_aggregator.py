@@ -71,6 +71,7 @@ class ConversationAggregator(Streamable):
         dag_start_time = conf["start_time"]
         memory_adapter = conf["memory_adapter"]
         memory_db_client = conf["memory_db_client"]
+        timezone = conf.get("timezone", None)
 
         if request_id not in self.input_buffer:
             self.input_buffer[request_id] = dict(
@@ -100,6 +101,7 @@ class ConversationAggregator(Streamable):
                 reject_ended=False,
                 pending_text_segments_tasks=0,
                 style=None,
+                timezone=timezone,
             )
         chunk_class_str = chunk.__class__.__name__
         self.input_buffer[request_id]["start_chunk_classes"].add(chunk_class_str)
@@ -309,12 +311,14 @@ class ConversationAggregator(Streamable):
             emotion = self.input_buffer[request_id]["emotion"]
 
             memory_db_client = self.input_buffer[request_id]["memory_db_client"]
+            timezone = self.input_buffer[request_id]["timezone"]
             asyncio.create_task(
                 memory_db_client.append_chat_history(
                     character_id=character_id,
                     unix_timestamp=cur_time,
                     role="assistant",
                     content=content,
+                    timezone=timezone,
                     **emotion,
                 )
             )

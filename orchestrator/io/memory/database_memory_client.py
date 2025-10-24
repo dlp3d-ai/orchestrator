@@ -100,6 +100,7 @@ class DatabaseMemoryClient(Super, ABC):
         disgust: Union[int, None] = None,
         surprise: Union[int, None] = None,
         shyness: Union[int, None] = None,
+        timezone: Union[str, None] = None,
     ) -> None:
         """Append chat history record.
 
@@ -131,6 +132,8 @@ class DatabaseMemoryClient(Super, ABC):
                 Surprise value, only valid for assistant role. Defaults to None.
             shyness (Union[int, None], optional):
                 Shyness value, only valid for assistant role. Defaults to None.
+            timezone (Union[str, None], optional):
+                Timezone name. If None, defaults to "Asia/Shanghai". Defaults to None.
 
         Raises:
             ValueError:
@@ -547,19 +550,23 @@ class DatabaseMemoryClient(Super, ABC):
     def convert_unix_timestamp_to_str(
         cls,
         unix_timestamp: float,
-        timezone: str = "Asia/Shanghai",
+        timezone: Union[str, None] = None,
     ) -> str:
         """Convert Unix timestamp to string.
 
         Args:
             unix_timestamp (float):
                 Unix timestamp.
+            timezone (Union[str, None], optional):
+                Timezone name. If None, defaults to "Asia/Shanghai". Defaults to None.
 
         Returns:
             str:
-                Timestamp string in Beijing timezone format "YYYY-MM-DD HH:MM:SS,mmm".
+                Timestamp string in specified timezone format "YYYY-MM-DD HH:MM:SS,mmm".
         """
-        if timezone not in pytz.all_timezones:
+        if timezone is None:
+            timezone = "Asia/Shanghai"
+        elif timezone not in pytz.all_timezones:
             cls.logger.warning(
                 f"Timezone name {timezone} not found in pytz.all_timezones" + ", using default timezone Asia/Shanghai"
             )

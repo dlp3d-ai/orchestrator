@@ -606,6 +606,7 @@ class Proxy(Super):
             )
             # user settings
             conf["user_settings"] = user_settings
+            conf["timezone"] = user_settings.pop("timezone", None)
             # for memory
             memory_adapter_key = character_settings["memory_adapter"]
             conf["memory_adapter"] = self.memory_adapters[memory_adapter_key]
@@ -981,6 +982,7 @@ class Proxy(Super):
             )
             # user settings
             conf["user_settings"] = user_settings
+            conf["timezone"] = user_settings.pop("timezone", None)
             # for memory
             memory_adapter_key = character_settings["memory_adapter"]
             conf["memory_adapter"] = self.memory_adapters[memory_adapter_key]
@@ -1227,6 +1229,7 @@ class Proxy(Super):
             )
             # user settings
             conf["user_settings"] = user_settings
+            conf["timezone"] = user_settings.pop("timezone", None)
             # for memory
             memory_adapter_key = character_settings["memory_adapter"]
             conf["memory_adapter"] = self.memory_adapters[memory_adapter_key]
@@ -1545,6 +1548,7 @@ class Proxy(Super):
             )
             # user settings
             conf["user_settings"] = user_settings
+            conf["timezone"] = user_settings.pop("timezone", None)
             # for memory
             memory_adapter_key = character_settings["memory_adapter"]
             conf["memory_adapter"] = self.memory_adapters[memory_adapter_key]

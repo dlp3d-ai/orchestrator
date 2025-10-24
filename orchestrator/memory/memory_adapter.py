@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
@@ -153,7 +153,9 @@ class BaseMemoryAdapter(Super):
             chat_context += f"<medium_term_memory>: {medium_term_memory_content}\n"
         return chat_context
 
-    async def build_user_message(self, message: str, start_time: float, relationship_stage: str):
+    async def build_user_message(
+        self, message: str, start_time: float, relationship_stage: str, timezone: Optional[str] = None
+    ):
         """Build formatted user message with timestamp and relationship stage.
 
         Args:
@@ -163,15 +165,14 @@ class BaseMemoryAdapter(Super):
                 Unix timestamp of the message.
             relationship_stage (str):
                 Current relationship stage.
+            timezone (Optional[str], optional):
+                Timezone name. Defaults to None, using "Asia/Shanghai" if not provided.
 
         Returns:
             str:
                 Formatted user message with timestamp and relationship info.
         """
-        # Convert timestamp to Beijing time
-        beijing_tz = timezone(timedelta(hours=8))
-        dt = datetime.fromtimestamp(start_time, tz=beijing_tz)
-        time_str = dt.strftime("%Y-%m-%d %H:%M %A")
+        time_str = DatabaseMemoryClient.convert_unix_timestamp_to_str(start_time, timezone)
 
         user_message = f"user_input: {message} [relationship_stage: {relationship_stage}] [time: {time_str}]"
         return user_message
@@ -220,6 +221,7 @@ class BaseMemoryAdapter(Super):
         relationship: Optional[Tuple[str, int]] = None,
         api_keys: Optional[Dict[str, Any]] = None,
         memory_model_override: Optional[str] = None,
+        timezone: Optional[str] = None,
         callback_bytes_fn: Optional[Callable] = None,
     ) -> None:
         """Handle conversation based on input type and call appropriate
@@ -240,17 +242,20 @@ class BaseMemoryAdapter(Super):
                 API keys for the LLM. Defaults to None.
             memory_model_override (Optional[str], optional):
                 Memory model override. Defaults to None.
+            timezone (Optional[str], optional):
+                Timezone name. Defaults to None.
             callback_bytes_fn (Optional[Any], optional):
                 Callback function for sending failure responses. Defaults to None.
         """
         memory_manager = self.get_memory_manager()
         if memory_manager.is_user_entry(user_input):
             await memory_manager.handle_user_entry(
-                character_id,
-                profile_memory,
-                cascade_memories,
-                api_keys,
-                memory_model_override,
+                character_id=character_id,
+                profile_memory=profile_memory,
+                cascade_memories=cascade_memories,
+                api_keys=api_keys,
+                memory_model_override=memory_model_override,
+                timezone=timezone,
                 callback_bytes_fn=callback_bytes_fn,
             )
         else:

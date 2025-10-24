@@ -71,6 +71,7 @@ class DatabaseConfigClient(Super, ABC):
         "snese_tts_api_key",
         "nova_tts_api_key",
         "elevenlabs_api_key",
+        "timezone",
     )
 
     def __init__(
@@ -216,6 +217,7 @@ class DatabaseConfigClient(Super, ABC):
                 - snese_tts_api_key (str): Sensenova TTS API Key
                 - nova_tts_api_key (str): Nova TTS API Key
                 - elevenlabs_api_key (str): ElevenLabs API Key
+                - timezone (str): Timezone name
 
         Raises:
             NoMatchingUserSettingsError:

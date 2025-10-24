@@ -14,5 +14,6 @@
     "huoshan_token": "HUOSHAN_TOKEN",
     "snese_tts_api_key": "SENSE_TTS_TOKEN",
     "nova_tts_api_key": "NOVATTS_API_KEY",
-    "elevenlabs_api_key": ""
+    "elevenlabs_api_key": "",
+    "timezone": "Asia/Shanghai"
 }

@@ -355,6 +355,7 @@ class OpenAIAudioClient(AudioConversationAdapter):
                 if user_input_done and assistant_output_done:
                     if not history_done:
                         memory_db_client = self.input_buffer[request_id]["memory_db_client"]
+                        timezone = self.input_buffer[request_id]["timezone"]
                         if memory_db_client is not None:
                             cur_time = time.time()
                             await memory_db_client.append_chat_history(
@@ -363,12 +364,14 @@ class OpenAIAudioClient(AudioConversationAdapter):
                                 role="user",
                                 content=user_input,
                                 relationship=self.input_buffer[request_id]["relationship"],
+                                timezone=timezone,
                             )
                             await memory_db_client.append_chat_history(
                                 character_id=self.input_buffer[request_id]["character_id"],
                                 unix_timestamp=cur_time,
                                 role="assistant",
                                 content=assistant_output,
+                                timezone=timezone,
                                 **self.input_buffer[request_id]["emotion"],
                             )
                         history_done = True

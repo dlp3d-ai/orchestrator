@@ -114,7 +114,7 @@ async def test_huoshan_tts_client_stream():
         cluster="volcano_tts",
         logger_cfg=logger_cfg,
     )
-    voice_name = "BV700_V2_streaming"
+    voice_name = "zh_female_roumeinvyou_emo_v2_mars_bigtts"
     voice_speed = 1.0
     text = "我是刻晴，璃月七星中的玉衡星。"
     adapter = build_tts_adapter(tts_client_cfg)

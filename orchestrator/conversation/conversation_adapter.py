@@ -461,7 +461,6 @@ class ConversationAdapter(Streamable):
 
             # memory manager
             callback_bytes_fn = task_space.get("callback_bytes_fn")
-            timezone = task_space["timezone"]
             asyncio.create_task(
                 memory_adapter.handle_conversation(
                     character_id=character_id,
@@ -478,7 +477,6 @@ class ConversationAdapter(Streamable):
 
             # append user history
             memory_db_client = task_space["memory_db_client"]
-            timezone = task_space["timezone"]
             asyncio.create_task(
                 memory_db_client.append_chat_history(
                     character_id=character_id,
@@ -550,7 +548,6 @@ class ConversationAdapter(Streamable):
             end_time = time.time()
             if not aggregator_downstream:
                 memory_db_client = task_space["memory_db_client"]
-                timezone = task_space["timezone"]
                 await memory_db_client.append_chat_history(
                     character_id=character_id,
                     unix_timestamp=end_time,

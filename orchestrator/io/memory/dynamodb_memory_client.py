@@ -99,7 +99,7 @@ class DynamoDBMemoryClient(DatabaseMemoryClient):
             character_id (str):
                 Character ID.
             unix_timestamp (float):
-                Unix timestamp for generating Beijing timezone timestamp string.
+                Unix timestamp for generating specified timezone timestamp string.
             role (Literal["user", "assistant"]):
                 Role type, user or assistant.
             content (str):

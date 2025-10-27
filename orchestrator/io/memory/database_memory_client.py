@@ -111,7 +111,7 @@ class DatabaseMemoryClient(Super, ABC):
             character_id (str):
                 Character ID.
             unix_timestamp (float):
-                Unix timestamp for generating Beijing timezone timestamp string.
+                Unix timestamp for generating specified timezone timestamp string.
             role (Literal["user", "assistant"]):
                 Role type, user or assistant.
             content (str):
@@ -571,6 +571,6 @@ class DatabaseMemoryClient(Super, ABC):
                 f"Timezone name {timezone} not found in pytz.all_timezones" + ", using default timezone Asia/Shanghai"
             )
             timezone = "Asia/Shanghai"
-        shanghai_tz = pytz.timezone(timezone)
-        time_str = datetime.fromtimestamp(unix_timestamp, shanghai_tz).strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
+        target_tz = pytz.timezone(timezone)
+        time_str = datetime.fromtimestamp(unix_timestamp, target_tz).strftime("%Y-%m-%d %H:%M:%S,%f")[:-3]
         return time_str

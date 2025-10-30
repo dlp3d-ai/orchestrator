@@ -4,6 +4,7 @@
 
 overview.md
 quick_start.md
+install.md
 api_documentation.md
 development.md
 ```

@@ -1,21 +1,4 @@
-# Orchestrator
-
-> **English Documentation** | [中文文档](docs/README_CN.md)
-
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)](orchestrator/version.py)
-
-## Table of Contents
-- [Project Overview](#project-overview)
-- [Core Features](#core-features)
-- [System Architecture](#system-architecture)
-- [Quick Start](#quick-start)
-- [AI Services](#ai-services)
-- [Documentation](#documentation)
-- [License](#license)
-
-## Project Overview
+# Overview
 Orchestrator is a real-time intelligent conversation system for building personalized multimodal AI interaction workflows, including speech recognition (ASR), text conversation (LLM), text-to-speech (TTS), emotion analysis (Classification & Reaction), memory management (Memory), and 3D animation generation (Audio2Face & Speech2Motion). The system supports multiple AI service providers through modular design, providing streaming processing and complete conversation management capabilities.
 
 Main application scenarios: personalized role-playing, customized virtual companions, education and training, intelligent customer service, office assistants, etc.
@@ -181,60 +164,35 @@ The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI
 
 **Workflow Diagrams:**
 
-- **Complete Audio Conversation Flow** (`audio_chat_with_text_llm_v4`)
-   ![Complete Audio Conversation Flow](docs/_static/audio_chat_with_text_llm_v4.svg)
+ - **Complete Audio Conversation Flow** (`audio_chat_with_text_llm_v4`)
+   <div style="text-align: center;">
+     <img src="_static/audio_chat_with_text_llm_v4.svg" style="width: 100%; max-width: 100%;">
+     <p><em>Complete Audio Conversation Flow</em></p>
+   </div>
 
-- **Express Audio Conversation Flow** (`audio_chat_with_audio_llm_v4`)
-   ![Express Audio Conversation Flow](docs/_static/audio_chat_with_audio_llm_v4.svg)
+ - **Express Audio Conversation Flow** (`audio_chat_with_audio_llm_v4`)
+   <div style="text-align: center;">
+     <img src="_static/audio_chat_with_audio_llm_v4.svg" style="width: 100%; max-width: 100%;">
+     <p><em>Express Audio Conversation Flow</em></p>
+   </div>
 
-- **Complete Text Conversation Flow** (`text_chat_with_text_llm_v4`)
-   ![Complete Text Conversation Flow](docs/_static/text_chat_with_text_llm_v4.svg)
+ - **Complete Text Conversation Flow** (`text_chat_with_text_llm_v4`)
+   <div style="text-align: center;">
+     <img src="_static/text_chat_with_text_llm_v4.svg" style="width: 100%; max-width: 100%;">
+     <p><em>Complete Text Conversation Flow</em></p>
+   </div>
 
-- **Express Text Conversation Flow** (`text_chat_with_audio_llm_v4`)
-   ![Express Text Conversation Flow](docs/_static/text_chat_with_audio_llm_v4.svg)
+ - **Express Text Conversation Flow** (`text_chat_with_audio_llm_v4`)
+   <div style="text-align: center;">
+     <img src="_static/text_chat_with_audio_llm_v4.svg" style="width: 100%; max-width: 100%;">
+     <p><em>Express Text Conversation Flow</em></p>
+   </div>
 
-- **Direct Generation Flow** (`direct_generation_v4`)
-   ![Direct Generation Flow](docs/_static/direct_generation_v4.svg)
-
-## Quick Start
-
-### Using Docker
-
-#### Recommended: Complete Backend Services with Docker Compose
-
-For the best experience, we recommend using Docker Compose to start the complete DLP3D backend services, which includes the Orchestrator along with all required dependencies (MongoDB, Audio2Face, Speech2Motion, etc.).
-
-Please follow the [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) documentation to set up and run the entire backend infrastructure.
-
-> **Note:** The above link will redirect you to the [web_backend repository](https://github.com/dlp3d-ai/web_backend) for complete backend setup instructions.
-
-#### Standalone Orchestrator Service
-
-If you need to run the Orchestrator service independently or configure advanced options, please refer to the [Docker Configuration Guide](docs/docker.md) for detailed setup instructions, environment variables, and configuration options.
-
-### Environment Setup
-
-For local development and deployment, please follow the detailed installation guide:
-
-📖 **[Complete Installation Guide](docs/install.md)**
-
-The installation guide provides step-by-step instructions for:
-- Setting up Python 3.10+ environment
-- Installing Protocol Buffers compiler
-- Configuring the development environment
-- Installing project dependencies
-
-### Local Development
-
-After completing the environment setup as described in the installation guide, you can start the service locally:
-
-```bash
-# Activate the conda environment
-conda activate orchestrator
-
-# Start the service
-python main.py --config_path configs/local.py
-```
+ - **Direct Generation Flow** (`direct_generation_v4`)
+   <div style="text-align: center;">
+     <img src="_static/direct_generation_v4.svg" style="width: 100%; max-width: 100%;">
+     <p><em>Direct Generation Flow</em></p>
+   </div>
 
 ## AI Services
 
@@ -286,15 +244,3 @@ python main.py --config_path configs/local.py
 | xAI | `XAIReactionClient` | `grok-3` |
 | Gemini | `GeminiReactionClient` | `gemini-2.5-flash-lite` |
 | SenseNova | `SenseNovaOmniReactionClient` | `SenseNova Omni` |
-
-## Documentation
-
-- **[Full Documentation](https://dlp3d.readthedocs.io/en/latest/_subrepos/orchestrator/overview.html)** - Detailed documentation
-- **[API Documentation](docs/API_Documentation.md)** - Complete API reference for WebSocket and HTTP endpoints
-- **[Development Guide](docs/Development_Guide.md)** - Guide for adding new AI services, testing, and code quality standards
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-The MIT License is a permissive free software license that allows you to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software with very few restrictions. The only requirement is that the original copyright notice and license text must be included in all copies or substantial portions of the software.

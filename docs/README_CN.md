@@ -183,19 +183,19 @@ orchestrator/
 **流程图：**
 
 - **完整版音频对话流程** (`audio_chat_with_text_llm_v4`)
-   ![完整版音频对话流程](en/source/_static/dags/audio_chat_with_text_llm_v4.svg)
+   ![完整版音频对话流程](_static/audio_chat_with_text_llm_v4.svg)
 
 - **极速版音频对话流程** (`audio_chat_with_audio_llm_v4`)
-   ![极速版音频对话流程](en/source/_static/dags/audio_chat_with_audio_llm_v4.svg)
+   ![极速版音频对话流程](_static/audio_chat_with_audio_llm_v4.svg)
 
 - **完整版文本对话流程** (`text_chat_with_text_llm_v4`)
-   ![完整版文本对话流程](en/source/_static/dags/text_chat_with_text_llm_v4.svg)
+   ![完整版文本对话流程](_static/text_chat_with_text_llm_v4.svg)
 
 - **极速版文本对话流程** (`text_chat_with_audio_llm_v4`)
-   ![极速版文本对话流程](en/source/_static/dags/text_chat_with_audio_llm_v4.svg)
+   ![极速版文本对话流程](_static/text_chat_with_audio_llm_v4.svg)
 
 - **直接生成流程** (`direct_generation_v4`)
-   ![直接生成流程](en/source/_static/dags/direct_generation_v4.svg)
+   ![直接生成流程](_static/direct_generation_v4.svg)
 
 ## 快速开始
 
@@ -291,6 +291,7 @@ python main.py --config_path configs/local.py
 
 ## 文档
 
+- **[完整文档](https://dlp3d.readthedocs.io/zh-cn/latest/_subrepos/orchestrator/overview.html)** - 详细文档
 - **[API 文档](API_Documentation.md)** - WebSocket 和 HTTP 端点的完整 API 参考
 - **[开发指南](Development_Guide.md)** - 添加新 AI 服务、测试和代码质量标准的指南
 

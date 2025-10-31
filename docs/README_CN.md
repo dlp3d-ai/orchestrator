@@ -201,11 +201,11 @@ orchestrator/
 
 ### 使用 Docker
 
-#### 推荐：使用 Docker Compose 启动完整的后端服务
+#### 推荐：使用 Docker Compose 启动完整服务
 
-为了获得最佳体验，我们推荐使用 Docker Compose 启动完整的 DLP3D 后端服务，包括 Orchestrator 以及所有必需的依赖项（MongoDB、Audio2Face、Speech2Motion 等）。
+为获得最佳体验，推荐使用 Docker Compose 启动完整的 DLP3D 服务，其中包含 Orchestrator 及所有必需依赖（MongoDB、Audio2Face、Speech2Motion 等）。
 
-请按照 [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) 文档来设置和运行整个后端基础设施。
+请参考文档 [DLP3D 快速启动](https://dlp3d.readthedocs.io/zh-cn/latest/getting_started/quick_start.html) 来搭建并运行整个服务。
 
 > **注意：** 上述链接将跳转到 [web_backend 仓库](https://github.com/dlp3d-ai/web_backend) 获取完整的后端设置说明。
 

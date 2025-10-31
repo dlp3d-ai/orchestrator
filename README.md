@@ -200,11 +200,11 @@ The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI
 
 ### Using Docker
 
-#### Recommended: Complete Backend Services with Docker Compose
+#### Recommended: Complete Services with Docker Compose
 
-For the best experience, we recommend using Docker Compose to start the complete DLP3D backend services, which includes the Orchestrator along with all required dependencies (MongoDB, Audio2Face, Speech2Motion, etc.).
+For the best experience, we recommend using Docker Compose to start the complete DLP3D services, which includes the Orchestrator along with all required dependencies (MongoDB, Audio2Face, Speech2Motion, etc.).
 
-Please follow the [Complete DLP3D Backend Services](https://github.com/dlp3d-ai/web_backend?tab=readme-ov-file#complete-dlp3d-backend-services) documentation to set up and run the entire backend infrastructure.
+Please follow the [Quick Start guide on ReadTheDocs](https://dlp3d.readthedocs.io/en/latest/getting_started/quick_start.html) to set up and run the entire infrastructure.
 
 > **Note:** The above link will redirect you to the [web_backend repository](https://github.com/dlp3d-ai/web_backend) for complete backend setup instructions.
 

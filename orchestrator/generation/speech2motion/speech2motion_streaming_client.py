@@ -760,8 +760,6 @@ class Speech2MotionStreamingClient(Speech2MotionAdapter):
                             time_diff = cur_time - dag_start_time
                             msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
                         self.logger.debug(msg)
-                        if self.latency_histogram:
-                            self.latency_histogram.observe(latency)
                 else:
                     msg = f"Unknown response class name: {resp.class_name}"
                     self.logger.error(msg)

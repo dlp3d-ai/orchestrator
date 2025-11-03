@@ -427,8 +427,6 @@ class TextToSpeechAdapter(Streamable):
                 time_diff = cur_time - dag_start_time
                 msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
             self.logger.debug(msg)
-            if self.latency_histogram:
-                self.latency_histogram.labels(adapter=self.name).observe(latency)
         self.input_buffer.pop(request_id)
 
     def contains_meaningful_text(self, text: str) -> bool:

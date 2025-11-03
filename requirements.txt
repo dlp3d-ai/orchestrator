@@ -13,6 +13,7 @@ PyYAML
 PyJWT
 pytest-asyncio
 pytz
+prometheus-client
 protobuf==6.31.1
 numpy
 soundfile

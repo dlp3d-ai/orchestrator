@@ -5,6 +5,8 @@ import traceback
 from abc import abstractmethod
 from typing import Any, Dict, Union
 
+from prometheus_client import Histogram
+
 from ...data_structures.audio_chunk import (
     AudioWithSubtitleChunkBody,
     AudioWithSubtitleChunkEnd,
@@ -37,6 +39,7 @@ class TextToSpeechAdapter(Streamable):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the text-to-speech adapter.
@@ -57,6 +60,10 @@ class TextToSpeechAdapter(Streamable):
             expire_time (float, optional):
                 Time in seconds after which requests expire.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. If None, default
                 logging configuration is used. Defaults to None.
@@ -73,6 +80,7 @@ class TextToSpeechAdapter(Streamable):
         self.logger_cfg["logger_name"] = name
         self.logger = setup_logger(**self.logger_cfg)
         self.sentence_splitter = SentenceSplitter(logger=self.logger)
+        self.latency_histogram = latency_histogram
 
     @abstractmethod
     async def _generate_tts(
@@ -347,9 +355,11 @@ class TextToSpeechAdapter(Streamable):
                     + "from receiving first TextChunkBody."
                 )
                 if dag_start_time is not None:
-                    latency = cur_time - dag_start_time
-                    msg = msg[:-1] + f", delay {latency:.2f}s from dag start."
+                    time_diff = cur_time - dag_start_time
+                    msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
                 self.logger.debug(msg)
+                if self.latency_histogram:
+                    self.latency_histogram.labels(adapter=self.name).observe(latency)
         except MissingAPIKeyException as e:
             msg = f"Missing API key during TTS generation: {e}"
             msg = msg + f" for request {request_id}"
@@ -414,9 +424,11 @@ class TextToSpeechAdapter(Streamable):
                 + "from receiving first TextChunkBody."
             )
             if dag_start_time is not None:
-                latency = cur_time - dag_start_time
-                msg = msg[:-1] + f", delay {latency:.2f}s from dag start."
+                time_diff = cur_time - dag_start_time
+                msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
             self.logger.debug(msg)
+            if self.latency_histogram:
+                self.latency_histogram.labels(adapter=self.name).observe(latency)
         self.input_buffer.pop(request_id)
 
     def contains_meaningful_text(self, text: str) -> bool:

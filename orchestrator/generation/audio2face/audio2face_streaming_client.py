@@ -8,6 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Literal, Union
 
 import websockets
+from prometheus_client import Histogram
 
 from ...data_structures import audio2face_v1_pb2 as a2f_pb2
 from ...data_structures.audio_chunk import (
@@ -55,6 +56,7 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
         expire_time: float = 120.0,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the audio2face streaming client.
@@ -89,6 +91,10 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
                 Thread pool executor.
                 If None, a new thread pool executor will be created based on
                 max_workers. Defaults to None.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary.
                 Defaults to None.
@@ -99,6 +105,7 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.ws_url = ws_url
@@ -497,9 +504,11 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
                             + "from sending first AudioChunkBody."
                         )
                         if dag_start_time is not None:
-                            latency = cur_time - dag_start_time
-                            msg = msg[:-1] + f", delay {latency:.2f}s from dag start."
+                            time_diff = cur_time - dag_start_time
+                            msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
                         self.logger.debug(msg)
+                        if self.latency_histogram:
+                            self.latency_histogram.observe(latency)
                 elif resp.class_name == "Audio2FaceV1ResponseChunkEnd":
                     chunk_end_received = True
                     for node in downstream_nodes:
@@ -517,9 +526,11 @@ class Audio2FaceStreamingClient(Audio2FaceAdapter):
                             + "from sending first AudioChunkBody."
                         )
                         if dag_start_time is not None:
-                            latency = cur_time - dag_start_time
-                            msg = msg[:-1] + f", delay {latency:.2f}s from dag start."
+                            time_diff = cur_time - dag_start_time
+                            msg = msg[:-1] + f", delay {time_diff:.2f}s from dag start."
                         self.logger.debug(msg)
+                        if self.latency_histogram:
+                            self.latency_histogram.observe(latency)
                 else:
                     msg = f"Unknown response class name: {resp.class_name}"
                     self.logger.error(msg)

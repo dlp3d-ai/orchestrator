@@ -3,6 +3,8 @@ from abc import abstractmethod
 from asyncio import QueueFull
 from typing import Any, Dict, Union
 
+from prometheus_client import Histogram
+
 from ...data_structures.audio_chunk import (
     AudioChunkBody,
     AudioChunkEnd,
@@ -43,6 +45,7 @@ class Audio2FaceAdapter(Streamable):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the audio2face adapter.
@@ -64,6 +67,10 @@ class Audio2FaceAdapter(Streamable):
             expire_time (float, optional):
                 Time in seconds after which requests are considered expired.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. If None, default logging is used.
                 Defaults to None.
@@ -76,6 +83,7 @@ class Audio2FaceAdapter(Streamable):
             expire_time=expire_time,
             logger_cfg=logger_cfg,
         )
+        self.latency_histogram = latency_histogram
 
     @abstractmethod
     async def generate_audio2face(

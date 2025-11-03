@@ -3,6 +3,7 @@ import json
 from typing import Any, Dict, Set, Union
 
 import websockets
+from prometheus_client import Histogram
 from typing_extensions import Buffer
 
 from .tts_adapter import TextToSpeechAdapter
@@ -45,6 +46,7 @@ class SensetimeTTSClient(TextToSpeechAdapter):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the Sensetime text-to-speech client.
@@ -70,6 +72,10 @@ class SensetimeTTSClient(TextToSpeechAdapter):
             expire_time (float, optional):
                 Time in seconds after which requests expire.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. If None, default
                 logging configuration is used. Defaults to None.
@@ -81,6 +87,7 @@ class SensetimeTTSClient(TextToSpeechAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.tts_ws_url = tts_ws_url

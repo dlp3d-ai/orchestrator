@@ -6,6 +6,7 @@ from abc import abstractmethod
 from typing import Any, Dict, Union, cast
 
 import yaml
+from prometheus_client import Histogram
 
 from ..data_structures.classification import (
     ClassificationChunkBody,
@@ -47,6 +48,8 @@ class ConversationAdapter(Streamable):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
+        token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the conversation adapter.
@@ -74,6 +77,14 @@ class ConversationAdapter(Streamable):
             expire_time (float, optional):
                 The time to expire requests in seconds.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
+            token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording token count distribution
+                per request. If provided, token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -94,6 +105,8 @@ class ConversationAdapter(Streamable):
 
         self.proxy_url = proxy_url
         self.request_timeout = request_timeout
+        self.latency_histogram = latency_histogram
+        self.token_number_histogram = token_number_histogram
 
     async def _handle_start(
         self,
@@ -124,6 +137,7 @@ class ConversationAdapter(Streamable):
         memory_adapter = conf.get("memory_adapter", None)
         memory_db_client = conf.get("memory_db_client", None)
         memory_model_override = conf.get("memory_model_override", "")
+        user_id = conf.get("user_id", "")
         timezone = conf.get("timezone", None)
         self.input_buffer[request_id] = {
             "last_update_time": cur_time,
@@ -138,6 +152,7 @@ class ConversationAdapter(Streamable):
                 "start_time": cur_time,
                 "language": language,
                 "style_list": style_list,
+                "user_id": user_id,
                 "character_id": character_id,
                 "llm_client": None,
                 "conversation_model_override": conversation_model_override,
@@ -521,7 +536,6 @@ class ConversationAdapter(Streamable):
                     )
                     coroutines.append(payload.feed_stream(body_trunk))
                 asyncio.gather(*coroutines)
-
             else:
                 # stream chat
                 chat_rsp = await self._llm_stream_chat(
@@ -560,6 +574,9 @@ class ConversationAdapter(Streamable):
             msg = f"Streaming chat with the LLM API took {end_time - start_time} seconds"
             msg = msg + f" for request {request_id}"
             self.logger.debug(msg)
+            if self.token_number_histogram:
+                user_id = task_space["user_id"]
+                self.token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(len(chat_rsp))
             self._cleanup_task_buffer(request_id, "chat_task")
 
         except Exception as e:

@@ -14,6 +14,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
+from prometheus_client import Histogram
 
 from ...data_structures.audio_chunk import AudioWithSubtitleChunkBody
 from ...data_structures.process_flow import DAGStatus
@@ -83,6 +84,7 @@ class SensenovaTTSClient(TextToSpeechAdapter):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the Sensenova text-to-speech client.
@@ -111,6 +113,10 @@ class SensenovaTTSClient(TextToSpeechAdapter):
             expire_time (float, optional):
                 Time in seconds after which requests expire.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. If None, default
                 logging configuration is used. Defaults to None.
@@ -122,6 +128,7 @@ class SensenovaTTSClient(TextToSpeechAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.tts_ws_url = tts_ws_url

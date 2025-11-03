@@ -2,6 +2,8 @@ import io
 from abc import abstractmethod
 from typing import Any, Union
 
+from prometheus_client import Histogram
+
 from ...utils.streamable import Streamable
 
 
@@ -23,6 +25,7 @@ class Speech2MotionAdapter(Streamable):
     def __init__(
         self,
         *args,
+        latency_histogram: Histogram | None = None,
         **kwargs,
     ):
         """Initialize the speech2motion adapter.
@@ -34,10 +37,15 @@ class Speech2MotionAdapter(Streamable):
         Args:
             *args:
                 Variable length argument list passed to the parent Streamable class.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             **kwargs:
                 Arbitrary keyword arguments passed to the parent Streamable class.
         """
         super().__init__(*args, **kwargs)
+        self.latency_histogram = latency_histogram
 
     @abstractmethod
     async def generate_speech2motion(

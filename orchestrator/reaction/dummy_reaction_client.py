@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional, Union
 
+from prometheus_client import Histogram
+
 from ..data_structures.reaction import EmotionDelta, ReactionDelta
 from .reaction_adapter import ReactionAdapter
 
@@ -17,6 +19,7 @@ class DummyReactionClient(ReactionAdapter):
         name: str,
         motion_keywords: Union[str, list[str], None],
         proxy_url: Union[None, str] = None,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the dummy reaction client.
@@ -29,6 +32,10 @@ class DummyReactionClient(ReactionAdapter):
             proxy_url (Union[None, str], optional):
                 The proxy URL for the reaction.
                 Defaults to None.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 The logger configuration. Defaults to None.
         """
@@ -36,6 +43,7 @@ class DummyReactionClient(ReactionAdapter):
             name=name,
             motion_keywords=motion_keywords,
             proxy_url=proxy_url,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
 

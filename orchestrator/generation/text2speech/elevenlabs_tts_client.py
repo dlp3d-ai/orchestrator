@@ -6,6 +6,7 @@ from typing import Any, Dict, Union
 import httpx
 from elevenlabs import VoiceSettings
 from elevenlabs.client import AsyncElevenLabs
+from prometheus_client import Histogram
 
 from ...utils.exception import MissingAPIKeyException
 from .tts_adapter import TextToSpeechAdapter
@@ -30,6 +31,7 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the ElevenLabs text to speech client.
@@ -56,6 +58,10 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
             expire_time (float, optional):
                 The time to expire the request.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (dict, optional):
                 The configuration for the logger.
                 Defaults to None.
@@ -67,6 +73,7 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.elevenlabs_model_name = elevenlabs_model_name

@@ -4,6 +4,7 @@ from asyncio import QueueFull
 from typing import Any, Dict, Union
 
 import yaml
+from prometheus_client import Histogram
 
 from ..data_structures.audio_chunk import AudioChunkBody, AudioChunkEnd, AudioChunkStart
 from ..utils.exception import MissingAPIKeyException, failure_callback
@@ -38,6 +39,8 @@ class AudioConversationAdapter(Streamable, ABC):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
+        token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the audio conversation adapter.
@@ -65,6 +68,14 @@ class AudioConversationAdapter(Streamable, ABC):
             expire_time (float, optional):
                 The time after which requests expire in seconds.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
+            token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording token count distribution
+                per request. If provided, token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. Defaults to None.
         """
@@ -85,6 +96,8 @@ class AudioConversationAdapter(Streamable, ABC):
             self.agent_prompts = yaml.safe_load(file)
         self.proxy_url = proxy_url
         self.request_timeout = request_timeout
+        self.latency_histogram = latency_histogram
+        self.token_number_histogram = token_number_histogram
 
     async def feed_stream(
         self,
@@ -154,6 +167,7 @@ class AudioConversationAdapter(Streamable, ABC):
         relationship = conf.get("relationship")
         user_prompt = conf.get("user_prompt")
         callback_bytes_fn = conf.get("callback_bytes_fn", None)
+        user_id = conf.get("user_id", "")
         timezone = conf.get("timezone", None)
         self.input_buffer[request_id] = {
             "dag_start_time": dag_start_time,
@@ -165,6 +179,7 @@ class AudioConversationAdapter(Streamable, ABC):
             "memory_db_client": memory_db_client,
             "conversation_model_override": conversation_model_override,
             "api_keys": api_keys,
+            "user_id": user_id,
             "character_id": character_id,
             "profile_memory": profile_memory,
             "cascade_memories": cascade_memories,

@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional, Union
 
 import jwt
 import websockets
+from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
 from ..utils.exception import MissingAPIKeyException
@@ -43,9 +44,11 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
-        logger_cfg: Union[None, Dict[str, Any]] = None,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
+        latency_histogram: Histogram | None = None,
+        token_number_histogram: Histogram | None = None,
+        logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the OpenAI conversation client.
 
@@ -75,14 +78,22 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
             expire_time (float, optional):
                 The time to expire requests in seconds.
                 Defaults to 120.0.
-            logger_cfg (Union[None, Dict[str, Any]], optional):
-                Logger configuration. Defaults to None.
             max_workers (int, optional):
                 The maximum number of worker threads.
                 Defaults to 1.
             thread_pool_executor (ThreadPoolExecutor | None, optional):
                 External thread pool executor to use.
                 Defaults to None.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
+            token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording token count distribution
+                per request. If provided, token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            logger_cfg (Union[None, Dict[str, Any]], optional):
+                Logger configuration. Defaults to None.
         """
         ConversationAdapter.__init__(
             self,
@@ -94,6 +105,8 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
+            token_number_histogram=token_number_histogram,
             logger_cfg=logger_cfg,
         )
         self.wss_url = wss_url
@@ -291,6 +304,11 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
                                     self.logger.debug(
                                         f"request {request_id} first chunk latency: {latency:.2f} seconds"
                                     )
+                                    if self.latency_histogram:
+                                        user_id = task_space["user_id"]
+                                        self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                                            latency
+                                        )
 
                         if message_type == "ResponseEndTextStream":
                             await ws.close()

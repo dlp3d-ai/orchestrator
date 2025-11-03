@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 import openai
+from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
 from ..utils.exception import MissingAPIKeyException
@@ -25,6 +26,7 @@ class GeminiClassificationClient(ClassificationAdapter):
         motion_keywords: Union[str, list[str], None],
         gemini_model_name: str = "gemini-2.5-flash-lite",
         proxy_url: Union[None, str] = None,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the Gemini classification client.
@@ -40,6 +42,10 @@ class GeminiClassificationClient(ClassificationAdapter):
             proxy_url (Union[None, str], optional):
                 The proxy URL for the Gemini API.
                 Defaults to None, use no proxy.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 The logger configuration. Defaults to None.
         """
@@ -47,6 +53,7 @@ class GeminiClassificationClient(ClassificationAdapter):
             name=name,
             motion_keywords=motion_keywords,
             proxy_url=proxy_url,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.gemini_model_name = gemini_model_name

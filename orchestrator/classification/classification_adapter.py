@@ -5,6 +5,7 @@ from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
+from prometheus_client import Histogram
 
 from ..data_structures.classification import (
     ClassificationChunkBody,
@@ -38,6 +39,7 @@ class ClassificationAdapter(Streamable):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the classification adapter.
@@ -63,6 +65,10 @@ class ClassificationAdapter(Streamable):
             expire_time (float, optional):
                 The time to expire requests.
                 Defaults to 120.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -95,6 +101,7 @@ class ClassificationAdapter(Streamable):
             raise TypeError(msg)
         self.motion_kws: List[str] = motion_kws
         self.logger.info(f"Loaded {len(self.motion_kws)} motion keywords")
+        self.latency_histogram = latency_histogram
 
     @abstractmethod
     async def _init_llm_client(self, request_id: str) -> None:
@@ -274,6 +281,8 @@ class ClassificationAdapter(Streamable):
             process_end_time = time.time()
             process_time = process_end_time - process_start_time
             self.logger.debug(f"Request {request_id} processed in {process_time} seconds, result: {result}")
+            if self.latency_histogram:
+                self.latency_histogram.labels(adapter=self.name).observe(process_time)
             # sending to downstream nodes
             dag = self.input_buffer[request_id]["dag"]
             node_name = self.input_buffer[request_id]["node_name"]

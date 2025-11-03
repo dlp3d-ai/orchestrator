@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 import openai
+from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
 from ..utils.exception import MissingAPIKeyException
@@ -26,6 +27,7 @@ class OpenAIReactionClient(ReactionAdapter):
         openai_model_name: str = "gpt-4.1-mini-2025-04-14",
         proxy_url: Union[None, str] = None,
         timeout: float = 10.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the OpenAI reaction client.
@@ -44,6 +46,10 @@ class OpenAIReactionClient(ReactionAdapter):
             timeout (float, optional):
                 The timeout for the OpenAI API requests.
                 Defaults to 10.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 The logger configuration. Defaults to None.
         """
@@ -51,6 +57,7 @@ class OpenAIReactionClient(ReactionAdapter):
             name=name,
             motion_keywords=motion_keywords,
             proxy_url=proxy_url,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.openai_model_name = openai_model_name

@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 import openai
+from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
 from ..utils.exception import MissingAPIKeyException
@@ -27,6 +28,7 @@ class GeminiReactionClient(ReactionAdapter):
         gemini_model_name: str = "gemini-2.5-flash-lite",
         proxy_url: Union[None, str] = None,
         timeout: float = 10.0,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the Gemini reaction client.
@@ -45,6 +47,10 @@ class GeminiReactionClient(ReactionAdapter):
             timeout (float, optional):
                 The timeout for the Gemini API requests.
                 Defaults to 10.0.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 The logger configuration. Defaults to None.
         """
@@ -52,6 +58,7 @@ class GeminiReactionClient(ReactionAdapter):
             name=name,
             motion_keywords=motion_keywords,
             proxy_url=proxy_url,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.gemini_model_name = gemini_model_name

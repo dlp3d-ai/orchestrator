@@ -6,6 +6,7 @@ from abc import abstractmethod
 from typing import Any, Dict, List, Optional, Union
 
 import httpx
+from prometheus_client import Histogram
 
 from ..data_structures.conversation import ClassifiedTextChunkBody, ClassifiedTextChunkEnd, ClassifiedTextChunkStart
 from ..data_structures.process_flow import DAGStatus
@@ -50,6 +51,7 @@ class ReactionAdapter(Streamable):
         emotion_decay_rate: float = 0.1,
         tts_char_duration_zh: float = 0.2,
         tts_char_duration_en: float = 0.05,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the reaction adapter.
@@ -84,6 +86,10 @@ class ReactionAdapter(Streamable):
             tts_char_duration_en (float, optional):
                 English TTS character duration in seconds per character.
                 Defaults to 0.05.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -120,6 +126,7 @@ class ReactionAdapter(Streamable):
             raise TypeError(msg)
         self.motion_kws: List[str] = motion_kws
         self.logger.info(f"Loaded {len(self.motion_kws)} motion keywords records")
+        self.latency_histogram = latency_histogram
 
     @abstractmethod
     async def _init_llm_client(self, request_id: str) -> None:
@@ -1098,6 +1105,8 @@ class ReactionAdapter(Streamable):
             msg = msg + f" for request {request_id}"
             msg += f", seq_number: {seq_number}"
             self.logger.debug(msg)
+            if self.latency_histogram:
+                self.latency_histogram.labels(adapter=self.name).observe(generation_end_time - generation_start_time)
 
             # Record first chunk send time
             if seq_number == 0:

@@ -9,6 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Union
 
 import websockets
+from prometheus_client import Histogram
 
 from ..data_structures.audio_chunk import (
     AudioWithSubtitleChunkBody,
@@ -52,6 +53,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
         expire_time: float = 120.0,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
+        latency_histogram: Histogram | None = None,
+        token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the OpenAI realtime audio conversation client.
@@ -90,6 +93,14 @@ class OpenAIAudioClient(AudioConversationAdapter):
             thread_pool_executor (ThreadPoolExecutor | None, optional):
                 External thread pool executor to use. If None, creates a new one.
                 Defaults to None.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
+            token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording token count distribution
+                per request. If provided, token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. Defaults to None.
         """
@@ -103,6 +114,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
             sleep_time=sleep_time,
             clean_interval=clean_interval,
             expire_time=expire_time,
+            latency_histogram=latency_histogram,
+            token_number_histogram=token_number_histogram,
             logger_cfg=logger_cfg,
         )
         self.wss_url = wss_url
@@ -337,6 +350,9 @@ class OpenAIAudioClient(AudioConversationAdapter):
                             time_diff = cur_time - self.input_buffer[request_id]["committed_time"]
                             msg += f", from received committed: {time_diff:.2f} seconds"
                         self.logger.debug(msg)
+                        if self.latency_histogram:
+                            user_id = self.input_buffer[request_id]["user_id"]
+                            self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(latency)
                     await self._send_audio_to_downstream(request_id, ret_dict, seq_number)
                 # elif event_type == "response.audio_transcript.delta":
                 #     self.logger.debug(f"response.audio_transcript.delta: {message['delta']}")
@@ -381,6 +397,11 @@ class OpenAIAudioClient(AudioConversationAdapter):
                         msg = f"Streaming audio conversation with the OpenAI Realtime API took {end_time - start_time} seconds"
                         msg = msg + f" for request {request_id}"
                         self.logger.info(msg)
+                        if self.token_number_histogram:
+                            user_id = self.input_buffer[request_id]["user_id"]
+                            self.token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                                len(assistant_output)
+                            )
                         await self._close_session(request_id)
                         break
             except Exception as e:

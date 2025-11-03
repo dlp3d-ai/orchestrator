@@ -9,6 +9,7 @@ from typing import Any, Dict, Optional, Union
 
 import jwt
 import websockets
+from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
 from ..utils.exception import MissingAPIKeyException
@@ -38,6 +39,7 @@ class SenseNovaOmniReactionClient(ReactionAdapter):
         timeout: float = 10.0,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
+        latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the SenseNova Omni reaction client.
@@ -62,6 +64,10 @@ class SenseNovaOmniReactionClient(ReactionAdapter):
                 Thread pool executor.
                 If None, a new thread pool executor will be created based on
                 max_workers. Defaults to None.
+            latency_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording request latency distribution
+                in seconds. If provided, latency metrics will be collected for monitoring
+                purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 The logger configuration. Defaults to None.
         """
@@ -69,6 +75,7 @@ class SenseNovaOmniReactionClient(ReactionAdapter):
             name=name,
             motion_keywords=motion_keywords,
             proxy_url=proxy_url,
+            latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
         self.wss_url = wss_url

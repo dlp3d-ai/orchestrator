@@ -8,6 +8,7 @@ from typing import Any, Dict, Union
 from fastapi import APIRouter, HTTPException, Request, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from ..data_structures import orchestrator_v4_pb2 as orchestrator_pb2
 from ..data_structures.process_flow import DAGStatus
@@ -795,6 +796,21 @@ class OrchestratorProxyServer(BaseFastAPIService):
             resp.headers["Content-Disposition"] = f"attachment; filename={base_name}"
             return resp
 
+    async def metrics(self) -> Response:
+        """Get the metrics for the orchestrator proxy server.
+
+        Returns:
+            Response:
+                Response object with the metrics content.
+        """
+        if self.proxy.prometheus_registry:
+            data = generate_latest(self.proxy.prometheus_registry)
+            return Response(content=data, media_type=CONTENT_TYPE_LATEST)
+        else:
+            msg = "Prometheus registry is not enabled."
+            self.logger.error(msg)
+            raise HTTPException(status_code=503, detail=msg)
+
     def root(self) -> RedirectResponse:
         """Redirect to the API documentation.
 
@@ -841,6 +857,14 @@ class OrchestratorProxyServer(BaseFastAPIService):
             status_code=200,
             response_class=Response,
         )
+        if self.proxy.prometheus_registry:
+            router.add_api_route(
+                "/metrics",
+                self.metrics,
+                methods=["GET"],
+                status_code=200,
+                response_class=Response,
+            )
         router.add_api_route(
             "/health",
             self.health,

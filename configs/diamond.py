@@ -24,6 +24,7 @@ server = dict(
 )
 proxy = dict(
     type="Proxy",
+    enable_prometheus_registry=True,
     db_memory_cfg=dict(
         type="MongoDBMemoryClient",
         host=os.environ["MONGODB_HOST"],

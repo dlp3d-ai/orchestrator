@@ -379,7 +379,7 @@ class Proxy(Super):
             self.reaction_latency_histogram = Histogram(
                 "reaction_latency",
                 "Latency of reaction LLM adapters",
-                labelnames=["adapter", "user_id"],
+                labelnames=["adapter"],
                 registry=self.prometheus_registry,
                 buckets=llm_latency_bucket,
             )

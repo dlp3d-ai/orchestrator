@@ -345,7 +345,7 @@ class Proxy(Super):
             animation_latency_bucket = [x / 1000.0 for x in range(200, 20000, 200)]
             llm_latency_bucket = [x / 1000.0 for x in range(500, 20000, 500)]
             tts_latency_bucket = [x / 1000.0 for x in range(200, 20000, 200)]
-            llm_token_number_bucket = [x for x in range(100, 10000, 100)]
+            llm_token_number_bucket = [x for x in range(50, 5000, 50)]
             self.a2f_latency_histogram = Histogram(
                 "a2f_latency",
                 "Latency of audio2face adapter",

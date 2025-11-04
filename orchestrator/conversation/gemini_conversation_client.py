@@ -244,7 +244,7 @@ class GeminiConversationClient(ConversationAdapter):
             output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in chat_rsp_stream:
-                if chunk.choices[0].delta.content is not None:
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content is not None:
                     text_seg = chunk.choices[0].delta.content
 
                     # Apply bracket filter
@@ -356,7 +356,7 @@ class GeminiConversationClient(ConversationAdapter):
             output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in reject_rsp_stream:
-                if chunk.choices[0].delta.content is not None:
+                if len(chunk.choices) > 0 and chunk.choices[0].delta.content is not None:
                     text_seg = chunk.choices[0].delta.content
 
                     # Apply bracket filter

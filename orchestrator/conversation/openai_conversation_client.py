@@ -234,7 +234,10 @@ class OpenAIConversationClient(ConversationAdapter):
                 ],
                 temperature=1,
                 stream=True,
+                stream_options={"include_usage": True},
             )
+            input_token_number = 0
+            output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in chat_rsp_stream:
                 if chunk.choices[0].delta.content is not None:
@@ -269,13 +272,12 @@ class OpenAIConversationClient(ConversationAdapter):
                                 if self.latency_histogram:
                                     self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(latency)
                         asyncio.gather(*coroutines)
+                if chunk.usage:
+                    input_token_number += chunk.usage.prompt_tokens
+                    output_token_number += chunk.usage.completion_tokens
             if self.input_token_number_histogram:
-                input_token_number = chat_rsp_stream.usage.prompt_tokens if hasattr(chat_rsp_stream, "usage") else 0
                 self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
             if self.output_token_number_histogram:
-                output_token_number = (
-                    chat_rsp_stream.usage.completion_tokens if hasattr(chat_rsp_stream, "usage") else 0
-                )
                 self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
                     output_token_number
                 )
@@ -343,7 +345,10 @@ class OpenAIConversationClient(ConversationAdapter):
                 temperature=1,
                 max_tokens=1000,
                 stream=True,
+                stream_options={"include_usage": True},
             )
+            input_token_number = 0
+            output_token_number = 0
             user_id = task_space["user_id"]
             loop = asyncio.get_event_loop()
             async for chunk in reject_rsp_stream:
@@ -377,13 +382,12 @@ class OpenAIConversationClient(ConversationAdapter):
                                     self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(latency)
                         asyncio.gather(*coroutines)
                         reject_rsp += text_seg
+                if chunk.usage:
+                    input_token_number += chunk.usage.prompt_tokens
+                    output_token_number += chunk.usage.completion_tokens
             if self.input_token_number_histogram:
-                input_token_number = reject_rsp_stream.usage.prompt_tokens if hasattr(reject_rsp_stream, "usage") else 0
                 self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
             if self.output_token_number_histogram:
-                output_token_number = (
-                    reject_rsp_stream.usage.completion_tokens if hasattr(reject_rsp_stream, "usage") else 0
-                )
                 self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
                     output_token_number
                 )

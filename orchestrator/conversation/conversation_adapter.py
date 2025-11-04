@@ -49,7 +49,8 @@ class ConversationAdapter(Streamable):
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
         latency_histogram: Histogram | None = None,
-        token_number_histogram: Histogram | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the conversation adapter.
@@ -81,9 +82,13 @@ class ConversationAdapter(Streamable):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
                 purposes. Defaults to None.
-            token_number_histogram (Histogram | None, optional):
-                Prometheus Histogram metric for recording token count distribution
-                per request. If provided, token usage metrics will be collected for
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
                 monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
@@ -106,7 +111,8 @@ class ConversationAdapter(Streamable):
         self.proxy_url = proxy_url
         self.request_timeout = request_timeout
         self.latency_histogram = latency_histogram
-        self.token_number_histogram = token_number_histogram
+        self.input_token_number_histogram = input_token_number_histogram
+        self.output_token_number_histogram = output_token_number_histogram
 
     async def _handle_start(
         self,
@@ -574,9 +580,6 @@ class ConversationAdapter(Streamable):
             msg = f"Streaming chat with the LLM API took {end_time - start_time} seconds"
             msg = msg + f" for request {request_id}"
             self.logger.debug(msg)
-            if self.token_number_histogram:
-                user_id = task_space["user_id"]
-                self.token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(len(chat_rsp))
             self._cleanup_task_buffer(request_id, "chat_task")
 
         except Exception as e:

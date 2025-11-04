@@ -54,6 +54,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
         latency_histogram: Histogram | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
@@ -97,9 +99,13 @@ class OpenAIAudioClient(AudioConversationAdapter):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
                 purposes. Defaults to None.
-            token_number_histogram (Histogram | None, optional):
-                Prometheus Histogram metric for recording token count distribution
-                per request. If provided, token usage metrics will be collected for
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
                 monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. Defaults to None.
@@ -115,7 +121,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
             clean_interval=clean_interval,
             expire_time=expire_time,
             latency_histogram=latency_histogram,
-            token_number_histogram=token_number_histogram,
+            input_token_number_histogram=input_token_number_histogram,
+            output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
         self.wss_url = wss_url
@@ -319,6 +326,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
         history_done = False
         response_done = False
         loop = asyncio.get_event_loop()
+        input_token_number = 0
+        output_token_number = 0
         while True:
             try:
                 message = await ws.recv()
@@ -363,6 +372,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
                     assistant_output = message["transcript"]
                     assistant_output_done = True
                 elif event_type == "response.done":
+                    input_token_number = message["usage"]["input_tokens"]
+                    output_token_number = message["usage"]["output_tokens"]
                     response_done = True
                 elif event_type == "error":
                     error_msg = message["error"]
@@ -397,10 +408,13 @@ class OpenAIAudioClient(AudioConversationAdapter):
                         msg = f"Streaming audio conversation with the OpenAI Realtime API took {end_time - start_time} seconds"
                         msg = msg + f" for request {request_id}"
                         self.logger.info(msg)
-                        if self.token_number_histogram:
-                            user_id = self.input_buffer[request_id]["user_id"]
-                            self.token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                                len(assistant_output)
+                        if self.input_token_number_histogram:
+                            self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                                input_token_number
+                            )
+                        if self.output_token_number_histogram:
+                            self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                                output_token_number
                             )
                         await self._close_session(request_id)
                         break

@@ -40,7 +40,8 @@ class AnthropicConversationClient(ConversationAdapter):
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
         latency_histogram: Histogram | None = None,
-        token_number_histogram: Histogram | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
         enable_bracket_filter: bool = True,
         bracket_pairs: list[tuple[str, str]] = [("*", "*"), ("(", ")"), ("[", "]"), ("{", "}"), ("「", "」"), ("（", "）")],
@@ -83,9 +84,13 @@ class AnthropicConversationClient(ConversationAdapter):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
                 purposes. Defaults to None.
-            token_number_histogram (Histogram | None, optional):
-                Prometheus Histogram metric for recording token count distribution
-                per request. If provided, token usage metrics will be collected for
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
                 monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
@@ -105,7 +110,8 @@ class AnthropicConversationClient(ConversationAdapter):
             clean_interval=clean_interval,
             expire_time=expire_time,
             latency_histogram=latency_histogram,
-            token_number_histogram=token_number_histogram,
+            input_token_number_histogram=input_token_number_histogram,
+            output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
         self.anthropic_model_name = anthropic_model_name
@@ -211,6 +217,7 @@ class AnthropicConversationClient(ConversationAdapter):
                 await asyncio.sleep(self.sleep_time)
                 llm_client = task_space.get("llm_client", None)
 
+            user_id = task_space["user_id"]
             async with llm_client.messages.stream(
                 model=model_name_override if model_name_override else self.anthropic_model_name,
                 max_tokens=1000,
@@ -256,11 +263,28 @@ class AnthropicConversationClient(ConversationAdapter):
                                         f"request {request_id} first chunk latency: {latency:.2f} seconds"
                                     )
                                     if self.latency_histogram:
-                                        user_id = task_space["user_id"]
                                         self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
                                             latency
                                         )
                             asyncio.gather(*coroutines)
+                if self.input_token_number_histogram:
+                    input_token_number = (
+                        stream.current_message_snapshot.usage.input_tokens
+                        if hasattr(stream.current_message_snapshot, "usage")
+                        else 0
+                    )
+                    self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                        input_token_number
+                    )
+                if self.output_token_number_histogram:
+                    output_token_number = (
+                        stream.current_message_snapshot.usage.output_tokens
+                        if hasattr(stream.current_message_snapshot, "usage")
+                        else 0
+                    )
+                    self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                        output_token_number
+                    )
             return chat_rsp
         except Exception as e:
             msg = f"Error in streaming chat: {e}"
@@ -316,7 +340,7 @@ class AnthropicConversationClient(ConversationAdapter):
             while llm_client is None:
                 await asyncio.sleep(self.sleep_time)
                 llm_client = task_space.get("llm_client", None)
-
+            user_id = task_space["user_id"]
             async with llm_client.messages.stream(
                 model=model_name_override if model_name_override else self.anthropic_model_name,
                 max_tokens=1000,
@@ -354,8 +378,30 @@ class AnthropicConversationClient(ConversationAdapter):
                                     self.logger.debug(
                                         f"request {request_id} first chunk latency: {latency:.2f} seconds"
                                     )
+                                    if self.latency_histogram:
+                                        self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                                            latency
+                                        )
                             asyncio.gather(*coroutines)
                             reject_rsp += text_seg
+                if self.input_token_number_histogram:
+                    input_token_number = (
+                        stream.current_message_snapshot.usage.input_tokens
+                        if hasattr(stream.current_message_snapshot, "usage")
+                        else 0
+                    )
+                    self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                        input_token_number
+                    )
+                if self.output_token_number_histogram:
+                    output_token_number = (
+                        stream.current_message_snapshot.usage.output_tokens
+                        if hasattr(stream.current_message_snapshot, "usage")
+                        else 0
+                    )
+                    self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                        output_token_number
+                    )
             return reject_rsp
         except Exception as e:
             msg = f"Error in streaming reject: {e}"

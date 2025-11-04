@@ -40,7 +40,8 @@ class AudioConversationAdapter(Streamable, ABC):
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
         latency_histogram: Histogram | None = None,
-        token_number_histogram: Histogram | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the audio conversation adapter.
@@ -72,9 +73,13 @@ class AudioConversationAdapter(Streamable, ABC):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
                 purposes. Defaults to None.
-            token_number_histogram (Histogram | None, optional):
-                Prometheus Histogram metric for recording token count distribution
-                per request. If provided, token usage metrics will be collected for
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
                 monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration dictionary. Defaults to None.
@@ -97,7 +102,8 @@ class AudioConversationAdapter(Streamable, ABC):
         self.proxy_url = proxy_url
         self.request_timeout = request_timeout
         self.latency_histogram = latency_histogram
-        self.token_number_histogram = token_number_histogram
+        self.input_token_number_histogram = input_token_number_histogram
+        self.output_token_number_histogram = output_token_number_histogram
 
     async def feed_stream(
         self,

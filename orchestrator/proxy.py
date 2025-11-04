@@ -226,8 +226,11 @@ class Proxy(Super):
             self.conversation_cfgs[conversation_key]["logger_cfg"] = logger_cfg
             self.conversation_cfgs[conversation_key]["latency_histogram"] = self.conversation_latency_histogram
             self.conversation_cfgs[conversation_key][
-                "token_number_histogram"
-            ] = self.conversation_token_number_histogram
+                "input_token_number_histogram"
+            ] = self.conversation_input_token_number_histogram
+            self.conversation_cfgs[conversation_key][
+                "output_token_number_histogram"
+            ] = self.conversation_output_token_number_histogram
             if ExecutorRegistry.validate_class(self.conversation_cfgs[conversation_key]["type"]):
                 self.conversation_cfgs[conversation_key]["thread_pool_executor"] = self.executor
             self.conversation_adapters[conversation_key] = build_conversation_adapter(
@@ -369,9 +372,16 @@ class Proxy(Super):
                 registry=self.prometheus_registry,
                 buckets=llm_latency_bucket,
             )
-            self.conversation_token_number_histogram = Histogram(
-                "conversation_token_number",
-                "Token number of conversation LLM adapters",
+            self.conversation_input_token_number_histogram = Histogram(
+                "conversation_input_token_number",
+                "Input token number of conversation LLM adapters",
+                labelnames=["adapter", "user_id"],
+                registry=self.prometheus_registry,
+                buckets=llm_token_number_bucket,
+            )
+            self.conversation_output_token_number_histogram = Histogram(
+                "conversation_output_token_number",
+                "Output token number of conversation LLM adapters",
                 labelnames=["adapter", "user_id"],
                 registry=self.prometheus_registry,
                 buckets=llm_token_number_bucket,
@@ -396,7 +406,8 @@ class Proxy(Super):
             self.s2m_latency_histogram = None
             self.tts_latency_histogram = None
             self.conversation_latency_histogram = None
-            self.conversation_token_number_histogram = None
+            self.conversation_input_token_number_histogram = None
+            self.conversation_output_token_number_histogram = None
             self.reaction_latency_histogram = None
             self.classification_latency_histogram = None
 

@@ -47,6 +47,8 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
         latency_histogram: Histogram | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
@@ -88,9 +90,13 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
                 purposes. Defaults to None.
-            token_number_histogram (Histogram | None, optional):
-                Prometheus Histogram metric for recording token count distribution
-                per request. If provided, token usage metrics will be collected for
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
                 monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
@@ -106,7 +112,8 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
             clean_interval=clean_interval,
             expire_time=expire_time,
             latency_histogram=latency_histogram,
-            token_number_histogram=token_number_histogram,
+            input_token_number_histogram=input_token_number_histogram,
+            output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
         self.wss_url = wss_url
@@ -228,7 +235,7 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
         request_id: str,
         start_time: float,
         is_reject: bool = False,
-    ):
+    ) -> str:
         """WebSocket message listener for receiving responses.
 
         Args:
@@ -255,6 +262,7 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
         else:
             task_space = self.input_buffer[request_id]["chat_task"]
 
+        user_id = task_space["user_id"]
         dag = task_space["dag"]
         dag_start_time = task_space["dag_start_time"]
         node_name = task_space["node_name"]
@@ -305,7 +313,6 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
                                         f"request {request_id} first chunk latency: {latency:.2f} seconds"
                                     )
                                     if self.latency_histogram:
-                                        user_id = task_space["user_id"]
                                         self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
                                             latency
                                         )
@@ -317,6 +324,10 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
                         self.logger.warning(f"SenseNova unable to parse JSON message: {response}")
                 except asyncio.TimeoutError:
                     continue  # Continue loop, check status
+            if self.output_token_number_histogram:
+                self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                    len(assistant_output)
+                )
             return assistant_output
         except websockets.exceptions.ConnectionClosedError:
             self.logger.debug("SenseNova WebSocket connection closed")
@@ -410,6 +421,9 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
             await ws.send(send_message)
 
             chat_rsp = await self._ws_message_listener(ws, request_id, start_time)
+            if self.input_token_number_histogram:
+                input_token_number = len(prompt_msg.replace(" ", "").replace("\n", "").replace("\t", ""))
+                self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
             return chat_rsp
         except Exception as e:
             msg = f"Error in streaming chat: {e}"

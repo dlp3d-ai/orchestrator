@@ -1,6 +1,7 @@
 from abc import abstractmethod
-from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
+
+from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.super import Super
@@ -42,6 +43,8 @@ class BaseMemoryAdapter(Super):
         short_term_length_threshold: int = 20,
         short_term_target_size: int = 10,
         medium_term_length_threshold: int = 10,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the base memory adapter.
@@ -61,6 +64,14 @@ class BaseMemoryAdapter(Super):
                 Target size for short-term memory compression. Defaults to 10.
             medium_term_length_threshold (int, optional):
                 Length threshold for medium-term memory compression. Defaults to 10.
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -75,6 +86,8 @@ class BaseMemoryAdapter(Super):
         self.logger_cfg = logger_cfg
 
         self.memory_manager: Optional["MemoryManager"] = None
+        self.input_token_number_histogram = input_token_number_histogram
+        self.output_token_number_histogram = output_token_number_histogram
 
     def set_memory_manager(self, memory_manager: "MemoryManager") -> None:
         """Set the memory manager instance.

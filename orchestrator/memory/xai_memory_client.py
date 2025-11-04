@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional, Union
 
 import httpx
 import openai
+from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.exception import MissingAPIKeyException
@@ -28,6 +29,8 @@ class XAIMemoryClient(BaseMemoryAdapter):
         short_term_length_threshold: int = 20,
         short_term_target_size: int = 10,
         medium_term_length_threshold: int = 10,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the XAI memory client.
@@ -53,6 +56,14 @@ class XAIMemoryClient(BaseMemoryAdapter):
                 Target size for short-term memory compression. Defaults to 10.
             medium_term_length_threshold (int, optional):
                 Length threshold for medium-term memory compression. Defaults to 10.
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -64,6 +75,8 @@ class XAIMemoryClient(BaseMemoryAdapter):
             short_term_length_threshold=short_term_length_threshold,
             short_term_target_size=short_term_target_size,
             medium_term_length_threshold=medium_term_length_threshold,
+            input_token_number_histogram=input_token_number_histogram,
+            output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
 
@@ -138,6 +151,12 @@ class XAIMemoryClient(BaseMemoryAdapter):
             content = response.choices[0].message.content
             if content is None:
                 raise ValueError("LLM returned None content")
+            if self.input_token_number_histogram:
+                input_token_number = response.usage.prompt_tokens if response.usage else 0
+                self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
+            if self.output_token_number_histogram:
+                output_token_number = response.usage.completion_tokens if response.usage else 0
+                self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
             output = json.loads(content)["output"]
             return output
         except Exception as e:

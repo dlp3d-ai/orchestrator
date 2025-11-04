@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional, Union
 
 import jwt
 import websockets
+from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.exception import MissingAPIKeyException
@@ -41,6 +42,8 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
         medium_term_length_threshold: int = 10,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
+        input_token_number_histogram: Histogram | None = None,
+        output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
         """Initialize the SenseNova Omni memory client.
@@ -72,6 +75,14 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
                 Thread pool executor.
                 If None, a new thread pool executor will be created based on
                 max_workers. Defaults to None.
+            input_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording input token count distribution
+                per request. If provided, input token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
+            output_token_number_histogram (Histogram | None, optional):
+                Prometheus Histogram metric for recording output token count distribution
+                per request. If provided, output token usage metrics will be collected for
+                monitoring purposes. Defaults to None.
             logger_cfg (Union[None, Dict[str, Any]], optional):
                 Logger configuration. Defaults to None.
         """
@@ -83,6 +94,8 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
             short_term_length_threshold=short_term_length_threshold,
             short_term_target_size=short_term_target_size,
             medium_term_length_threshold=medium_term_length_threshold,
+            input_token_number_histogram=input_token_number_histogram,
+            output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
 
@@ -303,6 +316,12 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
 
             response = await self._ws_message_listener(ws)
             output = response.split("<output>")[1].split("</output>")[0]
+            if self.input_token_number_histogram:
+                input_token_number = len(prompt_msg.replace(" ", "").replace("\n", "").replace("\t", ""))
+                self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
+            if self.output_token_number_histogram:
+                output_token_number = len(output.replace(" ", "").replace("\n", "").replace("\t", ""))
+                self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
             return output
         except Exception as e:
             self.logger.error(f"SenseNova LLM call failed: {e}")

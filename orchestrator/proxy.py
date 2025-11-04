@@ -201,6 +201,8 @@ class Proxy(Super):
         for memory_key, memory_cfg in memory_adapters.items():
             self.memory_cfgs[memory_key] = memory_cfg.copy()
             self.memory_cfgs[memory_key]["logger_cfg"] = logger_cfg
+            self.memory_cfgs[memory_key]["input_token_number_histogram"] = self.memory_input_token_number_histogram
+            self.memory_cfgs[memory_key]["output_token_number_histogram"] = self.memory_output_token_number_histogram
             self.memory_cfgs[memory_key]["db_client"] = self.db_memory_client
             if ExecutorRegistry.validate_class(self.memory_cfgs[memory_key]["type"]):
                 self.memory_cfgs[memory_key]["thread_pool_executor"] = self.executor
@@ -321,21 +323,25 @@ class Proxy(Super):
 
     def _setup_prometheus_registry(self) -> None:
         """Initialize Prometheus metrics registry and histograms for latency
-        monitoring.
+        and token number monitoring.
 
-        Creates a Prometheus CollectorRegistry and configures Histogram metrics for
-        monitoring latency across different adapter types. The metrics include:
+        Creates a Prometheus CollectorRegistry and configures Histogram metrics
+        for monitoring latency and token usage across different adapter types.
+        The metrics include:
         - Audio2Face (a2f) adapter latency
         - Speech2Motion (s2m) adapter latency
         - Text-to-Speech (tts) adapter latency (with adapter label)
         - Conversation LLM adapter latency (with adapter and user_id labels)
-        - Reaction LLM adapter latency (with adapter and user_id labels)
+        - Conversation LLM input/output token numbers (with adapter and user_id labels)
+        - Reaction LLM adapter latency (with adapter label)
         - Classification adapter latency (with adapter label)
+        - Memory adapter input/output token numbers (with adapter label)
 
-        Bucket ranges are configured differently based on expected latency ranges:
-        - Animation adapters (a2f, s2m, classification): 0.2s to 2.0s
-        - Text-to-Speech adapters: 0.2s to 5.0s
-        - LLM adapters (conversation, reaction): 0.5s to 10.0s
+        Bucket ranges are configured differently based on expected value ranges:
+        - Animation adapters (a2f, s2m, classification): 0.2s to 2.0s (200ms to 20000ms)
+        - Text-to-Speech adapters: 0.2s to 5.0s (200ms to 20000ms)
+        - LLM adapters (conversation, reaction): 0.5s to 10.0s (500ms to 20000ms)
+        - Token numbers: 50 to 5000 tokens (50 token increments)
 
         If Prometheus registry is disabled (enable_prometheus_registry is False),
         all histogram attributes are set to None.
@@ -400,6 +406,20 @@ class Proxy(Super):
                 registry=self.prometheus_registry,
                 buckets=animation_latency_bucket,
             )
+            self.memory_input_token_number_histogram = Histogram(
+                "memory_input_token_number",
+                "Input token number of memory adapters",
+                labelnames=["adapter"],
+                registry=self.prometheus_registry,
+                buckets=llm_token_number_bucket,
+            )
+            self.memory_output_token_number_histogram = Histogram(
+                "memory_output_token_number",
+                "Output token number of memory adapters",
+                labelnames=["adapter"],
+                registry=self.prometheus_registry,
+                buckets=llm_token_number_bucket,
+            )
         else:
             self.prometheus_registry = None
             self.a2f_latency_histogram = None
@@ -410,6 +430,8 @@ class Proxy(Super):
             self.conversation_output_token_number_histogram = None
             self.reaction_latency_histogram = None
             self.classification_latency_histogram = None
+            self.memory_input_token_number_histogram = None
+            self.memory_output_token_number_histogram = None
 
     async def start_streamable_instances(self) -> None:
         """Start all streamable adapter instances.

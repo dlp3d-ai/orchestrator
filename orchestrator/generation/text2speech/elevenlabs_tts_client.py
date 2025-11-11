@@ -93,9 +93,9 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
                 Keys are ElevenLabs voice IDs, values are descriptive names.
         """
         voice_names = {
-            "IAfVgyogVSvpCyZeevDo": "Keqing-en",
-            "v5WynholsiwnjjP7Iq1L": "Hutao-en",
-            "VTpilc4HcK9uYznwQK8c": "Furina-en",
+            "IAfVgyogVSvpCyZeevDo": "Keqing",
+            "v5WynholsiwnjjP7Iq1L": "Hutao",
+            "VTpilc4HcK9uYznwQK8c": "Furina",
             "OFk7GQifxSf2BCxOuOF3": "Grok_Ani",
             "EXAVITQu4vr4xnSDxMaL": "Sarah",
             "FGY2WhTYpPnrIDTdsKH5": "Laura",

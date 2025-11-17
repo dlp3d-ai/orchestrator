@@ -210,9 +210,10 @@ The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI
 ### ASR
 | Provider | Adapter Class |
 |----------|---------------|
-| Softsugar | `SoftSugarASRClient` |
 | OpenAI | `OpenAIRealtimeASRClient` |
+| Volcano Engine | `HuoshanASRClient` |
 | SenseTime | `SensetimeASRClient` |
+| Softsugar | `SoftSugarASRClient` |
 
 ### TTS
 | Provider | Adapter Class |

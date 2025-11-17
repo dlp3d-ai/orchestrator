@@ -295,6 +295,86 @@ async def test_softsugar_asr_client_stream():
 
 
 @pytest.mark.asyncio
+async def test_huoshan_asr_client_stream():
+    """Test Huoshan ASR client with streaming mode.
+
+    This test verifies the streaming functionality of the Huoshan ASR client by
+    processing audio data in real-time chunks and validating the complete
+    processing pipeline including DAG execution and buffer management.
+
+    Requires HUOSHAN_APPID and HUOSHAN_TOKEN environment variables.
+    """
+    huoshan_app_id = os.environ.get("HUOSHAN_APPID")
+    huoshan_token = os.environ.get("HUOSHAN_TOKEN")
+    if not huoshan_app_id or not huoshan_token:
+        pytest.skip("HUOSHAN_APPID or HUOSHAN_TOKEN is not set, skipping test test_huoshan_asr_client_stream")
+
+    logger_cfg = dict(
+        logger_name="test_huoshan_asr_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
+    asr_cfg = dict(
+        type="HuoshanASRClient",
+        name="huoshan_asr_client",
+        wss_url="wss://openspeech.bytedance.com/api/v2/asr",
+        logger_cfg=logger_cfg,
+    )
+    adapter = build_asr_adapter(asr_cfg)
+    asyncio.create_task(adapter.run())
+    profile = TextStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_huoshan_asr_client_stream",
+        conf=dict(
+            start_time=0.0,
+            user_settings=dict(
+                huoshan_app_id=huoshan_app_id,
+                huoshan_token=huoshan_token,
+            ),
+        ),
+        logger_cfg=logger_cfg,
+    )
+    asr_node = DAGNode(
+        name="asr_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(asr_node)
+    graph.add_node(profile_node)
+    graph.add_edge(asr_node.name, profile_node.name)
+    request_id = str(uuid.uuid4())
+    audio_path = "input/test_audio.wav"
+    chunks = _wav_to_chunks(audio_path, adapter.CHUNK_DURATION, request_id, graph, asr_node.name)
+    graph.conf["start_time"] = time.time()
+    graph.status = DAGStatus.RUNNING
+    last_send_time = 0.0
+    for chunk in chunks:
+        cur_time = time.time()
+        if not isinstance(chunk, AudioChunkBody):
+            await adapter.feed_stream(chunk)
+        else:
+            elapsed_since_last_send = cur_time - last_send_time
+            if last_send_time != 0.0 and elapsed_since_last_send < adapter.CHUNK_DURATION:
+                wait_duration = adapter.CHUNK_DURATION - elapsed_since_last_send
+                if wait_duration > 0:  # Ensure wait_duration is positive
+                    await asyncio.sleep(wait_duration)
+
+            await adapter.feed_stream(chunk)
+            last_send_time = time.time()  # Update last_send_time to the actual send time of the current chunk
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - graph.conf["start_time"] > 10:
+            raise TimeoutError("ASR stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+    assert len(adapter.input_buffer) == 0
+    assert len(profile.input_buffer) == 0
+
+
+@pytest.mark.asyncio
 async def test_openai_realtime_asr_client_stream():
     """Test OpenAI Realtime ASR client with streaming mode.
 

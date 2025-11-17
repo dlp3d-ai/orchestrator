@@ -252,9 +252,10 @@ python main.py --config_path configs/local.py
 ### ASR
 | Provider | Adapter Class |
 |----------|---------------|
-| Softsugar | `SoftSugarASRClient` |
 | OpenAI | `OpenAIRealtimeASRClient` |
+| Volcano Engine | `HuoshanASRClient` |
 | SenseTime | `SensetimeASRClient` |
+| Softsugar | `SoftSugarASRClient` |
 
 ### TTS
 | Provider | Adapter Class |

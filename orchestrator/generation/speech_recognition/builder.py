@@ -1,4 +1,5 @@
 from .asr_adapter import AutomaticSpeechRecognitionAdapter
+from .huoshan_asr_client import HuoshanASRClient
 from .openai_realtime_asr_client import OpenAIRealtimeASRClient
 from .sensetime_asr_client import SensetimeASRClient
 from .softsugar_asr_client import SoftSugarASRClient
@@ -7,6 +8,7 @@ _ASR_ADAPTERS = dict(
     SensetimeASRClient=SensetimeASRClient,
     SoftSugarASRClient=SoftSugarASRClient,
     OpenAIRealtimeASRClient=OpenAIRealtimeASRClient,
+    HuoshanASRClient=HuoshanASRClient,
 )
 
 

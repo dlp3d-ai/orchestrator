@@ -210,9 +210,10 @@ orchestrator/
 ### ASR
 | 服务商 | 适配器类 |
 |--------|----------|
-| Softsugar | `SoftSugarASRClient` |
 | OpenAI | `OpenAIRealtimeASRClient` |
+| 火山引擎 | `HuoshanASRClient` |
 | SenseTime | `SensetimeASRClient` |
+| Softsugar | `SoftSugarASRClient` |
 
 ### TTS
 | 服务商 | 适配器类 |

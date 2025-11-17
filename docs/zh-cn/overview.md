@@ -36,25 +36,27 @@ orchestrator/
 │   ├── anthropic_conversation_client.py # Anthropic 对话客户端
 │   ├── gemini_conversation_client.py   # Gemini 对话客户端
 │   ├── xai_conversation_client.py      # xAI 对话客户端
-│   ├── deepseek_conversation_client.py # DeepSeek 对话客户端
+|   ├── deepseek_conversation_client.py # DeepSeek 对话客户端
 │   └── sensenova_omni_conversation_client.py  # SenseNova 实时对话客户端
+|  
 ├── generation/                # 生成管理模块
-│   ├── speech_recognition/    # 语音识别（ASR）
+│   ├── speech_recognition/    # 语音识别 (ASR)
 │   │   ├── asr_adapter.py     # ASR 适配器基类
+│   │   ├── huoshan_asr_client.py     # 火山引擎 ASR
 │   │   ├── openai_realtime_asr_client.py # OpenAI 实时 ASR
 │   │   ├── sensetime_asr_client.py      # 商汤 ASR
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
-│   ├── text2speech/          # 语音合成（TTS）
-│   │   ├── tts_adapter.py     # TTS 适配器基类
+│   ├── text2speech/          # 语音合成 (TTS)
+│   │   ├── tts_adapter.py     # TTS适配器基类
 │   │   ├── elevenlabs_tts_client.py     # ElevenLabs TTS
 │   │   ├── huoshan_tts_client.py        # 火山引擎 TTS
-│   │   ├── sensenova_tts_client.py      # SenseNova TTS
+|   |   ├── sensenova_tts_client.py      # SenseNova TTS
 │   │   ├── sensetime_tts_client.py      # 商汤 TTS
 │   │   └── softsugar_tts_client.py      # Softsugar TTS
-│   ├── speech2motion/        # 语音转动作（S2M）
+│   ├── speech2motion/        # 语音转动作
 │   │   ├── speech2motion_adapter.py     # S2M 适配器基类
 │   │   └── speech2motion_streaming_client.py # S2M 流式客户端
-│   └── audio2face/           # 音频转面部表情（A2F）
+│   └── audio2face/           # 音频转面部表情
 │       ├── audio2face_adapter.py        # A2F 适配器基类
 │       └── audio2face_streaming_client.py # A2F 流式客户端
 ├── memory/                   # 记忆管理模块
@@ -62,17 +64,18 @@ orchestrator/
 │   ├── memory_manager.py     # 记忆管理器
 │   ├── memory_processor.py   # 记忆处理器
 │   ├── task_manager.py       # 任务管理器
+|   ├── openai_memory_client.py # OpenAI 记忆客户端
 │   ├── xai_memory_client.py  # xAI 记忆客户端
 │   └── sensenova_omni_memory_client.py # SenseNova 实时记忆客户端
 ├── classification/           # 分类模块
 │   ├── classification_adapter.py # 分类适配器基类
-│   ├── sensenova_omni_classification_client.py # SenseNova 实时分类客户端
+|   ├── sensenova_omni_classification_client.py # SenseNova 实时分类客户端
 │   ├── openai_classification_client.py # OpenAI 分类客户端
 │   ├── gemini_classification_client.py # Gemini 分类客户端
 │   └── xai_classification_client.py    # xAI 分类客户端
 ├── reaction/                # 反应模块
 │   ├── reaction_adapter.py   # 反应适配器基类
-│   ├── sensenova_omni_reaction_client.py # SenseNova 实时反应客户端
+|   ├── sensenova_omni_reaction_client.py # SenseNova 实时反应客户端
 │   ├── openai_reaction_client.py # OpenAI 反应客户端
 │   ├── gemini_reaction_client.py # Gemini 反应客户端
 │   └── xai_reaction_client.py    # xAI 反应客户端
@@ -227,6 +230,7 @@ orchestrator/
 ### Memory
 | 服务商 | 适配器类 | 默认模型 |
 |--------|----------|----------|
+| OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
 | SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
 

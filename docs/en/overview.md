@@ -41,6 +41,7 @@ orchestrator/
 ├── generation/                # Generation management module
 │   ├── speech_recognition/    # Speech Recognition (ASR)
 │   │   ├── asr_adapter.py     # ASR adapter base class
+│   │   ├── huoshan_asr_client.py # Volcano Engine ASR
 │   │   ├── openai_realtime_asr_client.py # OpenAI real-time ASR
 │   │   ├── sensetime_asr_client.py      # SenseTime ASR
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
@@ -62,6 +63,7 @@ orchestrator/
 │   ├── memory_manager.py     # Memory manager
 │   ├── memory_processor.py   # Memory processor
 │   ├── task_manager.py       # Task manager
+|   ├── openai_memory_client.py  # OpenAI memory client
 │   ├── xai_memory_client.py  # xAI memory client
 │   └── sensenova_omni_memory_client.py # SenseNova real-time memory client
 ├── classification/           # Classification module
@@ -227,6 +229,7 @@ The system uses a Directed Acyclic Graph (DAG) architecture to manage complex AI
 ### Memory
 | Provider | Adapter Class | Default Model |
 |----------|---------------|---------------|
+| OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
 | SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
 

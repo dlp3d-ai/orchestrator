@@ -59,6 +59,7 @@ orchestrator/
 ├── generation/                # 生成管理模块
 │   ├── speech_recognition/    # 语音识别 (ASR)
 │   │   ├── asr_adapter.py     # ASR 适配器基类
+│   │   ├── huoshan_asr_client.py     # 火山引擎 ASR
 │   │   ├── openai_realtime_asr_client.py # OpenAI 实时 ASR
 │   │   ├── sensetime_asr_client.py      # 商汤 ASR
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
@@ -80,6 +81,7 @@ orchestrator/
 │   ├── memory_manager.py     # 记忆管理器
 │   ├── memory_processor.py   # 记忆处理器
 │   ├── task_manager.py       # 任务管理器
+|   ├── openai_memory_client.py # OpenAI 记忆客户端
 │   ├── xai_memory_client.py  # xAI 记忆客户端
 │   └── sensenova_omni_memory_client.py # SenseNova 实时记忆客户端
 ├── classification/           # 分类模块
@@ -271,6 +273,7 @@ python main.py --config_path configs/local.py
 ### Memory
 | 服务商 | 适配器类 | 默认模型 |
 |--------|----------|------|
+| OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
 | SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
 

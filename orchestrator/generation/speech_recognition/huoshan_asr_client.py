@@ -340,8 +340,12 @@ class HuoshanASRClient(AutomaticSpeechRecognitionAdapter):
                 if "payload_msg" in result and result["payload_msg"]["sequence"] < 0:
                     asr_text = result["payload_msg"]["result"][0]["text"]
                     break
-            except asyncio.TimeoutError as e:
-                self.logger.error(f"ASR timeout for request {request_id}: {e}")
+            except asyncio.TimeoutError:
+                self.logger.error(
+                    f"ASR timeout for request {request_id}: "
+                    + f"spent {current_time - commit_time:.3f} seconds, "
+                    + f"timeout {self.commit_timeout:.3f} seconds"
+                )
                 break
             except Exception as e:
                 self.logger.error(f"ASR error for request {request_id}: {e}")

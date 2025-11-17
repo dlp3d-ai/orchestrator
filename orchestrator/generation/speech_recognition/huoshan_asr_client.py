@@ -63,7 +63,7 @@ class HuoshanASRClient(AutomaticSpeechRecognitionAdapter):
         sleep_time: float = 0.01,
         clean_interval: float = 10.0,
         expire_time: float = 120.0,
-        commit_timeout: float = 5.0,
+        commit_timeout: float = 10.0,
         max_workers: int = 1,
         thread_pool_executor: ThreadPoolExecutor | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
@@ -98,7 +98,7 @@ class HuoshanASRClient(AutomaticSpeechRecognitionAdapter):
                 Defaults to 120.0.
             commit_timeout (float, optional):
                 The timeout in seconds for waiting for ASR response after
-                sending commit message. Defaults to 2.0.
+                sending commit message. Defaults to 10.0.
             max_workers (int, optional):
                 The number of workers for the thread pool executor.
                 Defaults to 1.

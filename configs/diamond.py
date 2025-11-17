@@ -45,6 +45,12 @@ proxy = dict(
     ),
     db_config_cache_sync_trigger="健康检查",
     memory_adapters=dict(
+        openai_memory=dict(
+            type="OpenAIMemoryClient",
+            name="openai_memory_client",
+            openai_model_name="gpt-4.1-mini-2025-04-14",
+            proxy_url=os.environ.get("PROXY_URL", None),
+        ),
         xai_memory=dict(
             type="XAIMemoryClient",
             name="xai_memory_client",

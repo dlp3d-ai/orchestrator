@@ -5,6 +5,7 @@ import pytest
 
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
 from orchestrator.memory.memory_processor import MemoryProcessor
+from orchestrator.memory.openai_memory_client import OpenAIMemoryClient
 from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
 from orchestrator.memory.task_manager import TaskManager
 from orchestrator.memory.xai_memory_client import XAIMemoryClient
@@ -50,6 +51,21 @@ def xai_memory_client(mongodb_memory_client: MongoDBMemoryClient):
     """
     return XAIMemoryClient(
         name="test_xai_memory",
+        db_client=mongodb_memory_client,
+        proxy_url=os.environ.get("PROXY_URL", None),
+    )
+
+
+@pytest.fixture
+def openai_memory_client(mongodb_memory_client: MongoDBMemoryClient):
+    """Create a OpenAIMemoryClient instance for testing.
+
+    Returns:
+        OpenAIMemoryClient:
+            Configured OpenAI memory client instance for test database.
+    """
+    return OpenAIMemoryClient(
+        name="test_openai_memory",
         db_client=mongodb_memory_client,
         proxy_url=os.environ.get("PROXY_URL", None),
     )
@@ -195,4 +211,68 @@ async def test_sensenova_omni_memory_client_call_llm(sensenova_omni_memory_clien
     assert duration < 30  # should complete within 30 seconds
 
     print(f"Omni Memory Client call_llm test completed in {duration:.2f} seconds")
+    print(f"Result: {result}")
+
+
+@pytest.mark.asyncio
+async def test_openai_memory_client_call_llm(openai_memory_client: OpenAIMemoryClient):
+    """Test OpenAI memory client call_llm method.
+
+    This test verifies that the OpenAI memory client can successfully call the LLM
+    to merge short-term and medium-term memories. The test creates a MemoryProcessor
+    instance with test conversation data and validates that the memory merging
+    operation completes within 30 seconds and returns a non-empty string result.
+
+    Args:
+        openai_memory_client (OpenAIMemoryClient):
+            OpenAI memory client fixture for testing.
+    """
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
+    if not openai_api_key:
+        pytest.skip("openai_api_key is not set, skipping test test_openai_memory_client_call_llm")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_openai_memory_client_call_llm")
+
+    logger_cfg = dict(
+        logger_name="test_openai_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
+
+    # test data
+    short_term_memories = [
+        {"role": "user", "content": "你好，我叫小张", "relationship": "Stranger"},
+        {"role": "assistant", "content": "你好小张，很高兴认识你！"},
+    ]
+
+    latest_medium_term_memory = {"content": "关系阶段：陌生人，主要话题：用户询问我的姓名和职责。"}
+
+    # create MemoryProcessor instance
+    task_manager = TaskManager(logger_cfg=logger_cfg)
+    memory_processor = MemoryProcessor(
+        db_client=openai_memory_client.db_client,
+        task_manager=task_manager,
+        memory_adapter=openai_memory_client,
+        medium_term_char_threshold=100,
+        logger_cfg=logger_cfg,
+    )
+
+    # test _merge_short_and_medium_term
+    start_time = time.time()
+    result = await memory_processor._merge_short_and_medium_term(
+        short_term_memories=short_term_memories,
+        latest_medium_term_memory=latest_medium_term_memory,
+        api_keys={
+            "openai_api_key": openai_api_key,
+        },
+    )
+
+    end_time = time.time()
+    duration = end_time - start_time
+
+    # validate result
+    assert result is not None
+    assert isinstance(result, str)
+    assert len(result) > 0
+    assert duration < 30  # should complete within 30 seconds
+
+    print(f"OpenAI Memory Client call_llm test completed in {duration:.2f} seconds")
     print(f"Result: {result}")

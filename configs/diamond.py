@@ -199,6 +199,7 @@ proxy = dict(
             cluster_id="volcengine_streaming_common",
             default_language="zh-CN",
             request_timeout=5,
+            commit_timeout=5,
             queue_size=5000,
         ),
     ),

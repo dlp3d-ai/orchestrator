@@ -184,6 +184,16 @@ proxy = dict(
             proxy_url=__proxy_url__,
             queue_size=5000,
         ),
+        huoshan=dict(
+            type="HuoshanASRClient",
+            name="huoshan_asr_client",
+            wss_url="wss://openspeech.bytedance.com/api/v2/asr",
+            cluster_id="volcengine_streaming_common",
+            default_language="zh-CN",
+            request_timeout=5,
+            commit_timeout=5,
+            queue_size=5000,
+        ),
     ),
     s2m_cfg=dict(
         type="Speech2MotionStreamingClient",

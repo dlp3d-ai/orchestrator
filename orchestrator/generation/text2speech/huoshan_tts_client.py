@@ -182,9 +182,7 @@ class HuoshanTTSClient(TextToSpeechAdapter):
                 "zh_female_wanwanxiaohe_moon_bigtts": "火山语音大模型-湾湾小何-小智AI",
             }
         elif self.cluster == "volcano_icl":
-            voice_names = {
-                "S_RCFHBi9L1": "火山语音克隆-刻晴",
-            }
+            voice_names = {}
         else:
             voice_names = {}
         return voice_names
@@ -264,7 +262,7 @@ class HuoshanTTSClient(TextToSpeechAdapter):
             ret_dict["duration"] = duration
             ret_dict["audio"] = audio_io
 
-            if "speech_time" not in subtitle_result or not subtitle_result.get("speech_time"):
+            if not subtitle_result.get("speech_time"):
                 subtitle_result = self._estimate_speech_time_from_duration(text, duration)
 
             ret_dict.update(subtitle_result)

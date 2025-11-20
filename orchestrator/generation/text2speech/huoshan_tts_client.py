@@ -183,7 +183,7 @@ class HuoshanTTSClient(TextToSpeechAdapter):
             }
         elif self.cluster == "volcano_icl":
             voice_names = {
-                "S_3hNEIJln1": "火山语音克隆-刻晴",
+                "S_RCFHBi9L1": "火山语音克隆-刻晴",
             }
         else:
             voice_names = {}
@@ -263,6 +263,10 @@ class HuoshanTTSClient(TextToSpeechAdapter):
                 duration = frames / float(rate)
             ret_dict["duration"] = duration
             ret_dict["audio"] = audio_io
+
+            if "speech_time" not in subtitle_result or not subtitle_result.get("speech_time"):
+                subtitle_result = self._estimate_speech_time_from_duration(text, duration)
+
             ret_dict.update(subtitle_result)
             return ret_dict
 
@@ -365,5 +369,36 @@ class HuoshanTTSClient(TextToSpeechAdapter):
         return {
             "speech_text": speech_text,
             # "duration": duration,
+            "speech_time": speech_time,
+        }
+
+    @classmethod
+    def _estimate_speech_time_from_duration(cls, text: str, duration: float) -> Dict[str, Any]:
+        """Estimate speech_time by evenly distributing duration across
+        characters.
+
+        Args:
+            text (str):
+                Input text used for synthesis.
+            duration (float):
+                Total audio duration in seconds.
+
+        Returns:
+            Dict[str, Any]:
+                Standardized timing data containing:
+                - `speech_text` (str): Original input text
+                - `speech_time` (List[Tuple[int, float]]): Character timing
+                  mapping with (character_index, start_time) pairs
+        """
+        speech_time = []
+        text_len = len(text)
+
+        if text_len > 0 and duration > 0:
+            for i in range(text_len):
+                char_time = duration * i / text_len
+                speech_time.append((i, char_time))
+
+        return {
+            "speech_text": text,
             "speech_time": speech_time,
         }

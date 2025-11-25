@@ -110,6 +110,13 @@ proxy = dict(
             sensechat_model_name="SenseChat-5-1202",
             sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
         ),
+        sensenova_agent=dict(
+            type="SenseNovaConversationClient",
+            name="sensenova_agent_client",
+            agent_prompts_file="configs/agent_prompts.yaml",
+            sensenova_model_name="SenseNova-V6-5-Pro",
+            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
         openai_audio_agent=dict(
             type="OpenAIAudioClient",
             name="openai_audio_agent_client",

@@ -820,6 +820,97 @@ async def test_sensechat_stream(
 
 
 @pytest.mark.asyncio
+async def test_sensenova_stream(
+    test_memory_adapter: SenseNovaOmniMemoryClient,
+    mongodb_memory_client: MongoDBMemoryClient,
+):
+    """Test SenseNova conversation streaming functionality.
+
+    Args:
+        test_memory_adapter (SenseNovaOmniMemoryClient):
+            SenseNova Omni memory client for conversation testing.
+        mongodb_memory_client (MongoDBMemoryClient):
+            MongoDB memory client for database operations.
+    """
+    sensechat_ak = os.environ.get("SENSECHAT_AK")
+    sensechat_sk = os.environ.get("SENSECHAT_SK")
+    if not sensechat_ak or not sensechat_sk:
+        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensenova_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_stream")
+
+    logger_cfg = dict(logger_name="test_sensenova_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
+    sensenova_client_cfg = dict(
+        type="SenseNovaConversationClient",
+        name="sensenova_client",
+        agent_prompts_file="configs/agent_prompts.yaml",
+        sensenova_model_name="SenseNova-V6-5-Pro",
+        sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    cascade_memories = await test_memory_adapter.db_client.get_cascade_memories(
+        character_id=TEST_CHARACTER_ID,
+    )
+    adapter = build_conversation_adapter(sensenova_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = TextStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_sensenova_streaming",
+        conf=dict(
+            user_prompt=agent_prompts["keqing_default"],
+            character_id=TEST_CHARACTER_ID,
+            user_settings=dict(
+                sensechat_ak=sensechat_ak,
+                sensechat_sk=sensechat_sk,
+            ),
+            language="zh",
+            cascade_memories=cascade_memories,
+            relationship=("Lover", 100),
+            emotion=INITIAL_EMOTION_STATE,
+            memory_adapter=test_memory_adapter,
+            memory_db_client=mongodb_memory_client,
+        ),
+        logger_cfg=logger_cfg,
+    )
+    chat_node = DAGNode(
+        name="chat_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(chat_node)
+    graph.add_node(profile_node)
+    graph.add_edge(chat_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(request_id=request_id, dag=graph, node_name=chat_node.name)
+    await adapter.feed_stream(start_chunk)
+    message = "你好呀"
+    for char in message:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 10:
+            raise TimeoutError("SenseNova stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
 async def test_blank_input_stream(
     test_memory_adapter: SenseNovaOmniMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,

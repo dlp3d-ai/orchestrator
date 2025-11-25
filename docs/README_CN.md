@@ -250,7 +250,9 @@ python main.py --config_path configs/local.py
 | Google | `GeminiConversationClient` | `gemini-2.5-flash-lite` |
 | DeepSeek | `DeepSeekConversationClient` | `deepseek-chat` |
 | xAI | `XAIConversationClient` | `grok-3` |
-| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova Omni` |
+| SenseNova | `SenseChatConversationClient` | `SenseChat-5-1202` (大语言模型) |
+| SenseNova | `SenseNovaConversationClient` | `SenseNova-V6-5-Pro` (融合模态模型) |
+| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova-V6-5-Omni` (实时交互融合模态模型) |
 | OpenAI | `OpenAIAudioClient` | `gpt-4o-mini-realtime-preview-2024-12-17` |
 
 ### ASR
@@ -275,7 +277,7 @@ python main.py --config_path configs/local.py
 |--------|----------|------|
 | OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
-| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova-V6-5-Omni` |
 
 ### Classification
 | 服务商 | 适配器类 | 默认模型 |
@@ -283,7 +285,7 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIClassificationClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIClassificationClient` | `grok-3` |
 | Gemini | `GeminiClassificationClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova-V6-5-Omni` |
 
 ### Reaction
 | 服务商 | 适配器类 | 默认模型 |
@@ -291,7 +293,7 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIReactionClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIReactionClient` | `grok-3` |
 | Gemini | `GeminiReactionClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova-V6-5-Omni` |
 
 ## 文档
 

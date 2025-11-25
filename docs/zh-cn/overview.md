@@ -37,6 +37,8 @@ orchestrator/
 │   ├── gemini_conversation_client.py   # Gemini 对话客户端
 │   ├── xai_conversation_client.py      # xAI 对话客户端
 |   ├── deepseek_conversation_client.py # DeepSeek 对话客户端
+│   ├── sensechat_conversation_client.py # SenseChat 对话客户端
+│   ├── sensenova_conversation_client.py # SenseNova 对话客户端
 │   └── sensenova_omni_conversation_client.py  # SenseNova 实时对话客户端
 |  
 ├── generation/                # 生成管理模块
@@ -207,7 +209,9 @@ orchestrator/
 | Google | `GeminiConversationClient` | `gemini-2.5-flash-lite` |
 | DeepSeek | `DeepSeekConversationClient` | `deepseek-chat` |
 | xAI | `XAIConversationClient` | `grok-3` |
-| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova Omni` |
+| SenseNova | `SenseChatConversationClient` | `SenseChat-5-1202` (大语言模型) |
+| SenseNova | `SenseNovaConversationClient` | `SenseNova-V6-5-Pro` (融合模态模型) |
+| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova-V6-5-Omni` (实时交互融合模态模型) |
 | OpenAI | `OpenAIAudioClient` | `gpt-4o-mini-realtime-preview-2024-12-17` |
 
 ### ASR
@@ -232,7 +236,7 @@ orchestrator/
 |--------|----------|----------|
 | OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
-| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova-V6-5-Omni` |
 
 ### Classification
 | 服务商 | 适配器类 | 默认模型 |
@@ -240,7 +244,7 @@ orchestrator/
 | OpenAI | `OpenAIClassificationClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIClassificationClient` | `grok-3` |
 | Gemini | `GeminiClassificationClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova-V6-5-Omni` |
 
 ### Reaction
 | 服务商 | 适配器类 | 默认模型 |
@@ -248,6 +252,6 @@ orchestrator/
 | OpenAI | `OpenAIReactionClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIReactionClient` | `grok-3` |
 | Gemini | `GeminiReactionClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova Omni` |
+| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova-V6-5-Omni` |
 
 

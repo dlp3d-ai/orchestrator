@@ -251,6 +251,8 @@ class DynamoDBConfigClient(DatabaseConfigClient):
                 - sensenova_api_key (str): Sensenova API key
                 - sensenova_ak (str): Sensenova AK
                 - sensenova_sk (str): Sensenova SK
+                - sensechat_ak (str): SenseChat AK
+                - sensechat_sk (str): SenseChat SK
                 - softsugar_app_id (str): SoftSugar App ID
                 - softsugar_app_key (str): SoftSugar App Key
                 - huoshan_appid (str): Huoshan App ID

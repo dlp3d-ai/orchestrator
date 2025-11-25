@@ -4,6 +4,7 @@ from .deepseek_conversation_client import DeepSeekConversationClient
 from .gemini_conversation_client import GeminiConversationClient
 from .openai_audio_client import OpenAIAudioClient
 from .openai_conversation_client import OpenAIConversationClient
+from .sensechat_conversation_client import SenseChatConversationClient
 from .sensenova_omni_conversation_client import SenseNovaOmniConversationClient
 from .xai_conversation_client import XAIConversationClient
 
@@ -14,6 +15,7 @@ _CONVERSATION_ADAPTERS = dict(
     XAIConversationClient=XAIConversationClient,
     GeminiConversationClient=GeminiConversationClient,
     OpenAIAudioClient=OpenAIAudioClient,
+    SenseChatConversationClient=SenseChatConversationClient,
     SenseNovaOmniConversationClient=SenseNovaOmniConversationClient,
 )
 

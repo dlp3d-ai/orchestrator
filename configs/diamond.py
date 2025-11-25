@@ -105,6 +105,13 @@ proxy = dict(
             agent_prompts_file="configs/agent_prompts.yaml",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
+        sensechat_agent=dict(
+            type="SenseChatConversationClient",
+            name="sensechat_agent_client",
+            agent_prompts_file="configs/agent_prompts.yaml",
+            sensechat_model_name="SenseChat-5-1202",
+            sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
         openai_audio_agent=dict(
             type="OpenAIAudioClient",
             name="openai_audio_agent_client",

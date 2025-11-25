@@ -64,6 +64,8 @@ class DatabaseConfigClient(Super, ABC):
         "sensenova_api_key",
         "sensenova_ak",
         "sensenova_sk",
+        "sensechat_ak",
+        "sensechat_sk",
         "softsugar_app_id",
         "softsugar_app_key",
         "huoshan_app_id",
@@ -210,6 +212,8 @@ class DatabaseConfigClient(Super, ABC):
                 - sensenova_api_key (str): Sensenova API key
                 - sensenova_ak (str): Sensenova AK
                 - sensenova_sk (str): Sensenova SK
+                - sensechat_ak (str): SenseChat AK
+                - sensechat_sk (str): SenseChat SK
                 - softsugar_app_id (str): SoftSugar App ID
                 - softsugar_app_key (str): SoftSugar App Key
                 - huoshan_app_id (str): Huoshan App ID

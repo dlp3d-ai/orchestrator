@@ -8,6 +8,8 @@
     "sensenova_api_key": "SENSENOVA_API_KEY",
     "sensenova_ak": "SENSENOVA_AK",
     "sensenova_sk": "SENSENOVA_SK",
+    "sensechat_ak": "SENSECHAT_AK",
+    "sensechat_sk": "SENSECHAT_SK",
     "softsugar_app_id": "SOFTSUGAR_APP_ID",
     "softsugar_app_key": "SOFTSUGAR_APP_KEY",
     "huoshan_app_id": "HUOSHAN_APP_ID",

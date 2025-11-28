@@ -185,11 +185,11 @@ async def test_openai_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not openai_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
+        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_stream")
 
@@ -217,8 +217,8 @@ async def test_openai_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 openai_api_key=openai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             profile_memory=None,
             cascade_memories=cascade_memories,
@@ -278,11 +278,11 @@ async def test_gemini_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not gemini_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or GEMINI_API_KEY is not set, skipping test_gemini_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not gemini_api_key:
+        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or GEMINI_API_KEY is not set, skipping test_gemini_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_gemini_stream")
 
@@ -312,8 +312,8 @@ async def test_gemini_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 gemini_api_key=gemini_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             profile_memory=profile_memory,
@@ -374,11 +374,13 @@ async def test_deepseek_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not deepseek_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not deepseek_api_key:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_stream")
 
@@ -405,8 +407,8 @@ async def test_deepseek_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 deepseek_api_key=deepseek_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -466,11 +468,11 @@ async def test_xai_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not xai_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_xai_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
+        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_xai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_xai_stream")
 
@@ -497,8 +499,8 @@ async def test_xai_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 xai_api_key=xai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -558,11 +560,13 @@ async def test_anthropic_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not anthropic_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not anthropic_api_key:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_anthropic_stream")
 
@@ -589,8 +593,8 @@ async def test_anthropic_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 anthropic_api_key=anthropic_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -650,10 +654,10 @@ async def test_sensenova_omni_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenova_ak or not sensenova_sk:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_stream")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
+    if not sensenovaomni_ak or not sensenovaomni_sk:
+        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK is not set, skipping test_sensenova_omni_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_stream")
 
@@ -662,7 +666,7 @@ async def test_sensenova_omni_stream(
     )
     sensenova_omni_client_cfg = dict(
         type="SenseNovaOmniConversationClient",
-        name="sensenova_omni_client",
+        name="sensenovaomni_client",
         agent_prompts_file="configs/agent_prompts.yaml",
         wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         logger_cfg=logger_cfg,
@@ -680,8 +684,8 @@ async def test_sensenova_omni_stream(
             user_prompt=agent_prompts["keqing_default"],
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -741,10 +745,14 @@ async def test_sensechat_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     sensechat_ak = os.environ.get("SENSECHAT_AK")
     sensechat_sk = os.environ.get("SENSECHAT_SK")
-    if not sensechat_ak or not sensechat_sk:
-        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not sensechat_ak or not sensechat_sk:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensechat_stream")
 
@@ -771,6 +779,8 @@ async def test_sensechat_stream(
             user_prompt=agent_prompts["keqing_default"],
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
                 sensechat_ak=sensechat_ak,
                 sensechat_sk=sensechat_sk,
             ),
@@ -832,10 +842,14 @@ async def test_sensenova_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensechat_ak = os.environ.get("SENSECHAT_AK")
-    sensechat_sk = os.environ.get("SENSECHAT_SK")
-    if not sensechat_ak or not sensechat_sk:
-        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensenova_stream")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
+    sensenova_ak = os.environ.get("SENSENOVA_AK")
+    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not sensenova_ak or not sensenova_sk:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_stream")
 
@@ -862,8 +876,10 @@ async def test_sensenova_stream(
             user_prompt=agent_prompts["keqing_default"],
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensechat_ak=sensechat_ak,
-                sensechat_sk=sensechat_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
+                sensenova_ak=sensenova_ak,
+                sensenova_sk=sensenova_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -923,11 +939,11 @@ async def test_blank_input_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not openai_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
+        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_blank_input_stream")
 
@@ -954,8 +970,8 @@ async def test_blank_input_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 openai_api_key=openai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -1015,11 +1031,13 @@ async def test_classification_input_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not xai_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_classification_input_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_classification_input_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_classification_input_stream")
 
@@ -1047,8 +1065,8 @@ async def test_classification_input_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 xai_api_key=xai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,

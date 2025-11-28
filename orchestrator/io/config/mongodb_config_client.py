@@ -266,6 +266,8 @@ class MongoDBConfigClient(DatabaseConfigClient):
                 - sensenova_api_key (str): Sensenova API key
                 - sensenova_ak (str): Sensenova AK
                 - sensenova_sk (str): Sensenova SK
+                - sensenovaomni_ak (str): SenseNova Omni AK
+                - sensenovaomni_sk (str): SenseNova Omni SK
                 - sensechat_ak (str): SenseChat AK
                 - sensechat_sk (str): SenseChat SK
                 - softsugar_app_id (str): SoftSugar App ID

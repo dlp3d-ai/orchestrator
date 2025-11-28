@@ -264,14 +264,14 @@ async def test_sensenova_omni_classification_client_stream():
     process text chunks in streaming mode and correctly classify motion
     keywords.
 
-    The test will be skipped if SENSENOVA_AK or SENSENOVA_SK environment
-    variables are not set.
+    The test will be skipped if SENSENOVAOMNI_AK or SENSENOVAOMNI_SK
+    environment variables are not set.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenova_ak or not sensenova_sk:
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
+    if not sensenovaomni_ak or not sensenovaomni_sk:
         pytest.skip(
-            "sensenova_ak or sensenova_sk is not set, skipping test test_sensenova_omni_classification_client_stream"
+            "sensenovaomni_ak or sensenovaomni_sk is not set, skipping test test_sensenova_omni_classification_client_stream"
         )
 
     logger_cfg = dict(
@@ -281,7 +281,7 @@ async def test_sensenova_omni_classification_client_stream():
     )
     classification_client_cfg = dict(
         type="SenseNovaOmniClassificationClient",
-        name="sensenova_omni_classification_client",
+        name="sensenovaomni_classification_client",
         motion_keywords=motion_keywords,
         wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         proxy_url=os.environ.get("PROXY_URL", None),
@@ -296,8 +296,8 @@ async def test_sensenova_omni_classification_client_stream():
         conf=dict(
             language="zh",
             user_settings=dict(
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
         ),
         logger_cfg=logger_cfg,

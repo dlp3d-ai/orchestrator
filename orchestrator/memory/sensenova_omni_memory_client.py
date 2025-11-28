@@ -272,10 +272,10 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
         try:
             if not api_keys:
                 raise ValueError("api_keys is required for SenseNova LLM calls")
-            iss = api_keys.get("sensenova_ak", "")
-            secret = api_keys.get("sensenova_sk", "")
+            iss = api_keys.get("sensenovaomni_ak", "")
+            secret = api_keys.get("sensenovaomni_sk", "")
             if not iss or not secret:
-                msg = "SenseNova API keys are not found in the API keys."
+                msg = "SenseNova Omni API keys are not found in the API keys."
                 self.logger.error(msg)
                 raise MissingAPIKeyException(msg)
 

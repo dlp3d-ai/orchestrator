@@ -96,12 +96,12 @@ async def test_openai_reaction_client_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not openai_api_key:
+    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
         pytest.skip(
-            "SENSENOVA_AK or SENSENOVA_SK or OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream"
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream"
         )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_reaction_client_stream")
@@ -139,8 +139,8 @@ async def test_openai_reaction_client_stream(
             "language": "zh",
             "user_settings": dict(
                 openai_api_key=openai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -206,11 +206,13 @@ async def test_xai_reaction_client_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not xai_api_key:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK or XAI_API_KEY is not set, skipping test_xai_reaction_client_stream")
+    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_xai_reaction_client_stream"
+        )
 
     if not xai_api_key:
         pytest.skip("XAI_API_KEY is not available")
@@ -249,8 +251,8 @@ async def test_xai_reaction_client_stream(
             "language": "zh",
             "user_settings": dict(
                 xai_api_key=xai_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -316,12 +318,12 @@ async def test_gemini_reaction_client_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
-    if not sensenova_ak or not sensenova_sk or not gemini_api_key:
+    if not sensenovaomni_ak or not sensenovaomni_sk or not gemini_api_key:
         pytest.skip(
-            "SENSENOVA_AK or SENSENOVA_SK or GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream"
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream"
         )
 
     if not gemini_api_key:
@@ -361,8 +363,8 @@ async def test_gemini_reaction_client_stream(
             "language": "en",
             "user_settings": dict(
                 gemini_api_key=gemini_api_key,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -429,10 +431,12 @@ async def test_sensenova_omni_reaction_client_stream(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenova_ak or not sensenova_sk:
-        pytest.skip("SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_omni_reaction_client_stream")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
+    if not sensenovaomni_ak or not sensenovaomni_sk:
+        pytest.skip(
+            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK is not set, skipping test_sensenova_omni_reaction_client_stream"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_reaction_client_stream")
 
@@ -470,8 +474,8 @@ async def test_sensenova_omni_reaction_client_stream(
             "character_id": TEST_CHARACTER_ID,
             "language": "zh",
             "user_settings": dict(
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                sensenovaomni_ak=sensenovaomni_ak,
+                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,

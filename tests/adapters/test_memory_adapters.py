@@ -80,7 +80,7 @@ def sensenova_omni_memory_client(mongodb_memory_client: MongoDBMemoryClient):
             Configured SenseNova Omni memory client instance for test database.
     """
     return SenseNovaOmniMemoryClient(
-        name="test_sensenova_omni_memory",
+        name="test_sensenovaomni_memory",
         db_client=mongodb_memory_client,
     )
 
@@ -161,10 +161,12 @@ async def test_sensenova_omni_memory_client_call_llm(sensenova_omni_memory_clien
         sensenova_omni_memory_client (SenseNovaOmniMemoryClient):
             SenseNova Omni memory client fixture for testing.
     """
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenova_ak or not sensenova_sk:
-        pytest.skip("sensenova_ak or sensenova_sk is not set, skipping test test_sensenova_omni_memory_client_call_llm")
+    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
+    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
+    if not sensenovaomni_ak or not sensenovaomni_sk:
+        pytest.skip(
+            "sensenovaomni_ak or sensenovaomni_sk is not set, skipping test test_sensenova_omni_memory_client_call_llm"
+        )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_memory_client_call_llm")
 
@@ -196,8 +198,8 @@ async def test_sensenova_omni_memory_client_call_llm(sensenova_omni_memory_clien
         short_term_memories=short_term_memories,
         latest_medium_term_memory=latest_medium_term_memory,
         api_keys={
-            "sensenova_ak": sensenova_ak,
-            "sensenova_sk": sensenova_sk,
+            "sensenovaomni_ak": sensenovaomni_ak,
+            "sensenovaomni_sk": sensenovaomni_sk,
         },
     )
 

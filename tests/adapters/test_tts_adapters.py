@@ -375,9 +375,9 @@ async def test_elevenlabs_tts_client_stream():
         proxy_url=os.environ.get("PROXY_URL", None),
         logger_cfg=logger_cfg,
     )
-    voice_name = "EXAVITQu4vr4xnSDxMaL"
+    voice_name = "CjH2Rpa4eIAAHuDoVd5Z"
     voice_speed = 1.0
-    text = "Hi, my name is Ke Qing. Nice to meet you."
+    text = "my name is Ani and I'm a software engineer."
     adapter = build_tts_adapter(tts_client_cfg)
     asyncio.create_task(adapter.run())
     profile = AudioStreamProfile(

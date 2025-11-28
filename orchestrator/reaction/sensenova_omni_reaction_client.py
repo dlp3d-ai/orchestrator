@@ -312,10 +312,10 @@ class SenseNovaOmniReactionClient(ReactionAdapter):
                 or response parsing fails.
         """
         ws = None
-        iss = self.input_buffer[request_id]["api_keys"].get("sensenova_ak", "")
-        secret = self.input_buffer[request_id]["api_keys"].get("sensenova_sk", "")
+        iss = self.input_buffer[request_id]["api_keys"].get("sensenovaomni_ak", "")
+        secret = self.input_buffer[request_id]["api_keys"].get("sensenovaomni_sk", "")
         if not iss or not secret:
-            msg = "SenseNova API key or secret key is not found in the API keys."
+            msg = "SenseNova Omni API key or secret key is not found in the API keys."
             self.logger.error(msg)
             raise MissingAPIKeyException(msg)
 

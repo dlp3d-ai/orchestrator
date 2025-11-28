@@ -161,8 +161,8 @@ class SenseNovaConversationClient(ConversationAdapter):
                 JWT token string for API authentication.
         """
         api_keys = task_space.get("api_keys", {})
-        ak = api_keys.get("sensechat_ak", "")
-        sk = api_keys.get("sensechat_sk", "")
+        ak = api_keys.get("sensenova_ak", "")
+        sk = api_keys.get("sensenova_sk", "")
         if not ak or not sk:
             msg = "SenseNova API key is not found in the API keys."
             self.logger.error(msg)

@@ -96,7 +96,7 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
             "IAfVgyogVSvpCyZeevDo": "Keqing",
             "v5WynholsiwnjjP7Iq1L": "Hutao",
             "VTpilc4HcK9uYznwQK8c": "Furina",
-            "OFk7GQifxSf2BCxOuOF3": "Grok_Ani",
+            "CjH2Rpa4eIAAHuDoVd5Z": "Grok_Ani",
             "EXAVITQu4vr4xnSDxMaL": "Sarah",
             "FGY2WhTYpPnrIDTdsKH5": "Laura",
             "cgSgspJ2msm6clMCkdW9": "Jessica",

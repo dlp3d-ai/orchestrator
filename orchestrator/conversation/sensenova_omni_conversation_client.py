@@ -149,10 +149,10 @@ class SenseNovaOmniConversationClient(ConversationAdapter):
                 JWT token string for API authentication.
         """
         api_keys = task_space.get("api_keys", {})
-        iss = api_keys.get("sensenova_ak", "")
-        secret = api_keys.get("sensenova_sk", "")
+        iss = api_keys.get("sensenovaomni_ak", "")
+        secret = api_keys.get("sensenovaomni_sk", "")
         if not iss or not secret:
-            msg = "SenseNova API key is not found in the API keys."
+            msg = "SenseNova Omni API key is not found in the API keys."
             self.logger.error(msg)
             raise MissingAPIKeyException(msg)
 

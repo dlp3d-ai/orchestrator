@@ -55,9 +55,9 @@ proxy = dict(
             xai_model_name="grok-3",
             proxy_url=__proxy_url__,
         ),
-        sensenova_omni_memory=dict(
+        sensenovaomni_memory=dict(
             type="SenseNovaOmniMemoryClient",
-            name="sensenova_omni_memory_client",
+            name="sensenovaomni_memory_client",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
     ),
@@ -97,9 +97,9 @@ proxy = dict(
             xai_model_name="grok-3",
             proxy_url=__proxy_url__,
         ),
-        sensenova_omni_agent=dict(
+        sensenovaomni_agent=dict(
             type="SenseNovaOmniConversationClient",
-            name="sensenova_omni_agent_client",
+            name="sensenovaomni_agent_client",
             agent_prompts_file="configs/agent_prompts.yaml",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
@@ -147,9 +147,9 @@ proxy = dict(
             proxy_url=__proxy_url__,
             gemini_model_name="gemini-2.5-flash-lite",
         ),
-        sensenova_omni_classification=dict(
+        sensenovaomni_classification=dict(
             type="SenseNovaOmniClassificationClient",
-            name="sensenova_omni_classification_client",
+            name="sensenovaomni_classification_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
@@ -176,9 +176,9 @@ proxy = dict(
             proxy_url=__proxy_url__,
             gemini_model_name="gemini-2.5-flash-lite",
         ),
-        sensenova_omni_reaction=dict(
+        sensenovaomni_reaction=dict(
             type="SenseNovaOmniReactionClient",
-            name="sensenova_omni_reaction_client",
+            name="sensenovaomni_reaction_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),

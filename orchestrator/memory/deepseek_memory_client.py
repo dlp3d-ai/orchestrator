@@ -1,4 +1,3 @@
-import json
 from typing import Any, Dict, Optional, Union
 
 import httpx
@@ -18,8 +17,6 @@ class DeepSeekMemoryClient(BaseMemoryAdapter):
     This class provides memory management functionality using the DeepSeek API
     for LLM calls and memory operations.
     """
-
-    ExecutorRegistry.register_class("DeepSeekMemoryClient")
 
     def __init__(
         self,

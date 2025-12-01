@@ -340,3 +340,256 @@ async def test_sensenova_omni_classification_client_stream():
     await adapter.interrupt()
     await profile.interrupt()
     await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
+async def test_sensenova_classification_client_stream():
+    """Test SenseNova classification client streaming functionality.
+
+    This test verifies that the SenseNova classification adapter can process
+    text chunks in streaming mode and correctly classify motion keywords.
+
+    The test will be skipped if SENSENOVA_AK or SENSENOVA_SK environment
+    variables are not set.
+    """
+    sensenova_ak = os.environ.get("SENSENOVA_AK")
+    sensenova_sk = os.environ.get("SENSENOVA_SK")
+    if not sensenova_ak or not sensenova_sk:
+        pytest.skip(
+            "sensenova_ak or sensenova_sk is not set, skipping test test_sensenova_classification_client_stream"
+        )
+
+    logger_cfg = dict(
+        logger_name="test_sensenova_classification_client_stream",
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
+    )
+    classification_client_cfg = dict(
+        type="SenseNovaClassificationClient",
+        name="sensenova_classification_client",
+        motion_keywords=motion_keywords,
+        sensenova_model_name="SenseNova-V6-5-Pro",
+        sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    adapter = build_classification_adapter(classification_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = ClassificationStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_classification_stream",
+        conf=dict(
+            language="zh",
+            user_settings=dict(
+                sensenova_ak=sensenova_ak,
+                sensenova_sk=sensenova_sk,
+            ),
+        ),
+        logger_cfg=logger_cfg,
+    )
+    classification_node = DAGNode(
+        name="classification_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(classification_node)
+    graph.add_node(profile_node)
+    graph.add_edge(classification_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(
+        request_id=request_id,
+        dag=graph,
+        node_name=classification_node.name,
+    )
+    await adapter.feed_stream(start_chunk)
+    text = "请唱个歌"
+    for char in text:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 10:
+            raise TimeoutError("Classification stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
+async def test_sensechat_classification_client_stream():
+    """Test SenseChat classification client streaming functionality.
+
+    This test verifies that the SenseChat classification adapter can process
+    text chunks in streaming mode and correctly classify motion keywords.
+
+    The test will be skipped if SENSECHAT_AK or SENSECHAT_SK environment
+    variables are not set.
+    """
+    sensechat_ak = os.environ.get("SENSECHAT_AK")
+    sensechat_sk = os.environ.get("SENSECHAT_SK")
+    if not sensechat_ak or not sensechat_sk:
+        pytest.skip(
+            "sensechat_ak or sensechat_sk is not set, skipping test test_sensechat_classification_client_stream"
+        )
+
+    logger_cfg = dict(
+        logger_name="test_sensechat_classification_client_stream",
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
+    )
+    classification_client_cfg = dict(
+        type="SenseChatClassificationClient",
+        name="sensechat_classification_client",
+        motion_keywords=motion_keywords,
+        sensechat_model_name="SenseChat-5-1202",
+        sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    adapter = build_classification_adapter(classification_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = ClassificationStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_classification_stream",
+        conf=dict(
+            language="zh",
+            user_settings=dict(
+                sensechat_ak=sensechat_ak,
+                sensechat_sk=sensechat_sk,
+            ),
+        ),
+        logger_cfg=logger_cfg,
+    )
+    classification_node = DAGNode(
+        name="classification_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(classification_node)
+    graph.add_node(profile_node)
+    graph.add_edge(classification_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(
+        request_id=request_id,
+        dag=graph,
+        node_name=classification_node.name,
+    )
+    await adapter.feed_stream(start_chunk)
+    text = "请跳支舞"
+    for char in text:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 10:
+            raise TimeoutError("Classification stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
+async def test_deepseek_classification_client_stream():
+    """Test DeepSeek classification client streaming functionality.
+
+    This test verifies that the DeepSeek classification adapter can process
+    text chunks in streaming mode and correctly classify motion keywords.
+
+    The test will be skipped if DEEPSEEK_API_KEY environment variable is not
+    set.
+    """
+    deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
+    if not deepseek_api_key:
+        pytest.skip("deepseek_api_key is not set, skipping test test_deepseek_classification_client_stream")
+
+    logger_cfg = dict(
+        logger_name="test_deepseek_classification_client_stream",
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
+    )
+    classification_client_cfg = dict(
+        type="DeepSeekClassificationClient",
+        name="deepseek_classification_client",
+        motion_keywords=motion_keywords,
+        deepseek_model_name="deepseek-chat",
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    adapter = build_classification_adapter(classification_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = ClassificationStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_classification_stream",
+        conf=dict(
+            language="zh",
+            user_settings=dict(
+                deepseek_api_key=deepseek_api_key,
+            ),
+        ),
+        logger_cfg=logger_cfg,
+    )
+    classification_node = DAGNode(
+        name="classification_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(classification_node)
+    graph.add_node(profile_node)
+    graph.add_edge(classification_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(
+        request_id=request_id,
+        dag=graph,
+        node_name=classification_node.name,
+    )
+    await adapter.feed_stream(start_chunk)
+    text = "请跳个舞"
+    for char in text:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 10:
+            raise TimeoutError("Classification stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)

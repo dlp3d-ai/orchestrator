@@ -386,6 +386,12 @@ class ReactionAdapter(Streamable):
                 f"Reaction delta timeout after {timeout_duration:.2f}s, return empty but continue in background"
             )
 
+            # Save threshold values before they might be lost from input_buffer
+            acquaintance_threshold = self.input_buffer[request_id]["acquaintance_threshold"]
+            friend_threshold = self.input_buffer[request_id]["friend_threshold"]
+            situationship_threshold = self.input_buffer[request_id]["situationship_threshold"]
+            lover_threshold = self.input_buffer[request_id]["lover_threshold"]
+
             # Return default reaction
             empty_reaction_llm = ReactionLLM(
                 speech_text=text,
@@ -397,12 +403,6 @@ class ReactionAdapter(Streamable):
             # Continue waiting for task, update memory when completed
             async def background_update():
                 try:
-                    # Save threshold values before they might be lost from input_buffer
-                    acquaintance_threshold = self.input_buffer[request_id]["acquaintance_threshold"]
-                    friend_threshold = self.input_buffer[request_id]["friend_threshold"]
-                    situationship_threshold = self.input_buffer[request_id]["situationship_threshold"]
-                    lover_threshold = self.input_buffer[request_id]["lover_threshold"]
-
                     reaction_delta = await task  # Do not restart, wait for original task
                     emotion, relationship = await self.update_reaction(
                         reaction_delta,

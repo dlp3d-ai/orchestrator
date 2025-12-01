@@ -21,8 +21,6 @@ class DeepSeekClassificationClient(ClassificationAdapter):
     classification and uses DeepSeek models for text analysis.
     """
 
-    ExecutorRegistry.register_class("DeepSeekClassificationClient")
-
     def __init__(
         self,
         name: str,

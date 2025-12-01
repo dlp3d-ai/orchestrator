@@ -21,8 +21,6 @@ class DeepSeekReactionClient(ReactionAdapter):
     appropriate emotional reactions and motion suggestions for animated agents.
     """
 
-    ExecutorRegistry.register_class("DeepSeekReactionClient")
-
     def __init__(
         self,
         name: str,

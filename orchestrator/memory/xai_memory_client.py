@@ -160,5 +160,14 @@ class XAIMemoryClient(BaseMemoryAdapter):
             output = json.loads(content)["output"]
             return output
         except Exception as e:
-            self.logger.error(f"XAI LLM call failed: {e}")
+            exception_type = type(e).__name__
+            error_msg = f"XAI LLM call failed: {exception_type}: {e}"
+            if "response" in locals() and response is not None:
+                try:
+                    response_content = response.choices[0].message.content if response.choices else None
+                    if response_content:
+                        error_msg += f" | LLM response content: {response_content[:500]}"
+                except Exception:
+                    pass
+            self.logger.error(error_msg)
             raise e

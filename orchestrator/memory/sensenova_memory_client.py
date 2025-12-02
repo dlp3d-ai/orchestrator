@@ -242,5 +242,21 @@ class SenseNovaMemoryClient(BaseMemoryAdapter):
             output = content.split("<output>")[1].split("</output>")[0]
             return output
         except Exception as e:
-            self.logger.error(f"SenseNova LLM call failed: {e}")
+            exception_type = type(e).__name__
+            error_msg = f"SenseNova LLM call failed: {exception_type}: {e}"
+            if "response" in locals() and response is not None:
+                try:
+                    response_text = response.text if hasattr(response, "text") else None
+                    if response_text:
+                        error_msg += f" | LLM response content: {response_text[:500]}"
+                except Exception:
+                    pass
+            elif "response_data" in locals() and response_data is not None:
+                try:
+                    response_str = str(response_data)[:500]
+                    if response_str:
+                        error_msg += f" | LLM response data: {response_str}"
+                except Exception:
+                    pass
+            self.logger.error(error_msg)
             raise e

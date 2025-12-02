@@ -1,5 +1,6 @@
 import asyncio
 import json
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Optional, Union
@@ -239,7 +240,12 @@ class SenseNovaMemoryClient(BaseMemoryAdapter):
                 output_token_number = response_data.get("usage", {}).get("completion_tokens", 0)
                 self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
 
-            output = content.split("<output>")[1].split("</output>")[0]
+            match = re.search(r"<output>(.*?)</output>", content, re.DOTALL)
+            if match:
+                output = match.group(1)
+            else:
+                self.logger.warning(f"Failed to extract <output> tag from content: {content}")
+                output = content
             return output
         except Exception as e:
             exception_type = type(e).__name__

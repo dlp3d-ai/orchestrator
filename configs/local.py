@@ -71,6 +71,7 @@ proxy = dict(
             name="sensechat_memory_client",
             sensechat_model_name="SenseChat-5-1202",
             sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            timeout=30.0,
         ),
         gemini_memory=dict(
             type="GeminiMemoryClient",

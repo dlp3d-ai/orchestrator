@@ -1,3 +1,4 @@
+from .chatterbox_tts_client import ChatterboxTTSClient
 from .elevenlabs_tts_client import ElevenLabsTTSClient
 from .huoshan_tts_client import HuoshanTTSClient
 from .sensenova_tts_client import SensenovaTTSClient
@@ -11,6 +12,7 @@ _TTS_ADAPTERS = dict(
     SoftSugarTTSClient=SoftSugarTTSClient,
     SensenovaTTSClient=SensenovaTTSClient,
     ElevenLabsTTSClient=ElevenLabsTTSClient,
+    ChatterboxTTSClient=ChatterboxTTSClient,
 )
 
 

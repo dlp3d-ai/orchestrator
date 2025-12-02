@@ -435,3 +435,82 @@ async def test_elevenlabs_tts_client_stream():
     await adapter.interrupt()
     await profile.interrupt()
     await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
+async def test_chatterbox_tts_client_stream():
+    """Test Chatterbox TTS client streaming functionality.
+
+    This test verifies that the Chatterbox TTS adapter can process text chunks
+    in streaming mode and generate audio output. It creates a TTS adapter
+    instance, feeds text chunks character by character, and verifies that the
+    audio stream is generated and processed correctly through the DAG pipeline.
+
+    The test will be skipped if CHATTERBOX_TTS_HTTP_URL environment variable is
+    not set.
+    """
+    tts_http_url = os.environ.get("CHATTERBOX_TTS_HTTP_URL")
+    if not tts_http_url:
+        pytest.skip("CHATTERBOX_TTS_HTTP_URL is not set, skipping test test_chatterbox_tts_client_stream")
+
+    logger_cfg = dict(
+        logger_name="test_sensetime_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
+    tts_client_cfg = dict(
+        type="ChatterboxTTSClient",
+        name="chatterbox_tts_client",
+        tts_http_url=tts_http_url,
+    )
+    voice_name = "刻晴_zh"
+    voice_speed = 1.0
+    text = "我叫刻晴，璃月七星中的玉衡星！"
+    adapter = build_tts_adapter(tts_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = AudioStreamProfile(mark_status_on_end=True, save_dir="output", logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_sensetime_tts_client_stream",
+        conf=dict(
+            voice_name=voice_name,
+            voice_speed=voice_speed,
+            language="zh",
+        ),
+        logger_cfg=logger_cfg,
+    )
+    tts_node = DAGNode(
+        name="tts_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(tts_node)
+    graph.add_node(profile_node)
+    graph.add_edge(tts_node.name, profile_node.name)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(
+        request_id=request_id,
+        node_name=tts_node.name,
+        dag=graph,
+    )
+    graph.status = DAGStatus.RUNNING
+    await adapter.feed_stream(start_chunk)
+    for char in text:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 30:
+            raise TimeoutError("TTS stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)

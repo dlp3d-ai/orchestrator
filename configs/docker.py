@@ -320,7 +320,7 @@ proxy = dict(
         chatterbox=dict(
             type="ChatterboxTTSClient",
             name="chatterbox_tts_client",
-            tts_ws_url=os.environ.get("CHATTERBOX_TTS_HTTP_URL", ""),
+            tts_http_url=os.environ.get("CHATTERBOX_TTS_HTTP_URL", ""),
         ),
     ),
     conversation_aggregator_cfg=dict(type="ConversationAggregator"),

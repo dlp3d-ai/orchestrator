@@ -108,7 +108,7 @@ class ChatterboxTTSClient(TextToSpeechAdapter):
             voice_key=voice_name,
         )
         self.logger.info(f"Generating TTS for request {request_id}, text: {text}, voice_name: {voice_name}")
-        async with httpx.AsyncClient(timeout=60) as client:
+        async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(url, json=request_dict)
             response.raise_for_status()
             audio_data = response.content

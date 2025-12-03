@@ -457,13 +457,11 @@ async def test_chatterbox_tts_client_stream():
         logger_name="test_sensetime_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
-        type="ChatterboxTTSClient",
-        name="chatterbox_tts_client",
-        tts_http_url=tts_http_url,
+        type="ChatterboxTTSClient", name="chatterbox_tts_client", tts_http_url=tts_http_url, queue_size=1000
     )
-    voice_name = "刻晴_zh"
+    voice_name = "GrokAni_en"
     voice_speed = 1.0
-    text = "我叫刻晴，璃月七星中的玉衡星！"
+    text = "This test verifies that the Chatterbox adapter can process text chunks in streaming mode and generate audio output."
     adapter = build_tts_adapter(tts_client_cfg)
     asyncio.create_task(adapter.run())
     profile = AudioStreamProfile(mark_status_on_end=True, save_dir="output", logger_cfg=logger_cfg)

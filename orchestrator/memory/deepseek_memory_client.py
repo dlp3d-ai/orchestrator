@@ -1,4 +1,4 @@
-import json
+import re
 from typing import Any, Dict, Optional, Union
 
 import httpx
@@ -7,23 +7,25 @@ from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
 from ..utils.exception import MissingAPIKeyException
+from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
 
-class XAIMemoryClient(BaseMemoryAdapter):
-    """XAI memory client that implements memory management based on XAI API.
+class DeepSeekMemoryClient(BaseMemoryAdapter):
+    """DeepSeek memory client that implements memory management based on
+    DeepSeek API.
 
-    This class provides memory management functionality using the XAI API for
-    LLM calls and memory operations.
+    This class provides memory management functionality using the DeepSeek API
+    for LLM calls and memory operations.
     """
 
     def __init__(
         self,
         name: str,
         db_client: DatabaseMemoryClient,
-        xai_model_name: str = "grok-3",
+        deepseek_model_name: str = "deepseek-chat",
         proxy_url: Union[None, str] = None,
-        timeout: float = 10.0,
+        timeout: float = 20.0,
         conversation_char_threshold: int = 10000,
         conversation_char_target: int = 8000,
         short_term_length_threshold: int = 20,
@@ -33,19 +35,19 @@ class XAIMemoryClient(BaseMemoryAdapter):
         output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
-        """Initialize the XAI memory client.
+        """Initialize the DeepSeek memory client.
 
         Args:
             name (str):
                 Name of the memory client.
             db_client (DatabaseMemoryClient):
                 Database client for memory operations.
-            xai_model_name (str, optional):
-                Default XAI model name to use. Defaults to "grok-3".
+            deepseek_model_name (str, optional):
+                Default DeepSeek model name to use. Defaults to "deepseek-chat".
             proxy_url (Union[None, str], optional):
                 Proxy URL for API requests. Defaults to None.
             timeout (float, optional):
-                Request timeout in seconds. Defaults to 10.0.
+                Request timeout in seconds. Defaults to 20.0.
             conversation_char_threshold (int, optional):
                 Character threshold for conversation compression. Defaults to 10000.
             conversation_char_target (int, optional):
@@ -80,8 +82,8 @@ class XAIMemoryClient(BaseMemoryAdapter):
             logger_cfg=logger_cfg,
         )
 
-        self.xai_model_name = xai_model_name
-        self.xai_base_url = "https://api.x.ai/v1"
+        self.deepseek_model_name = deepseek_model_name
+        self.deepseek_base_url = "https://api.deepseek.com"
         self.proxy_url = proxy_url
         self.timeout = timeout
 
@@ -100,7 +102,7 @@ class XAIMemoryClient(BaseMemoryAdapter):
         api_keys: Optional[Dict[str, Any]] = None,
         model_override: Optional[str] = None,
     ) -> str:
-        """Call XAI LLM for text generation.
+        """Call DeepSeek LLM for text generation.
 
         Args:
             system_prompt (str):
@@ -120,48 +122,59 @@ class XAIMemoryClient(BaseMemoryAdapter):
 
         Returns:
             str:
-                Generated text content from the XAI LLM.
+                Generated text content from the DeepSeek LLM.
         """
         try:
             if not api_keys:
-                raise ValueError("api_keys is required for XAI LLM calls")
-            xai_api_key = api_keys.get("xai_api_key", "")
-            if not xai_api_key:
-                msg = "XAI API key is not found in the API keys."
+                raise ValueError("api_keys is required for DeepSeek LLM calls")
+            deepseek_api_key = api_keys.get("deepseek_api_key", "")
+            if not deepseek_api_key:
+                msg = "DeepSeek API key is not found in the API keys."
                 self.logger.error(msg)
                 raise MissingAPIKeyException(msg)
 
-            xai_client = openai.AsyncOpenAI(
-                api_key=xai_api_key,
-                base_url=self.xai_base_url,
+            deepseek_client = openai.AsyncOpenAI(
+                api_key=deepseek_api_key,
+                base_url=self.deepseek_base_url,
                 http_client=self.http_client,
                 timeout=self.timeout,
             )
 
-            xai_model_name = model_override if model_override else self.xai_model_name
-            response = await xai_client.chat.completions.create(
-                model=xai_model_name,
+            deepseek_model_name = model_override if model_override else self.deepseek_model_name
+
+            system_content = system_prompt + "\n" + tag_prompt if tag_prompt else system_prompt
+
+            response = await deepseek_client.chat.completions.create(
+                model=deepseek_model_name,
                 messages=[
-                    {"role": "system", "content": system_prompt},
+                    {"role": "system", "content": system_content},
                     {"role": "user", "content": user_input},
                 ],
+                temperature=1,
                 max_tokens=max_tokens,
-                response_format=response_format,  # type: ignore
             )
+
             content = response.choices[0].message.content
             if content is None:
                 raise ValueError("LLM returned None content")
+
             if self.input_token_number_histogram:
                 input_token_number = response.usage.prompt_tokens if response.usage else 0
                 self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
             if self.output_token_number_histogram:
                 output_token_number = response.usage.completion_tokens if response.usage else 0
                 self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
-            output = json.loads(content)["output"]
+
+            match = re.search(r"<output>(.*?)</output>", content, re.DOTALL)
+            if match:
+                output = match.group(1)
+            else:
+                self.logger.warning(f"Failed to extract <output> tag from content: {content}")
+                output = content
             return output
         except Exception as e:
             exception_type = type(e).__name__
-            error_msg = f"XAI LLM call failed: {exception_type}: {e}"
+            error_msg = f"DeepSeek LLM call failed: {exception_type}: {e}"
             if "response" in locals() and response is not None:
                 try:
                     response_content = response.choices[0].message.content if response.choices else None

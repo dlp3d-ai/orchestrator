@@ -324,7 +324,16 @@ class SenseNovaOmniMemoryClient(BaseMemoryAdapter):
                 self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
             return output
         except Exception as e:
-            self.logger.error(f"SenseNova LLM call failed: {e}")
+            exception_type = type(e).__name__
+            error_msg = f"SenseNova Omni LLM call failed: {exception_type}: {e}"
+            if "response" in locals() and response is not None:
+                try:
+                    response_str = str(response)[:500]
+                    if response_str:
+                        error_msg += f" | LLM response content: {response_str}"
+                except Exception:
+                    pass
+            self.logger.error(error_msg)
             raise e
 
 

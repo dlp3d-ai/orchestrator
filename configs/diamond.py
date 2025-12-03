@@ -62,6 +62,31 @@ proxy = dict(
             name="sensenovaomni_memory_client",
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
+        sensenova_memory=dict(
+            type="SenseNovaMemoryClient",
+            name="sensenova_memory_client",
+            sensenova_model_name="SenseNova-V6-5-Pro",
+            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
+        sensechat_memory=dict(
+            type="SenseChatMemoryClient",
+            name="sensechat_memory_client",
+            sensechat_model_name="SenseChat-5-1202",
+            sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            timeout=30.0,
+        ),
+        gemini_memory=dict(
+            type="GeminiMemoryClient",
+            name="gemini_memory_client",
+            gemini_model_name="gemini-2.5-flash-lite",
+            proxy_url=os.environ.get("PROXY_URL", None),
+        ),
+        deepseek_memory=dict(
+            type="DeepSeekMemoryClient",
+            name="deepseek_memory_client",
+            deepseek_model_name="deepseek-chat",
+            proxy_url=os.environ.get("PROXY_URL", None),
+        ),
     ),
     conversation_adapters=dict(
         anthropic_agent=dict(
@@ -155,6 +180,27 @@ proxy = dict(
             motion_keywords=os.environ.get("BACKEND_URL", None),
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
         ),
+        sensenova_classification=dict(
+            type="SenseNovaClassificationClient",
+            name="sensenova_classification_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            sensenova_model_name="SenseNova-V6-5-Pro",
+            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
+        sensechat_classification=dict(
+            type="SenseChatClassificationClient",
+            name="sensechat_classification_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            sensechat_model_name="SenseChat-5-1202",
+            sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
+        deepseek_classification=dict(
+            type="DeepSeekClassificationClient",
+            name="deepseek_classification_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            deepseek_model_name="deepseek-chat",
+            proxy_url=os.environ.get("PROXY_URL", None),
+        ),
     ),
     reaction_adapters=dict(
         openai_reaction=dict(
@@ -183,6 +229,27 @@ proxy = dict(
             name="sensenovaomni_reaction_client",
             motion_keywords=os.environ.get("BACKEND_URL", None),
             wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
+        ),
+        sensenova_reaction=dict(
+            type="SenseNovaReactionClient",
+            name="sensenova_reaction_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            sensenova_model_name="SenseNova-V6-5-Pro",
+            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
+        sensechat_reaction=dict(
+            type="SenseChatReactionClient",
+            name="sensechat_reaction_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            sensechat_model_name="SenseChat-5-1202",
+            sensechat_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        ),
+        deepseek_reaction=dict(
+            type="DeepSeekReactionClient",
+            name="deepseek_reaction_client",
+            motion_keywords=os.environ.get("BACKEND_URL", None),
+            deepseek_model_name="deepseek-chat",
+            proxy_url=os.environ.get("PROXY_URL", None),
         ),
     ),
     a2f_cfg=dict(

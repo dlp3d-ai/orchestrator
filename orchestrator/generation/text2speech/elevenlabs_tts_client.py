@@ -92,11 +92,12 @@ class ElevenLabsTTSClient(TextToSpeechAdapter):
                 A dictionary mapping voice IDs to their human-readable names.
                 Keys are ElevenLabs voice IDs, values are descriptive names.
         """
+        # Excluding developer's cloned voices as they are only accessible to the account owner
+        # "IAfVgyogVSvpCyZeevDo": "Keqing",
+        # "v5WynholsiwnjjP7Iq1L": "Hutao",
+        # "VTpilc4HcK9uYznwQK8c": "Furina",
+        # "CjH2Rpa4eIAAHuDoVd5Z": "Grok_Ani",
         voice_names = {
-            "IAfVgyogVSvpCyZeevDo": "Keqing",
-            "v5WynholsiwnjjP7Iq1L": "Hutao",
-            "VTpilc4HcK9uYznwQK8c": "Furina",
-            "CjH2Rpa4eIAAHuDoVd5Z": "Grok_Ani",
             "EXAVITQu4vr4xnSDxMaL": "Sarah",
             "FGY2WhTYpPnrIDTdsKH5": "Laura",
             "cgSgspJ2msm6clMCkdW9": "Jessica",

@@ -10,18 +10,19 @@ from ..utils.exception import MissingAPIKeyException
 from .memory_adapter import BaseMemoryAdapter
 
 
-class XAIMemoryClient(BaseMemoryAdapter):
-    """XAI memory client that implements memory management based on XAI API.
+class GeminiMemoryClient(BaseMemoryAdapter):
+    """Gemini memory client that implements memory management based on Google's
+    Gemini API.
 
-    This class provides memory management functionality using the XAI API for
-    LLM calls and memory operations.
+    This class provides memory management functionality using the Gemini API
+    for LLM calls and memory operations.
     """
 
     def __init__(
         self,
         name: str,
         db_client: DatabaseMemoryClient,
-        xai_model_name: str = "grok-3",
+        gemini_model_name: str = "gemini-2.5-flash-lite",
         proxy_url: Union[None, str] = None,
         timeout: float = 10.0,
         conversation_char_threshold: int = 10000,
@@ -33,15 +34,15 @@ class XAIMemoryClient(BaseMemoryAdapter):
         output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
-        """Initialize the XAI memory client.
+        """Initialize the Gemini memory client.
 
         Args:
             name (str):
                 Name of the memory client.
             db_client (DatabaseMemoryClient):
                 Database client for memory operations.
-            xai_model_name (str, optional):
-                Default XAI model name to use. Defaults to "grok-3".
+            gemini_model_name (str, optional):
+                Default Gemini model name to use. Defaults to "gemini-2.5-flash-lite".
             proxy_url (Union[None, str], optional):
                 Proxy URL for API requests. Defaults to None.
             timeout (float, optional):
@@ -80,8 +81,8 @@ class XAIMemoryClient(BaseMemoryAdapter):
             logger_cfg=logger_cfg,
         )
 
-        self.xai_model_name = xai_model_name
-        self.xai_base_url = "https://api.x.ai/v1"
+        self.gemini_model_name = gemini_model_name
+        self.gemini_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
         self.proxy_url = proxy_url
         self.timeout = timeout
 
@@ -100,7 +101,7 @@ class XAIMemoryClient(BaseMemoryAdapter):
         api_keys: Optional[Dict[str, Any]] = None,
         model_override: Optional[str] = None,
     ) -> str:
-        """Call XAI LLM for text generation.
+        """Call Gemini LLM for text generation.
 
         Args:
             system_prompt (str):
@@ -120,48 +121,53 @@ class XAIMemoryClient(BaseMemoryAdapter):
 
         Returns:
             str:
-                Generated text content from the XAI LLM.
+                Generated text content from the Gemini LLM.
         """
         try:
             if not api_keys:
-                raise ValueError("api_keys is required for XAI LLM calls")
-            xai_api_key = api_keys.get("xai_api_key", "")
-            if not xai_api_key:
-                msg = "XAI API key is not found in the API keys."
+                raise ValueError("api_keys is required for Gemini LLM calls")
+            gemini_api_key = api_keys.get("gemini_api_key", "")
+            if not gemini_api_key:
+                msg = "Gemini API key is not found in the API keys."
                 self.logger.error(msg)
                 raise MissingAPIKeyException(msg)
 
-            xai_client = openai.AsyncOpenAI(
-                api_key=xai_api_key,
-                base_url=self.xai_base_url,
+            gemini_client = openai.AsyncOpenAI(
+                api_key=gemini_api_key,
                 http_client=self.http_client,
+                base_url=self.gemini_base_url,
                 timeout=self.timeout,
             )
 
-            xai_model_name = model_override if model_override else self.xai_model_name
-            response = await xai_client.chat.completions.create(
-                model=xai_model_name,
+            gemini_model_name = model_override if model_override else self.gemini_model_name
+
+            response = await gemini_client.chat.completions.create(
+                model=gemini_model_name,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input},
                 ],
+                temperature=1,
                 max_tokens=max_tokens,
                 response_format=response_format,  # type: ignore
             )
+
             content = response.choices[0].message.content
             if content is None:
                 raise ValueError("LLM returned None content")
+
             if self.input_token_number_histogram:
                 input_token_number = response.usage.prompt_tokens if response.usage else 0
                 self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
             if self.output_token_number_histogram:
                 output_token_number = response.usage.completion_tokens if response.usage else 0
                 self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
+
             output = json.loads(content)["output"]
             return output
         except Exception as e:
             exception_type = type(e).__name__
-            error_msg = f"XAI LLM call failed: {exception_type}: {e}"
+            error_msg = f"Gemini LLM call failed: {exception_type}: {e}"
             if "response" in locals() and response is not None:
                 try:
                     response_content = response.choices[0].message.content if response.choices else None

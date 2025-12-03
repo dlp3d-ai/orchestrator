@@ -143,7 +143,7 @@ class ChatterboxTTSClient(TextToSpeechAdapter):
         # Not configured for HTTP, return empty dict
         if not self.tts_http_url.startswith("http://") and not self.tts_http_url.startswith("https://"):
             return dict()
-        url = f"{self.tts_http_url}/api/vi/list_voice_names"
+        url = f"{self.tts_http_url}/api/v1/list_voice_names"
         async with httpx.AsyncClient(timeout=1) as client:
             try:
                 response = await client.get(url)

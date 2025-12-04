@@ -17,6 +17,7 @@ from ..data_structures.classification import (
 from ..data_structures.face_chunk import FaceChunkBody, FaceChunkEnd, FaceChunkStart
 from ..data_structures.motion_chunk import MotionChunkBody, MotionChunkEnd, MotionChunkStart
 from ..data_structures.process_flow import DAGStatus
+from ..utils.audio import resample_pcm
 from ..utils.executor_registry import ExecutorRegistry
 from ..utils.streamable import ChunkWithoutStartError, Streamable
 
@@ -40,6 +41,10 @@ class CallbackAggregator(Streamable):
     audio, motion, face) and sends them to callback functions. It handles
     protobuf serialization and manages streaming data flow through callbacks.
     """
+
+    FRAME_RATE: int = 16000
+    N_CHANNELS: int = 1
+    SAMPLE_WIDTH: int = 2
 
     ExecutorRegistry.register_class("CallbackAggregator")
 
@@ -247,9 +252,9 @@ class CallbackAggregator(Streamable):
                     callback_bytes_fn = self.input_buffer[request_id]["callback_bytes_fn"]
                     pb_response = orchestrator_pb2.OrchestratorV4Response()
                     pb_response.class_name = "AudioChunkStart"
-                    pb_response.audio_n_channels = chunk.n_channels
-                    pb_response.audio_sample_width = chunk.sample_width
-                    pb_response.audio_frame_rate = chunk.frame_rate
+                    pb_response.audio_n_channels = self.__class__.N_CHANNELS
+                    pb_response.audio_sample_width = self.__class__.SAMPLE_WIDTH
+                    pb_response.audio_frame_rate = self.__class__.FRAME_RATE
                     pb_response_bytes = await loop.run_in_executor(
                         self.thread_pool_executor, pb_response.SerializeToString
                     )
@@ -394,9 +399,9 @@ class CallbackAggregator(Streamable):
                         self.input_buffer[request_id]["audio_byte_rate"] = frame_rate * sample_width * n_channels
                         pb_response = orchestrator_pb2.OrchestratorV4Response()
                         pb_response.class_name = "AudioChunkStart"
-                        pb_response.audio_n_channels = n_channels
-                        pb_response.audio_sample_width = sample_width
-                        pb_response.audio_frame_rate = frame_rate
+                        pb_response.audio_n_channels = self.__class__.N_CHANNELS
+                        pb_response.audio_sample_width = self.__class__.SAMPLE_WIDTH
+                        pb_response.audio_frame_rate = self.__class__.FRAME_RATE
                         pb_response_bytes = await loop.run_in_executor(
                             self.thread_pool_executor, pb_response.SerializeToString
                         )
@@ -408,6 +413,16 @@ class CallbackAggregator(Streamable):
                             pcm_bytes = wf.readframes(n_frames)
                 else:  # pcm
                     pcm_bytes = chunk.audio_io.getvalue()
+                frame_rate = self.input_buffer[request_id]["audio_frame_rate"]
+                if frame_rate != self.__class__.FRAME_RATE:
+                    loop = asyncio.get_event_loop()
+                    pcm_bytes = await loop.run_in_executor(
+                        self.thread_pool_executor,
+                        resample_pcm,
+                        pcm_bytes,
+                        frame_rate,
+                        self.__class__.FRAME_RATE,
+                    )
                 pb_response = orchestrator_pb2.OrchestratorV4Response()
                 pb_response.class_name = "AudioChunkBody"
                 pb_response.data = pcm_bytes

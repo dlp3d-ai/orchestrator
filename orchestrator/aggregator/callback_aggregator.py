@@ -415,7 +415,6 @@ class CallbackAggregator(Streamable):
                     pcm_bytes = chunk.audio_io.getvalue()
                 frame_rate = self.input_buffer[request_id]["audio_frame_rate"]
                 if frame_rate != self.__class__.FRAME_RATE:
-                    loop = asyncio.get_event_loop()
                     pcm_bytes = await loop.run_in_executor(
                         self.thread_pool_executor,
                         resample_pcm,

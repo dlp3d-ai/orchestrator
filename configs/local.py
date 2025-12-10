@@ -316,6 +316,11 @@ proxy = dict(
             name="elevenlabs_tts_client",
             elevenlabs_model_name="eleven_flash_v2_5",
         ),
+        chatterbox=dict(
+            type="ChatterboxTTSClient",
+            name="chatterbox_tts_client",
+            tts_http_url="http://127.0.0.1:18085",
+        ),
     ),
     conversation_aggregator_cfg=dict(type="ConversationAggregator"),
     tts_reaction_aggregator_cfg=dict(type="TTSReactionAggregator"),

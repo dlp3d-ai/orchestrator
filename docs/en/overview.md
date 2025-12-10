@@ -49,6 +49,7 @@ orchestrator/
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
 │   ├── text2speech/          # Text-to-Speech (TTS)
 │   │   ├── tts_adapter.py     # TTS adapter base class
+│   │   ├── chatterbox_tts_client.py     # Chatterbox TTS
 │   │   ├── elevenlabs_tts_client.py     # ElevenLabs TTS
 │   │   ├── huoshan_tts_client.py        # Volcano Engine TTS
 │   │   ├── sensenova_tts_client.py      # SenseNova TTS

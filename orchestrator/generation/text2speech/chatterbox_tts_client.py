@@ -15,6 +15,11 @@ class ChatterboxTTSClient(TextToSpeechAdapter):
     audio from text by making HTTP requests to a Chatterbox TTS service
     endpoint. It supports streaming and provides audio data in WAV format with
     timing information for each character.
+
+    This client connects to a TTS service deployed using the forked Chatterbox repository
+    (https://github.com/LazyBusyYang/chatterbox). When initializing the client,
+    provide the `tts_http_url` parameter with the base URL of the deployed service,
+    for example: ``https://127.0.0.1:80``.
     """
 
     AVAILABLE_FOR_STREAM = True

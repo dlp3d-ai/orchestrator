@@ -50,6 +50,7 @@ orchestrator/
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
 │   ├── text2speech/          # 语音合成 (TTS)
 │   │   ├── tts_adapter.py     # TTS适配器基类
+│   │   ├── chatterbox_tts_client.py     # Chatterbox TTS
 │   │   ├── elevenlabs_tts_client.py     # ElevenLabs TTS
 │   │   ├── huoshan_tts_client.py        # 火山引擎 TTS
 |   |   ├── sensenova_tts_client.py      # SenseNova TTS

@@ -66,6 +66,7 @@ orchestrator/
 │   │   └── softsugar_asr_client.py      # Softsugar ASR
 │   ├── text2speech/          # Text-to-Speech (TTS)
 │   │   ├── tts_adapter.py     # TTS adapter base class
+│   │   ├── chatterbox_tts_client.py     # Chatterbox TTS
 │   │   ├── elevenlabs_tts_client.py     # ElevenLabs TTS
 │   │   ├── huoshan_tts_client.py        # Volcano Engine TTS
 │   │   ├── sensenova_tts_client.py      # SenseNova TTS
@@ -271,6 +272,7 @@ python main.py --config_path configs/local.py
 | SenseNova | `SensenovaTTSClient` |
 | ElevenLabs | `ElevenLabsTTSClient` |
 | SenseTime | `SensetimeTTSClient` |
+| [Chatterbox(self-hosted)](https://github.com/LazyBusyYang/chatterbox) | `ChatterboxTTSClient` |
 
 ### Memory
 | Provider | Adapter Class | Default Model |

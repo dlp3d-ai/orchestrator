@@ -64,6 +64,7 @@ async def setup_test_memory():
         username=MONGODB_MEMORY_USER,
         password=MONGODB_MEMORY_PASSWORD,
         database=(MONGODB_MEMORY_DB or "character"),
+        auth_database=MONGODB_AUTH_DATABASE,
         logger_cfg={"console_level": logging.DEBUG},
     )
 

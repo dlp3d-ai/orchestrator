@@ -454,7 +454,7 @@ async def test_chatterbox_tts_client_stream():
         pytest.skip("CHATTERBOX_TTS_HTTP_URL is not set, skipping test test_chatterbox_tts_client_stream")
 
     logger_cfg = dict(
-        logger_name="test_sensetime_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+        logger_name="test_chatterbox_tts_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
     tts_client_cfg = dict(
         type="ChatterboxTTSClient", name="chatterbox_tts_client", tts_http_url=tts_http_url, queue_size=1000
@@ -467,7 +467,7 @@ async def test_chatterbox_tts_client_stream():
     profile = AudioStreamProfile(mark_status_on_end=True, save_dir="output", logger_cfg=logger_cfg)
     asyncio.create_task(profile.run())
     graph = DirectedAcyclicGraph(
-        name="test_sensetime_tts_client_stream",
+        name="test_chatterbox_tts_client_stream",
         conf=dict(
             voice_name=voice_name,
             voice_speed=voice_speed,

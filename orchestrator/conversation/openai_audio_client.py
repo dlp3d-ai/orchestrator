@@ -372,8 +372,8 @@ class OpenAIAudioClient(AudioConversationAdapter):
                     assistant_output = message["transcript"]
                     assistant_output_done = True
                 elif event_type == "response.done":
-                    input_token_number = message["usage"]["input_tokens"]
-                    output_token_number = message["usage"]["output_tokens"]
+                    input_token_number = message["response"]["usage"]["input_tokens"]
+                    output_token_number = message["response"]["usage"]["output_tokens"]
                     response_done = True
                 elif event_type == "error":
                     error_msg = message["error"]

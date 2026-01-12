@@ -105,6 +105,8 @@ class SensetimeTTSClient(TextToSpeechAdapter):
             "keqing_0807": "刻晴-音色克隆",
             "funingna_0808_general": "芙宁娜-音色克隆",
             "hutao_0819_general": "胡桃-音色克隆",
+            "klee_1215_general": "可莉-音色克隆",
+            "nahida_1215_general": "纳西妲-音色克隆",
             "baimianmian": "白绵绵",
             "xiaotao": "小桃",
             "yuanqishaonv": "元气少女",

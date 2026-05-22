@@ -1,48 +1,51 @@
 import asyncio
-import json
 from typing import Any, Dict, Optional, Union
 
 from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
-from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
+from ..utils.executor_registry import ExecutorRegistry
+from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.openai_chat import complete, create_client
 from .classification_adapter import ClassificationAdapter
 
 
-class OpenAIClassificationClient(ClassificationAdapter):
-    """Classification client for OpenAI API.
+class MiniMaxClassificationClient(ClassificationAdapter):
+    """Classification client for MiniMax API using OpenAI-compatible
+    interface.
 
-    This client provides text classification functionality through OpenAI's
-    API. It supports motion keyword-based classification and uses OpenAI models
-    for text analysis with configurable timeout and proxy settings.
+    This client provides text classification functionality through MiniMax's
+    API using the OpenAI-compatible interface. It supports motion keyword-based
+    classification and uses MiniMax models for text analysis.
     """
 
     def __init__(
         self,
         name: str,
         motion_keywords: Union[str, list[str], None],
-        openai_model_name: str = "gpt-4.1-mini-2025-04-14",
+        minimax_model_name: str = MINIMAX_DEFAULT_MODEL,
+        minimax_url: str = MINIMAX_DEFAULT_BASE_URL,
         proxy_url: Union[None, str] = None,
-        timeout: float = 2.0,
+        timeout: float = 20.0,
         latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
-        """Initialize the OpenAI classification client.
+        """Initialize the MiniMax classification client.
 
         Args:
             name (str):
                 The name of the classification client.
             motion_keywords (Union[str, list[str], None]):
                 The motion keywords.
-            openai_model_name (str, optional):
-                The name of the OpenAI model to use.
-                Defaults to "gpt-4.1-mini-2025-04-14".
+            minimax_model_name (str, optional):
+                The name of the MiniMax model to use.
+                Defaults to MINIMAX_DEFAULT_MODEL.
             proxy_url (Union[None, str], optional):
-                The proxy URL for the OpenAI API.
+                The proxy URL for the MiniMax API.
                 Defaults to None, use no proxy.
             timeout (float, optional):
-                The timeout for the OpenAI API.
-                Defaults to 2.0.
+                The timeout for the MiniMax API.
+                Defaults to 20.0.
             latency_histogram (Histogram | None, optional):
                 Prometheus Histogram metric for recording request latency distribution
                 in seconds. If provided, latency metrics will be collected for monitoring
@@ -57,12 +60,12 @@ class OpenAIClassificationClient(ClassificationAdapter):
             latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
-        self.openai_model_name = openai_model_name
+        self.minimax_model_name = minimax_model_name
+        self.minimax_url = minimax_url
         self.timeout = timeout
-        self.llm_provider_config = OpenAIChatProviderConfig(
-            provider_name="OpenAI",
-            api_key_field="openai_api_key",
-            model_name=openai_model_name,
+        self.llm_provider_config = build_minimax_config(
+            model_name=minimax_model_name,
+            base_url=minimax_url,
             timeout=timeout,
             proxy_url=proxy_url,
         )
@@ -111,24 +114,31 @@ class OpenAIClassificationClient(ClassificationAdapter):
             llm_client = self.input_buffer[request_id].get("llm_client", None)
 
         model_name_override = self.input_buffer[request_id]["classification_model_override"]
-        openai_model_name = model_name_override if model_name_override else self.openai_model_name
+        minimax_model_name = model_name_override if model_name_override else self.minimax_model_name
+        system_content = prompt + "\n" + tag_prompt if tag_prompt else prompt
         try:
             response = await complete(
                 client=llm_client,
                 api_keys=None,
                 config=self.llm_provider_config,
-                model_override=openai_model_name,
+                model_override=minimax_model_name,
                 messages=[
-                    {"role": "system", "content": prompt},
+                    {"role": "system", "content": system_content},
                     {"role": "user", "content": f"<user_input>: {text}"},
                 ],
                 temperature=1,
                 max_tokens=1000,
-                response_format=response_format,  # type: ignore
             )
-            response = json.loads(response.content)["type"]
-            self.logger.debug(f"Classification response: {response}")
-            return ClassificationType(response)
+            response_text = response.content
+
+            if "reject" in response_text.lower():
+                classification_result = "reject"
+            elif "leave" in response_text.lower():
+                classification_result = "leave"
+            else:
+                classification_result = "accept"
+            self.logger.debug(f"Classification response: {classification_result}")
+            return ClassificationType(classification_result)
         except Exception as e:
             self.logger.error(f"Classification error: {e}")
             raise e

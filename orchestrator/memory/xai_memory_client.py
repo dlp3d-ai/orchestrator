@@ -1,12 +1,10 @@
 import json
 from typing import Any, Dict, Optional, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..utils.exception import MissingAPIKeyException
+from ..llm.openai_chat import OpenAIChatProviderConfig, complete
 from .memory_adapter import BaseMemoryAdapter
 
 
@@ -84,11 +82,14 @@ class XAIMemoryClient(BaseMemoryAdapter):
         self.xai_base_url = "https://api.x.ai/v1"
         self.proxy_url = proxy_url
         self.timeout = timeout
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="XAI",
+            api_key_field="xai_api_key",
+            model_name=xai_model_name,
+            base_url=self.xai_base_url,
+            timeout=timeout,
+            proxy_url=proxy_url,
+        )
 
     async def call_llm(
         self,
@@ -125,22 +126,11 @@ class XAIMemoryClient(BaseMemoryAdapter):
         try:
             if not api_keys:
                 raise ValueError("api_keys is required for XAI LLM calls")
-            xai_api_key = api_keys.get("xai_api_key", "")
-            if not xai_api_key:
-                msg = "XAI API key is not found in the API keys."
-                self.logger.error(msg)
-                raise MissingAPIKeyException(msg)
-
-            xai_client = openai.AsyncOpenAI(
-                api_key=xai_api_key,
-                base_url=self.xai_base_url,
-                http_client=self.http_client,
-                timeout=self.timeout,
-            )
-
             xai_model_name = model_override if model_override else self.xai_model_name
-            response = await xai_client.chat.completions.create(
-                model=xai_model_name,
+            response = await complete(
+                api_keys=api_keys,
+                config=self.llm_provider_config,
+                model_override=xai_model_name,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input},
@@ -148,26 +138,14 @@ class XAIMemoryClient(BaseMemoryAdapter):
                 max_tokens=max_tokens,
                 response_format=response_format,  # type: ignore
             )
-            content = response.choices[0].message.content
-            if content is None:
-                raise ValueError("LLM returned None content")
             if self.input_token_number_histogram:
-                input_token_number = response.usage.prompt_tokens if response.usage else 0
-                self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
+                self.input_token_number_histogram.labels(adapter=self.name).observe(response.usage.prompt_tokens)
             if self.output_token_number_histogram:
-                output_token_number = response.usage.completion_tokens if response.usage else 0
-                self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
-            output = json.loads(content)["output"]
+                self.output_token_number_histogram.labels(adapter=self.name).observe(response.usage.completion_tokens)
+            output = json.loads(response.content)["output"]
             return output
         except Exception as e:
             exception_type = type(e).__name__
             error_msg = f"XAI LLM call failed: {exception_type}: {e}"
-            if "response" in locals() and response is not None:
-                try:
-                    response_content = response.choices[0].message.content if response.choices else None
-                    if response_content:
-                        error_msg += f" | LLM response content: {response_content[:500]}"
-                except Exception:
-                    pass
             self.logger.error(error_msg)
             raise e

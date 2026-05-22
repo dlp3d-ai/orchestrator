@@ -25,7 +25,7 @@ Orchestrator 是一个实时智能对话系统，用于构建个性化多模态 
 ### 技术特性
 - **多模态交互**：语音交互、文本对话、3D 动画生成
 - **实时流式处理**：实时数据流处理，低延迟响应
-- **多 AI 服务商支持**：集成 SenseNova、OpenAI、Anthropic、Gemini、xAI、DeepSeek、ElevenLabs、火山引擎等主流 AI 服务
+- **多 AI 服务商支持**：集成 SenseNova、OpenAI、Anthropic、Gemini、xAI、DeepSeek、MiniMax、ElevenLabs、火山引擎等主流 AI 服务
 - **智能记忆管理**：多级对话记忆、关系状态、情绪状态管理
 - **情感智能分析**：实时分析角色的情绪变化、关系变化和触发动作
 - **高度可扩展架构**：模块化设计，易于添加新的 AI 服务和定制功能
@@ -54,7 +54,8 @@ orchestrator/
 │   ├── gemini_conversation_client.py   # Gemini 对话客户端
 │   ├── xai_conversation_client.py      # xAI 对话客户端
 |   ├── deepseek_conversation_client.py # DeepSeek 对话客户端
-│   └── sensenova_omni_conversation_client.py  # SenseNova 实时对话客户端
+│   ├── sensenova_conversation_client.py # SenseNova 对话客户端
+│   └── minimax_conversation_client.py # MiniMax 对话客户端
 |  
 ├── generation/                # 生成管理模块
 │   ├── speech_recognition/    # 语音识别 (ASR)
@@ -84,18 +85,21 @@ orchestrator/
 │   ├── task_manager.py       # 任务管理器
 |   ├── openai_memory_client.py # OpenAI 记忆客户端
 │   ├── xai_memory_client.py  # xAI 记忆客户端
-│   └── sensenova_omni_memory_client.py # SenseNova 实时记忆客户端
+│   ├── sensenova_memory_client.py # SenseNova 记忆客户端
+│   └── minimax_memory_client.py # MiniMax 记忆客户端
 ├── classification/           # 分类模块
 │   ├── classification_adapter.py # 分类适配器基类
-|   ├── sensenova_omni_classification_client.py # SenseNova 实时分类客户端
 │   ├── openai_classification_client.py # OpenAI 分类客户端
 │   ├── gemini_classification_client.py # Gemini 分类客户端
+│   ├── sensenova_classification_client.py # SenseNova 分类客户端
+│   ├── minimax_classification_client.py # MiniMax 分类客户端
 │   └── xai_classification_client.py    # xAI 分类客户端
 ├── reaction/                # 反应模块
 │   ├── reaction_adapter.py   # 反应适配器基类
-|   ├── sensenova_omni_reaction_client.py # SenseNova 实时反应客户端
 │   ├── openai_reaction_client.py # OpenAI 反应客户端
 │   ├── gemini_reaction_client.py # Gemini 反应客户端
+│   ├── sensenova_reaction_client.py # SenseNova 反应客户端
+│   ├── minimax_reaction_client.py # MiniMax 反应客户端
 │   └── xai_reaction_client.py    # xAI 反应客户端
 ├── aggregator/              # 数据聚合器
 │   ├── conversation_aggregator.py # 对话聚合器
@@ -122,7 +126,7 @@ orchestrator/
 - **核心组件**:
   - `ConversationAdapter`: 文本对话适配器基类，处理流式文本对话
   - `AudioConversationAdapter`: 音频对话适配器基类，处理实时语音交互
-  - 支持服务商: SenseNova、OpenAI、Anthropic、Gemini、xAI、DeepSeek 等
+  - 支持服务商: SenseNova、OpenAI、Anthropic、Gemini、xAI、DeepSeek、MiniMax 等
 - **特性**: 支持流式输出、长上下文、多模态对话
 
 #### 2. 语音合成模块 (TTS)
@@ -251,10 +255,12 @@ python main.py --config_path configs/local.py
 | Google | `GeminiConversationClient` | `gemini-2.5-flash-lite` |
 | DeepSeek | `DeepSeekConversationClient` | `deepseek-chat` |
 | xAI | `XAIConversationClient` | `grok-3` |
+| MiniMax | `MiniMaxConversationClient` | `MiniMax-M2.7` |
 | SenseNova | `SenseChatConversationClient` | `SenseChat-5-1202` (大语言模型) |
-| SenseNova | `SenseNovaConversationClient` | `SenseNova-V6-5-Pro` (融合模态模型) |
-| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova-V6-5-Omni` (实时交互融合模态模型) |
+| SenseNova | `SenseNovaConversationClient` | `sensenova-6.7-flash-lite` |
 | OpenAI | `OpenAIAudioClient` | `gpt-4o-mini-realtime-preview-2024-12-17` |
+
+OpenAI-compatible LLM 凭据从用户配置读取。MiniMax 使用 `minimax_api_key`，默认 base URL 为 `https://api.minimaxi.com/v1`；SenseNova 使用 `sensenova_api_key`，默认 base URL 为 `https://token.sensenova.cn/v1`。
 
 ### ASR
 | 服务商 | 适配器类 |
@@ -279,7 +285,8 @@ python main.py --config_path configs/local.py
 |--------|----------|------|
 | OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
-| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxMemoryClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaMemoryClient` | `sensenova-6.7-flash-lite` |
 
 ### Classification
 | 服务商 | 适配器类 | 默认模型 |
@@ -287,7 +294,8 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIClassificationClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIClassificationClient` | `grok-3` |
 | Gemini | `GeminiClassificationClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxClassificationClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaClassificationClient` | `sensenova-6.7-flash-lite` |
 
 ### Reaction
 | 服务商 | 适配器类 | 默认模型 |
@@ -295,7 +303,8 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIReactionClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIReactionClient` | `grok-3` |
 | Gemini | `GeminiReactionClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxReactionClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaReactionClient` | `sensenova-6.7-flash-lite` |
 
 ## 文档
 

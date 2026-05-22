@@ -16,7 +16,7 @@ from orchestrator.data_structures.audio_chunk import AudioChunkBody, AudioChunkE
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
 from orchestrator.memory.memory_adapter import INITIAL_EMOTION_STATE
-from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
+from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
 from orchestrator.profile.audio_stream_profile import AudioStreamProfile
 from orchestrator.utils.log import logging
 
@@ -268,12 +268,10 @@ async def test_openai_audio_client_stream_pcm_16khz(
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client for memory operations during testing.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not openai_api_key or not sensenovaomni_ak or not sensenovaomni_sk:
+    if not openai_api_key:
         pytest.skip(
-            "OPENAI_API_KEY or SENSENOVAOMNI_AK or SENSENOVAOMNI_SK not set, skipping test_openai_audio_client_stream_pcm_16khz"
+            "OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_16khz"
         )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_audio_client_stream_pcm_16khz")
@@ -282,7 +280,7 @@ async def test_openai_audio_client_stream_pcm_16khz(
         logger_name="test_openai_audio_client_stream_pcm_16khz", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
 
-    test_memory_adapter = SenseNovaOmniMemoryClient(
+    test_memory_adapter = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -312,8 +310,6 @@ async def test_openai_audio_client_stream_pcm_16khz(
             language="en",
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
                 openai_api_key=openai_api_key,
             ),
             user_prompt=agent_prompts["keqing_default"],
@@ -382,12 +378,10 @@ async def test_openai_audio_client_stream_pcm_24khz(mongodb_memory_client: Mongo
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client for memory operations during testing.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not openai_api_key or not sensenovaomni_ak or not sensenovaomni_sk:
+    if not openai_api_key:
         pytest.skip(
-            "OPENAI_API_KEY or SENSENOVAOMNI_AK or SENSENOVAOMNI_SK not set, skipping test_openai_audio_client_stream_pcm_24khz"
+            "OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_24khz"
         )
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_audio_client_stream_pcm_24khz")
@@ -396,7 +390,7 @@ async def test_openai_audio_client_stream_pcm_24khz(mongodb_memory_client: Mongo
         logger_name="test_openai_audio_client_stream_pcm_24khz", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
 
-    test_memory_adapter = SenseNovaOmniMemoryClient(
+    test_memory_adapter = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -425,8 +419,6 @@ async def test_openai_audio_client_stream_pcm_24khz(mongodb_memory_client: Mongo
             language="en",
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
                 openai_api_key=openai_api_key,
             ),
             user_prompt=agent_prompts["keqing_default"],

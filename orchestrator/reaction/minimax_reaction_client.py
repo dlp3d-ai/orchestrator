@@ -7,15 +7,16 @@ from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
 from ..utils.executor_registry import ExecutorRegistry
-from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
+from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.openai_chat import complete, create_client
 from .reaction_adapter import ReactionAdapter
 
 
-class DeepSeekReactionClient(ReactionAdapter):
-    """DeepSeek reaction client using DeepSeek API for emotion and motion
+class MiniMaxReactionClient(ReactionAdapter):
+    """MiniMax reaction client using MiniMax API for emotion and motion
     analysis.
 
-    This client uses DeepSeek API to analyze conversation context and generate
+    This client uses MiniMax API to analyze conversation context and generate
     appropriate emotional reactions and motion suggestions for animated agents.
     """
 
@@ -23,27 +24,28 @@ class DeepSeekReactionClient(ReactionAdapter):
         self,
         name: str,
         motion_keywords: Union[str, list[str], None],
-        deepseek_model_name: str = "deepseek-chat",
+        minimax_model_name: str = MINIMAX_DEFAULT_MODEL,
+        minimax_url: str = MINIMAX_DEFAULT_BASE_URL,
         proxy_url: Union[None, str] = None,
         timeout: float = 20.0,
         latency_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
-        """Initialize the DeepSeek reaction client.
+        """Initialize the MiniMax reaction client.
 
         Args:
             name (str):
                 The name of the reaction client.
             motion_keywords (Union[str, list[str], None]):
                 The motion keywords.
-            deepseek_model_name (str, optional):
-                The name of the DeepSeek model to use.
-                Defaults to "deepseek-chat".
+            minimax_model_name (str, optional):
+                The name of the MiniMax model to use.
+                Defaults to MINIMAX_DEFAULT_MODEL.
             proxy_url (Union[None, str], optional):
-                The proxy URL for the DeepSeek API.
+                The proxy URL for the MiniMax API.
                 Defaults to None, use no proxy.
             timeout (float, optional):
-                The timeout for the DeepSeek API requests.
+                The timeout for the MiniMax API requests.
                 Defaults to 20.0.
             latency_histogram (Histogram | None, optional):
                 Prometheus Histogram metric for recording request latency distribution
@@ -59,14 +61,12 @@ class DeepSeekReactionClient(ReactionAdapter):
             latency_histogram=latency_histogram,
             logger_cfg=logger_cfg,
         )
-        self.deepseek_model_name = deepseek_model_name
-        self.deepseek_base_url = "https://api.deepseek.com"
+        self.minimax_model_name = minimax_model_name
+        self.minimax_url = minimax_url
         self.timeout = timeout
-        self.llm_provider_config = OpenAIChatProviderConfig(
-            provider_name="DeepSeek",
-            api_key_field="deepseek_api_key",
-            model_name=deepseek_model_name,
-            base_url=self.deepseek_base_url,
+        self.llm_provider_config = build_minimax_config(
+            model_name=minimax_model_name,
+            base_url=minimax_url,
             timeout=timeout,
             proxy_url=proxy_url,
         )
@@ -95,7 +95,7 @@ class DeepSeekReactionClient(ReactionAdapter):
         response_format: Optional[Dict[str, Any]] = None,
         tag_prompt: Optional[str] = None,
     ) -> ReactionDelta:
-        """Get the reaction delta according to user's text input using DeepSeek
+        """Get the reaction delta according to user's text input using MiniMax
         LLM.
 
         Args:
@@ -116,7 +116,7 @@ class DeepSeekReactionClient(ReactionAdapter):
                 Current relationship state between user and agent.
                 Defaults to None.
             response_format (Optional[Dict[str, Any]], optional):
-                JSON schema format for structured response. Not supported by DeepSeek API.
+                JSON schema format for structured response. Not supported by MiniMax API.
                 Defaults to None.
             tag_prompt (Optional[str], optional):
                 Additional prompt specific to the tag.
@@ -133,7 +133,7 @@ class DeepSeekReactionClient(ReactionAdapter):
             llm_client = self.input_buffer[request_id].get("llm_client", None)
 
         model_name_override = self.input_buffer[request_id]["reaction_model_override"]
-        deepseek_model_name = model_name_override if model_name_override else self.deepseek_model_name
+        minimax_model_name = model_name_override if model_name_override else self.minimax_model_name
         system_content = prompt + "\n" + tag_prompt if tag_prompt else prompt
 
         try:
@@ -158,7 +158,7 @@ class DeepSeekReactionClient(ReactionAdapter):
                 client=llm_client,
                 api_keys=None,
                 config=self.llm_provider_config,
-                model_override=deepseek_model_name,
+                model_override=minimax_model_name,
                 messages=[
                     {"role": "system", "content": system_content},
                     {"role": "user", "content": user_message},
@@ -216,7 +216,7 @@ class DeepSeekReactionClient(ReactionAdapter):
             }
 
             self.logger.debug(
-                f"DeepSeek spent {time.time() - start_time} seconds to get reaction delta: {response_delta}"
+                f"MiniMax spent {time.time() - start_time} seconds to get reaction delta: {response_delta}"
             )
             return ReactionDelta(**response_delta)
 

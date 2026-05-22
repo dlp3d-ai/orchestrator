@@ -4,13 +4,11 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
-from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
+from ..llm.openai_chat import OpenAIChatProviderConfig, create_client, stream
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
 
@@ -116,11 +114,14 @@ class XAIConversationClient(ConversationAdapter):
         )
         self.xai_model_name = xai_model_name
         self.xai_base_url = "https://api.x.ai/v1"
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="XAI",
+            api_key_field="xai_api_key",
+            model_name=xai_model_name,
+            base_url=self.xai_base_url,
+            timeout=request_timeout,
+            proxy_url=proxy_url,
+        )
 
         # Initialize bracket filter
         self.enable_bracket_filter = enable_bracket_filter
@@ -143,24 +144,12 @@ class XAIConversationClient(ConversationAdapter):
             request_id (str):
                 The unique identifier for the request.
         """
-        xai_api_key = self.input_buffer[request_id]["chat_task"].get("api_keys", {}).get("xai_api_key", "")
-        if not xai_api_key:
-            msg = "XAI API key is not found in the API keys."
-            self.logger.error(msg)
-            raise MissingAPIKeyException(msg)
-
-        self.input_buffer[request_id]["chat_task"]["llm_client"] = openai.AsyncOpenAI(
-            api_key=xai_api_key,
-            base_url=self.xai_base_url,
-            http_client=self.http_client,
-            timeout=self.request_timeout,
+        llm_client = create_client(
+            self.input_buffer[request_id]["chat_task"].get("api_keys", {}),
+            self.llm_provider_config,
         )
-        self.input_buffer[request_id]["reject_task"]["llm_client"] = openai.AsyncOpenAI(
-            api_key=xai_api_key,
-            base_url=self.xai_base_url,
-            http_client=self.http_client,
-            timeout=self.request_timeout,
-        )
+        self.input_buffer[request_id]["chat_task"]["llm_client"] = llm_client
+        self.input_buffer[request_id]["reject_task"]["llm_client"] = llm_client
 
     async def _llm_stream_chat(
         self,
@@ -222,8 +211,11 @@ class XAIConversationClient(ConversationAdapter):
                 llm_client = task_space.get("llm_client", None)
 
             user_id = task_space["user_id"]
-            chat_rsp_stream = await llm_client.chat.completions.create(
-                model=model_name_override if model_name_override else self.xai_model_name,
+            chat_rsp_stream = stream(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=model_name_override if model_name_override else self.xai_model_name,
                 messages=[
                     {
                         "role": "system",
@@ -235,15 +227,14 @@ class XAIConversationClient(ConversationAdapter):
                 ],
                 temperature=1,
                 max_tokens=1000,
-                stream=True,
                 stream_options={"include_usage": True},
             )
             input_token_number = 0
             output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in chat_rsp_stream:
-                if len(chunk.choices) > 0 and chunk.choices[0].delta.content is not None:
-                    text_seg = chunk.choices[0].delta.content
+                if chunk.text_delta:
+                    text_seg = chunk.text_delta
 
                     # Apply bracket filter
                     if bracket_filter is not None and text_seg:
@@ -338,15 +329,17 @@ class XAIConversationClient(ConversationAdapter):
                 await asyncio.sleep(self.sleep_time)
                 llm_client = task_space.get("llm_client", None)
 
-            reject_rsp_stream = await llm_client.chat.completions.create(
-                model=model_name_override if model_name_override else self.xai_model_name,
+            reject_rsp_stream = stream(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=model_name_override if model_name_override else self.xai_model_name,
                 messages=[
                     {"role": "system", "content": reject_prompt},
                     {"role": "user", "content": message},
                 ],
                 temperature=1,
                 max_tokens=1000,
-                stream=True,
                 stream_options={"include_usage": True},
             )
             user_id = task_space["user_id"]
@@ -354,8 +347,8 @@ class XAIConversationClient(ConversationAdapter):
             output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in reject_rsp_stream:
-                if len(chunk.choices) > 0 and chunk.choices[0].delta.content is not None:
-                    text_seg = chunk.choices[0].delta.content
+                if chunk.text_delta:
+                    text_seg = chunk.text_delta
 
                     # Apply bracket filter
                     if bracket_filter is not None and text_seg:

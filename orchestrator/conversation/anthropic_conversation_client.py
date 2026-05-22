@@ -4,13 +4,11 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, Union
 
-import anthropic
-import httpx
 from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
-from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
+from ..llm.anthropic_messages import AnthropicMessagesProviderConfig, create_client, stream
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
 
@@ -115,11 +113,12 @@ class AnthropicConversationClient(ConversationAdapter):
             logger_cfg=logger_cfg,
         )
         self.anthropic_model_name = anthropic_model_name
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = AnthropicMessagesProviderConfig(
+            api_key_field="anthropic_api_key",
+            model_name=anthropic_model_name,
+            timeout=request_timeout,
+            proxy_url=proxy_url,
+        )
 
         # Initialize bracket filter
         self.enable_bracket_filter = enable_bracket_filter
@@ -142,20 +141,12 @@ class AnthropicConversationClient(ConversationAdapter):
             request_id (str):
                 The unique identifier for the request.
         """
-        anthropic_api_key = self.input_buffer[request_id]["chat_task"].get("api_keys", {}).get("anthropic_api_key", "")
-        if not anthropic_api_key:
-            msg = "Anthropic API key is not found in the API keys."
-            self.logger.error(msg)
-            raise MissingAPIKeyException(msg)
-
-        self.input_buffer[request_id]["chat_task"]["llm_client"] = anthropic.AsyncAnthropic(
-            api_key=anthropic_api_key,
-            http_client=self.http_client,
+        llm_client = create_client(
+            self.input_buffer[request_id]["chat_task"].get("api_keys", {}),
+            self.llm_provider_config,
         )
-        self.input_buffer[request_id]["reject_task"]["llm_client"] = anthropic.AsyncAnthropic(
-            api_key=anthropic_api_key,
-            http_client=self.http_client,
-        )
+        self.input_buffer[request_id]["chat_task"]["llm_client"] = llm_client
+        self.input_buffer[request_id]["reject_task"]["llm_client"] = llm_client
 
     async def _llm_stream_chat(
         self,
@@ -218,8 +209,11 @@ class AnthropicConversationClient(ConversationAdapter):
                 llm_client = task_space.get("llm_client", None)
 
             user_id = task_space["user_id"]
-            async with llm_client.messages.stream(
-                model=model_name_override if model_name_override else self.anthropic_model_name,
+            chat_rsp_stream = stream(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=model_name_override if model_name_override else self.anthropic_model_name,
                 max_tokens=1000,
                 temperature=1,
                 system=conversation_prompt,
@@ -228,63 +222,52 @@ class AnthropicConversationClient(ConversationAdapter):
                     *conversation_history,
                     {"role": "user", "content": message},
                 ],
-            ) as stream:
-                loop = asyncio.get_event_loop()
-                async for chunk in stream.text_stream:
-                    if chunk is not None and len(chunk.strip()) > 0:
-                        text_seg = chunk
+            )
+            input_token_number = 0
+            output_token_number = 0
+            loop = asyncio.get_event_loop()
+            async for chunk in chat_rsp_stream:
+                if chunk.usage:
+                    input_token_number += chunk.usage.prompt_tokens
+                    output_token_number += chunk.usage.completion_tokens
+                if chunk.text_delta and len(chunk.text_delta.strip()) > 0:
+                    text_seg = chunk.text_delta
 
-                        # Apply bracket filter
-                        if bracket_filter is not None and text_seg:
-                            text_seg = await loop.run_in_executor(
-                                self.executor, bracket_filter.filter_text_segment, text_seg
+                    # Apply bracket filter
+                    if bracket_filter is not None and text_seg:
+                        text_seg = await loop.run_in_executor(
+                            self.executor, bracket_filter.filter_text_segment, text_seg
+                        )
+
+                    if len(text_seg) > 0:
+                        chat_rsp += text_seg
+                        style = await loop.run_in_executor(self.executor, self.extract_style_tag, chat_rsp)
+                        coroutines = list()
+                        for next_node_name, payload in downstream_instances.items():
+                            body_trunk = ConversationChunkBody(
+                                request_id=request_id,
+                                text_segment=text_seg,
+                                style=style,
                             )
-
-                        if len(text_seg) > 0:
-                            chat_rsp += text_seg
-                            style = await loop.run_in_executor(self.executor, self.extract_style_tag, chat_rsp)
-                            coroutines = list()
-                            for next_node_name, payload in downstream_instances.items():
-                                body_trunk = ConversationChunkBody(
-                                    request_id=request_id,
-                                    text_segment=text_seg,
-                                    style=style,
-                                )
-                                coroutines.append(payload.feed_stream(body_trunk))
-                                if first_body_trunk:
-                                    first_body_trunk = False
-                                    if dag_start_time is not None:
-                                        time_diff = time.time() - dag_start_time
-                                        self.logger.debug(
-                                            f"request {request_id} LLM delay from DAG start: {time_diff:.2f} seconds"
-                                        )
-                                    latency = time.time() - start_time
+                            coroutines.append(payload.feed_stream(body_trunk))
+                            if first_body_trunk:
+                                first_body_trunk = False
+                                if dag_start_time is not None:
+                                    time_diff = time.time() - dag_start_time
                                     self.logger.debug(
-                                        f"request {request_id} first chunk latency: {latency:.2f} seconds"
+                                        f"request {request_id} LLM delay from DAG start: {time_diff:.2f} seconds"
                                     )
-                                    if self.latency_histogram:
-                                        self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                                            latency
-                                        )
-                            asyncio.gather(*coroutines)
-                if self.input_token_number_histogram:
-                    input_token_number = (
-                        stream.current_message_snapshot.usage.input_tokens
-                        if hasattr(stream.current_message_snapshot, "usage")
-                        else 0
-                    )
-                    self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                        input_token_number
-                    )
-                if self.output_token_number_histogram:
-                    output_token_number = (
-                        stream.current_message_snapshot.usage.output_tokens
-                        if hasattr(stream.current_message_snapshot, "usage")
-                        else 0
-                    )
-                    self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                        output_token_number
-                    )
+                                latency = time.time() - start_time
+                                self.logger.debug(f"request {request_id} first chunk latency: {latency:.2f} seconds")
+                                if self.latency_histogram:
+                                    self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(latency)
+                        asyncio.gather(*coroutines)
+            if self.input_token_number_histogram:
+                self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
+            if self.output_token_number_histogram:
+                self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                    output_token_number
+                )
             return chat_rsp
         except Exception as e:
             msg = f"Error in streaming chat: {e}"
@@ -341,67 +324,59 @@ class AnthropicConversationClient(ConversationAdapter):
                 await asyncio.sleep(self.sleep_time)
                 llm_client = task_space.get("llm_client", None)
             user_id = task_space["user_id"]
-            async with llm_client.messages.stream(
-                model=model_name_override if model_name_override else self.anthropic_model_name,
+            reject_rsp_stream = stream(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=model_name_override if model_name_override else self.anthropic_model_name,
                 max_tokens=1000,
                 temperature=1,
                 system=reject_prompt,
                 messages=[{"role": "user", "content": message}],
-            ) as stream:
-                loop = asyncio.get_event_loop()
-                async for chunk in stream.text_stream:
-                    if chunk is not None and len(chunk.strip()) > 0:
-                        text_seg = chunk
+            )
+            input_token_number = 0
+            output_token_number = 0
+            loop = asyncio.get_event_loop()
+            async for chunk in reject_rsp_stream:
+                if chunk.usage:
+                    input_token_number += chunk.usage.prompt_tokens
+                    output_token_number += chunk.usage.completion_tokens
+                if chunk.text_delta and len(chunk.text_delta.strip()) > 0:
+                    text_seg = chunk.text_delta
 
-                        # Apply bracket filter
-                        if bracket_filter is not None and text_seg:
-                            text_seg = await loop.run_in_executor(
-                                self.executor, bracket_filter.filter_text_segment, text_seg
+                    # Apply bracket filter
+                    if bracket_filter is not None and text_seg:
+                        text_seg = await loop.run_in_executor(
+                            self.executor, bracket_filter.filter_text_segment, text_seg
+                        )
+
+                    if len(text_seg) > 0:
+                        coroutines = list()
+                        for next_node_name, payload in downstream_instances.items():
+                            body_trunk = RejectChunkBody(
+                                request_id=request_id,
+                                text_segment=text_seg,
                             )
-
-                        if len(text_seg) > 0:
-                            coroutines = list()
-                            for next_node_name, payload in downstream_instances.items():
-                                body_trunk = RejectChunkBody(
-                                    request_id=request_id,
-                                    text_segment=text_seg,
-                                )
-                                coroutines.append(payload.feed_stream(body_trunk))
-                                if first_body_trunk:
-                                    first_body_trunk = False
-                                    if dag_start_time is not None:
-                                        time_diff = time.time() - dag_start_time
-                                        self.logger.debug(
-                                            f"request {request_id} LLM delay from DAG start: {time_diff:.2f} seconds"
-                                        )
-                                    latency = time.time() - start_time
+                            coroutines.append(payload.feed_stream(body_trunk))
+                            if first_body_trunk:
+                                first_body_trunk = False
+                                if dag_start_time is not None:
+                                    time_diff = time.time() - dag_start_time
                                     self.logger.debug(
-                                        f"request {request_id} first chunk latency: {latency:.2f} seconds"
+                                        f"request {request_id} LLM delay from DAG start: {time_diff:.2f} seconds"
                                     )
-                                    if self.latency_histogram:
-                                        self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                                            latency
-                                        )
-                            asyncio.gather(*coroutines)
-                            reject_rsp += text_seg
-                if self.input_token_number_histogram:
-                    input_token_number = (
-                        stream.current_message_snapshot.usage.input_tokens
-                        if hasattr(stream.current_message_snapshot, "usage")
-                        else 0
-                    )
-                    self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                        input_token_number
-                    )
-                if self.output_token_number_histogram:
-                    output_token_number = (
-                        stream.current_message_snapshot.usage.output_tokens
-                        if hasattr(stream.current_message_snapshot, "usage")
-                        else 0
-                    )
-                    self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
-                        output_token_number
-                    )
+                                latency = time.time() - start_time
+                                self.logger.debug(f"request {request_id} first chunk latency: {latency:.2f} seconds")
+                                if self.latency_histogram:
+                                    self.latency_histogram.labels(adapter=self.name, user_id=user_id).observe(latency)
+                        asyncio.gather(*coroutines)
+                        reject_rsp += text_seg
+            if self.input_token_number_histogram:
+                self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
+            if self.output_token_number_histogram:
+                self.output_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(
+                    output_token_number
+                )
             return reject_rsp
         except Exception as e:
             msg = f"Error in streaming reject: {e}"

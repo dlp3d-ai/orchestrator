@@ -2,11 +2,11 @@ from .anthropic_conversation_client import AnthropicConversationClient
 from .conversation_adapter import ConversationAdapter
 from .deepseek_conversation_client import DeepSeekConversationClient
 from .gemini_conversation_client import GeminiConversationClient
+from .minimax_conversation_client import MiniMaxConversationClient
 from .openai_audio_client import OpenAIAudioClient
 from .openai_conversation_client import OpenAIConversationClient
 from .sensechat_conversation_client import SenseChatConversationClient
 from .sensenova_conversation_client import SenseNovaConversationClient
-from .sensenova_omni_conversation_client import SenseNovaOmniConversationClient
 from .xai_conversation_client import XAIConversationClient
 
 _CONVERSATION_ADAPTERS = dict(
@@ -15,10 +15,10 @@ _CONVERSATION_ADAPTERS = dict(
     DeepSeekConversationClient=DeepSeekConversationClient,
     XAIConversationClient=XAIConversationClient,
     GeminiConversationClient=GeminiConversationClient,
+    MiniMaxConversationClient=MiniMaxConversationClient,
     OpenAIAudioClient=OpenAIAudioClient,
     SenseChatConversationClient=SenseChatConversationClient,
     SenseNovaConversationClient=SenseNovaConversationClient,
-    SenseNovaOmniConversationClient=SenseNovaOmniConversationClient,
 )
 
 

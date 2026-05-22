@@ -23,7 +23,7 @@ from orchestrator.data_structures.conversation import (
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
 from orchestrator.memory.memory_adapter import INITIAL_EMOTION_STATE
-from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
+from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
 from orchestrator.profile.classified_text_stream_profile import ClassifiedStreamProfile
 
 # Test character ID
@@ -67,7 +67,7 @@ async def test_conversation_aggregator_accept(mongodb_memory_client: MongoDBMemo
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_accept", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -154,7 +154,7 @@ async def test_conversation_aggregator_reject(mongodb_memory_client: MongoDBMemo
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_reject", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -253,7 +253,7 @@ async def test_conversation_aggregator_leave(mongodb_memory_client: MongoDBMemor
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_leave", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )

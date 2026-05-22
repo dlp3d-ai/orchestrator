@@ -7,28 +7,30 @@ from typing import Any, Dict, Union
 from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
+from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.openai_chat import create_client, stream
 from ..utils.executor_registry import ExecutorRegistry
-from ..llm.openai_chat import OpenAIChatProviderConfig, create_client, stream
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
 
-class DeepSeekConversationClient(ConversationAdapter):
-    """DeepSeek conversation client for streaming chat and reject operations.
+class MiniMaxConversationClient(ConversationAdapter):
+    """MiniMax conversation client for streaming chat and reject operations.
 
-    This client provides streaming conversation capabilities using DeepSeek
+    This client provides streaming conversation capabilities using MiniMax
     models, with support for bracket content filtering and downstream task
     processing.
     """
 
     AVAILABLE_FOR_STREAM = True
     AVAILABLE_FOR_REJECT = True
-    ExecutorRegistry.register_class("DeepSeekConversationClient")
+    ExecutorRegistry.register_class("MiniMaxConversationClient")
 
     def __init__(
         self,
         name: str,
         agent_prompts_file: str,
-        deepseek_model_name: str = "deepseek-chat",
+        minimax_model_name: str = MINIMAX_DEFAULT_MODEL,
+        minimax_url: str = MINIMAX_DEFAULT_BASE_URL,
         proxy_url: Union[None, str] = None,
         request_timeout: float = 20.0,
         queue_size: int = 100,
@@ -44,16 +46,16 @@ class DeepSeekConversationClient(ConversationAdapter):
         enable_bracket_filter: bool = True,
         bracket_pairs: list[tuple[str, str]] = [("*", "*"), ("(", ")"), ("[", "]"), ("{", "}"), ("「", "」"), ("（", "）")],
     ):
-        """Initialize the DeepSeek conversation client.
+        """Initialize the MiniMax conversation client.
 
         Args:
             name (str):
                 The name of the conversation adapter.
             agent_prompts_file (str):
                 The path to the agent prompts file.
-            deepseek_model_name (str, optional):
-                The name of the DeepSeek model to use.
-                Defaults to "deepseek-chat".
+            minimax_model_name (str, optional):
+                The name of the MiniMax model to use.
+                Defaults to "MiniMax-M2.7".
             proxy_url (Union[None, str], optional):
                 The proxy URL for the conversation.
                 Defaults to None.
@@ -112,13 +114,11 @@ class DeepSeekConversationClient(ConversationAdapter):
             output_token_number_histogram=output_token_number_histogram,
             logger_cfg=logger_cfg,
         )
-        self.deepseek_model_name = deepseek_model_name
-        self.deepseek_base_url = "https://api.deepseek.com"
-        self.llm_provider_config = OpenAIChatProviderConfig(
-            provider_name="DeepSeek",
-            api_key_field="deepseek_api_key",
-            model_name=deepseek_model_name,
-            base_url=self.deepseek_base_url,
+        self.minimax_model_name = minimax_model_name
+        self.minimax_url = minimax_url
+        self.llm_provider_config = build_minimax_config(
+            model_name=minimax_model_name,
+            base_url=minimax_url,
             timeout=request_timeout,
             proxy_url=proxy_url,
         )
@@ -183,8 +183,8 @@ class DeepSeekConversationClient(ConversationAdapter):
             # Prepare downstream tasks
             task_space = self.input_buffer[request_id]["chat_task"]
             dag = task_space["dag"]
-            style_list = task_space["style_list"]
             dag_start_time = task_space["dag_start_time"]
+            style_list = task_space["style_list"]
             node_name = task_space["node_name"]
             dag_node = dag.get_node(node_name)
             downstream_nodes = dag_node.downstreams
@@ -210,11 +210,12 @@ class DeepSeekConversationClient(ConversationAdapter):
                 await asyncio.sleep(self.sleep_time)
                 llm_client = task_space.get("llm_client", None)
 
+            user_id = task_space["user_id"]
             chat_rsp_stream = stream(
                 client=llm_client,
                 api_keys=None,
                 config=self.llm_provider_config,
-                model_override=model_name_override if model_name_override else self.deepseek_model_name,
+                model_override=model_name_override if model_name_override else self.minimax_model_name,
                 messages=[
                     {
                         "role": "system",
@@ -227,10 +228,8 @@ class DeepSeekConversationClient(ConversationAdapter):
                     {"role": "user", "content": message},
                 ],
                 temperature=1,
-                max_tokens=1000,
                 stream_options={"include_usage": True},
             )
-            user_id = task_space["user_id"]
             input_token_number = 0
             output_token_number = 0
             loop = asyncio.get_event_loop()
@@ -335,7 +334,7 @@ class DeepSeekConversationClient(ConversationAdapter):
                 client=llm_client,
                 api_keys=None,
                 config=self.llm_provider_config,
-                model_override=model_name_override if model_name_override else self.deepseek_model_name,
+                model_override=model_name_override if model_name_override else self.minimax_model_name,
                 messages=[
                     {"role": "system", "content": reject_prompt},
                     {"role": "user", "content": message},
@@ -344,9 +343,9 @@ class DeepSeekConversationClient(ConversationAdapter):
                 max_tokens=1000,
                 stream_options={"include_usage": True},
             )
-            user_id = task_space["user_id"]
             input_token_number = 0
             output_token_number = 0
+            user_id = task_space["user_id"]
             loop = asyncio.get_event_loop()
             async for chunk in reject_rsp_stream:
                 if chunk.text_delta:

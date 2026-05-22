@@ -1,18 +1,20 @@
-import json
+import re
 from typing import Any, Dict, Optional, Union
 
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..llm.openai_chat import OpenAIChatProviderConfig, complete
+from ..utils.executor_registry import ExecutorRegistry
+from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.openai_chat import complete
 from .memory_adapter import BaseMemoryAdapter
 
 
-class GeminiMemoryClient(BaseMemoryAdapter):
-    """Gemini memory client that implements memory management based on Google's
-    Gemini API.
+class MiniMaxMemoryClient(BaseMemoryAdapter):
+    """MiniMax memory client that implements memory management based on
+    MiniMax API.
 
-    This class provides memory management functionality using the Gemini API
+    This class provides memory management functionality using the MiniMax API
     for LLM calls and memory operations.
     """
 
@@ -20,9 +22,10 @@ class GeminiMemoryClient(BaseMemoryAdapter):
         self,
         name: str,
         db_client: DatabaseMemoryClient,
-        gemini_model_name: str = "gemini-2.5-flash-lite",
+        minimax_model_name: str = MINIMAX_DEFAULT_MODEL,
+        minimax_url: str = MINIMAX_DEFAULT_BASE_URL,
         proxy_url: Union[None, str] = None,
-        timeout: float = 10.0,
+        timeout: float = 20.0,
         conversation_char_threshold: int = 10000,
         conversation_char_target: int = 8000,
         short_term_length_threshold: int = 20,
@@ -32,19 +35,19 @@ class GeminiMemoryClient(BaseMemoryAdapter):
         output_token_number_histogram: Histogram | None = None,
         logger_cfg: Union[None, Dict[str, Any]] = None,
     ):
-        """Initialize the Gemini memory client.
+        """Initialize the MiniMax memory client.
 
         Args:
             name (str):
                 Name of the memory client.
             db_client (DatabaseMemoryClient):
                 Database client for memory operations.
-            gemini_model_name (str, optional):
-                Default Gemini model name to use. Defaults to "gemini-2.5-flash-lite".
+            minimax_model_name (str, optional):
+                Default MiniMax model name to use. Defaults to MINIMAX_DEFAULT_MODEL.
             proxy_url (Union[None, str], optional):
                 Proxy URL for API requests. Defaults to None.
             timeout (float, optional):
-                Request timeout in seconds. Defaults to 10.0.
+                Request timeout in seconds. Defaults to 20.0.
             conversation_char_threshold (int, optional):
                 Character threshold for conversation compression. Defaults to 10000.
             conversation_char_target (int, optional):
@@ -79,15 +82,13 @@ class GeminiMemoryClient(BaseMemoryAdapter):
             logger_cfg=logger_cfg,
         )
 
-        self.gemini_model_name = gemini_model_name
-        self.gemini_base_url = "https://generativelanguage.googleapis.com/v1beta/openai/"
+        self.minimax_model_name = minimax_model_name
+        self.minimax_url = minimax_url
         self.proxy_url = proxy_url
         self.timeout = timeout
-        self.llm_provider_config = OpenAIChatProviderConfig(
-            provider_name="Gemini",
-            api_key_field="gemini_api_key",
-            model_name=gemini_model_name,
-            base_url=self.gemini_base_url,
+        self.llm_provider_config = build_minimax_config(
+            model_name=minimax_model_name,
+            base_url=minimax_url,
             timeout=timeout,
             proxy_url=proxy_url,
         )
@@ -102,7 +103,7 @@ class GeminiMemoryClient(BaseMemoryAdapter):
         api_keys: Optional[Dict[str, Any]] = None,
         model_override: Optional[str] = None,
     ) -> str:
-        """Call Gemini LLM for text generation.
+        """Call MiniMax LLM for text generation.
 
         Args:
             system_prompt (str):
@@ -122,24 +123,23 @@ class GeminiMemoryClient(BaseMemoryAdapter):
 
         Returns:
             str:
-                Generated text content from the Gemini LLM.
+                Generated text content from the MiniMax LLM.
         """
         try:
-            if not api_keys:
-                raise ValueError("api_keys is required for Gemini LLM calls")
-            gemini_model_name = model_override if model_override else self.gemini_model_name
+            minimax_model_name = model_override if model_override else self.minimax_model_name
+
+            system_content = system_prompt + "\n" + tag_prompt if tag_prompt else system_prompt
 
             response = await complete(
                 api_keys=api_keys,
                 config=self.llm_provider_config,
-                model_override=gemini_model_name,
+                model_override=minimax_model_name,
                 messages=[
-                    {"role": "system", "content": system_prompt},
+                    {"role": "system", "content": system_content},
                     {"role": "user", "content": user_input},
                 ],
                 temperature=1,
                 max_tokens=max_tokens,
-                response_format=response_format,  # type: ignore
             )
 
             if self.input_token_number_histogram:
@@ -147,10 +147,15 @@ class GeminiMemoryClient(BaseMemoryAdapter):
             if self.output_token_number_histogram:
                 self.output_token_number_histogram.labels(adapter=self.name).observe(response.usage.completion_tokens)
 
-            output = json.loads(response.content)["output"]
+            match = re.search(r"<output>(.*?)</output>", response.content, re.DOTALL)
+            if match:
+                output = match.group(1)
+            else:
+                self.logger.warning(f"Failed to extract <output> tag from content: {response.content}")
+                output = response.content
             return output
         except Exception as e:
             exception_type = type(e).__name__
-            error_msg = f"Gemini LLM call failed: {exception_type}: {e}"
+            error_msg = f"MiniMax LLM call failed: {exception_type}: {e}"
             self.logger.error(error_msg)
             raise e

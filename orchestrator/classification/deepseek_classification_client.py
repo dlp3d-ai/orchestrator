@@ -1,14 +1,11 @@
 import asyncio
-import json
 from typing import Any, Dict, Optional, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
-from ..utils.exception import MissingAPIKeyException
 from ..utils.executor_registry import ExecutorRegistry
+from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
 from .classification_adapter import ClassificationAdapter
 
 
@@ -64,11 +61,14 @@ class DeepSeekClassificationClient(ClassificationAdapter):
         self.deepseek_model_name = deepseek_model_name
         self.deepseek_base_url = "https://api.deepseek.com"
         self.timeout = timeout
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="DeepSeek",
+            api_key_field="deepseek_api_key",
+            model_name=deepseek_model_name,
+            base_url=self.deepseek_base_url,
+            timeout=timeout,
+            proxy_url=proxy_url,
+        )
 
     async def _init_llm_client(self, request_id: str) -> None:
         """Initialize the LLM client.
@@ -77,17 +77,9 @@ class DeepSeekClassificationClient(ClassificationAdapter):
             request_id (str):
                 The request id.
         """
-        deepseek_api_key = self.input_buffer[request_id]["api_keys"].get("deepseek_api_key", "")
-        if not deepseek_api_key:
-            msg = "DeepSeek API key is not found in the API keys."
-            self.logger.error(msg)
-            raise MissingAPIKeyException(msg)
-
-        self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
-            api_key=deepseek_api_key,
-            base_url=self.deepseek_base_url,
-            http_client=self.http_client,
-            timeout=self.timeout,
+        self.input_buffer[request_id]["llm_client"] = create_client(
+            self.input_buffer[request_id]["api_keys"],
+            self.llm_provider_config,
         )
 
     async def classify(
@@ -125,8 +117,11 @@ class DeepSeekClassificationClient(ClassificationAdapter):
         deepseek_model_name = model_name_override if model_name_override else self.deepseek_model_name
         system_content = prompt + "\n" + tag_prompt if tag_prompt else prompt
         try:
-            response = await llm_client.chat.completions.create(
-                model=deepseek_model_name,
+            response = await complete(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=deepseek_model_name,
                 messages=[
                     {"role": "system", "content": system_content},
                     {"role": "user", "content": f"<user_input>: {text}"},
@@ -134,7 +129,7 @@ class DeepSeekClassificationClient(ClassificationAdapter):
                 temperature=1,
                 max_tokens=1000,
             )
-            response_text = response.choices[0].message.content or ""  # type: ignore
+            response_text = response.content
 
             if "reject" in response_text.lower():
                 classification_result = "reject"

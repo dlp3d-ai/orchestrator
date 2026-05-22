@@ -60,7 +60,6 @@ proxy = dict(
             name="minimax_memory_client",
             minimax_model_name="MiniMax-M2.7",
             minimax_url="https://api.minimaxi.com/v1",
-            proxy_url=__proxy_url__,
         ),
         sensenova_memory=dict(
             type="SenseNovaMemoryClient",
@@ -130,7 +129,6 @@ proxy = dict(
             agent_prompts_file="configs/agent_prompts.yaml",
             minimax_model_name="MiniMax-M2.7",
             minimax_url="https://api.minimaxi.com/v1",
-            proxy_url=__proxy_url__,
         ),
         sensechat_agent=dict(
             type="SenseChatConversationClient",
@@ -182,7 +180,6 @@ proxy = dict(
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
             minimax_model_name="MiniMax-M2.7",
             minimax_url="https://api.minimaxi.com/v1",
-            proxy_url=__proxy_url__,
         ),
         sensenova_classification=dict(
             type="SenseNovaClassificationClient",
@@ -234,7 +231,6 @@ proxy = dict(
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
             minimax_model_name="MiniMax-M2.7",
             minimax_url="https://api.minimaxi.com/v1",
-            proxy_url=__proxy_url__,
         ),
         sensenova_reaction=dict(
             type="SenseNovaReactionClient",

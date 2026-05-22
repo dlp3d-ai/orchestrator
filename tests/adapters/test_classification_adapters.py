@@ -264,7 +264,8 @@ async def test_sensenova_classification_client_stream():
     This test verifies that the SenseNova classification adapter can process
     text chunks in streaming mode and correctly classify motion keywords.
 
-    The test will be skipped if SENSENOVA_API_KEY environment variable is not set.
+    The test will be skipped if SENSENOVA_API_KEY environment variable is not
+    set.
     """
     sensenova_api_key = os.environ.get("SENSENOVA_API_KEY")
     if not sensenova_api_key:

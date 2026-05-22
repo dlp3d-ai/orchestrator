@@ -371,9 +371,7 @@ async def test_deepseek_stream(
     """
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not deepseek_api_key:
-        pytest.skip(
-            "DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream"
-        )
+        pytest.skip("DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_stream")
 
@@ -549,9 +547,7 @@ async def test_anthropic_stream(
     """
     anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not anthropic_api_key:
-        pytest.skip(
-            "ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream"
-        )
+        pytest.skip("ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_anthropic_stream")
 
@@ -640,9 +636,7 @@ async def test_sensechat_stream(
     sensechat_ak = os.environ.get("SENSECHAT_AK")
     sensechat_sk = os.environ.get("SENSECHAT_SK")
     if not sensechat_ak or not sensechat_sk:
-        pytest.skip(
-            "SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream"
-        )
+        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensechat_stream")
 
@@ -909,9 +903,7 @@ async def test_classification_input_stream(
     """
     xai_api_key = os.environ.get("XAI_API_KEY")
     if not xai_api_key:
-        pytest.skip(
-            "XAI_API_KEY is not set, skipping test_classification_input_stream"
-        )
+        pytest.skip("XAI_API_KEY is not set, skipping test_classification_input_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_classification_input_stream")
 

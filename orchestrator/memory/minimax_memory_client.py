@@ -4,15 +4,15 @@ from typing import Any, Dict, Optional, Union
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..utils.executor_registry import ExecutorRegistry
 from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
 from ..llm.openai_chat import complete
+from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
 
 class MiniMaxMemoryClient(BaseMemoryAdapter):
-    """MiniMax memory client that implements memory management based on
-    MiniMax API.
+    """MiniMax memory client that implements memory management based on MiniMax
+    API.
 
     This class provides memory management functionality using the MiniMax API
     for LLM calls and memory operations.

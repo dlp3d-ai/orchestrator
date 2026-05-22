@@ -4,8 +4,8 @@ from typing import Any, Dict, Optional, Union
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..utils.executor_registry import ExecutorRegistry
 from ..llm.openai_chat import OpenAIChatProviderConfig, complete
+from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
 

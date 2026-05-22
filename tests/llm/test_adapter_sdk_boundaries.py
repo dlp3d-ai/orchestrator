@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 MIGRATED_ADAPTERS = [
     "orchestrator/classification/openai_classification_client.py",
     "orchestrator/classification/deepseek_classification_client.py",

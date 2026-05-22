@@ -4,15 +4,14 @@ from typing import Any, Dict, Optional, Union
 from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
-from ..utils.executor_registry import ExecutorRegistry
 from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
 from ..llm.openai_chat import complete, create_client
+from ..utils.executor_registry import ExecutorRegistry
 from .classification_adapter import ClassificationAdapter
 
 
 class MiniMaxClassificationClient(ClassificationAdapter):
-    """Classification client for MiniMax API using OpenAI-compatible
-    interface.
+    """Classification client for MiniMax API using OpenAI-compatible interface.
 
     This client provides text classification functionality through MiniMax's
     API using the OpenAI-compatible interface. It supports motion keyword-based

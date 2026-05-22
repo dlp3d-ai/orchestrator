@@ -66,16 +66,18 @@ def test_complete_normalizes_content_usage_and_request_kwargs():
         base_url="https://api.deepseek.com",
     )
 
-    result = asyncio.run(complete(
-        api_keys=None,
-        client=client,
-        config=config,
-        model_override="override-model",
-        messages=[{"role": "user", "content": "hello"}],
-        max_tokens=12,
-        response_format={"type": "json_object"},
-        extra_body={"thinking": {"enabled": False}},
-    ))
+    result = asyncio.run(
+        complete(
+            api_keys=None,
+            client=client,
+            config=config,
+            model_override="override-model",
+            messages=[{"role": "user", "content": "hello"}],
+            max_tokens=12,
+            response_format={"type": "json_object"},
+            extra_body={"thinking": {"enabled": False}},
+        )
+    )
 
     assert result.content == '{"type":"accept"}'
     assert result.usage.prompt_tokens == 3
@@ -119,20 +121,24 @@ def test_stream_normalizes_text_and_usage_chunks():
 def test_complete_wraps_provider_errors_and_empty_content():
     config = OpenAIChatProviderConfig(provider_name="OpenAI", api_key_field="openai_api_key", model_name="gpt-test")
     with pytest.raises(LLMProviderCallError):
-        asyncio.run(complete(
-            api_keys=None,
-            client=FakeClient(FakeCompletions(error=RuntimeError("boom"))),
-            config=config,
-            messages=[],
-        ))
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(FakeCompletions(error=RuntimeError("boom"))),
+                config=config,
+                messages=[],
+            )
+        )
 
     with pytest.raises(LLMEmptyResponseError):
-        asyncio.run(complete(
-            api_keys=None,
-            client=FakeClient(FakeCompletions(response=make_response(content=None))),
-            config=config,
-            messages=[],
-        ))
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(FakeCompletions(response=make_response(content=None))),
+                config=config,
+                messages=[],
+            )
+        )
 
 
 def test_create_client_requires_configured_api_key():

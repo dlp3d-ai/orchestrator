@@ -3,7 +3,8 @@ try:
 except Exception:
 
     class MissingAPIKeyException(Exception):
-        """Fallback used when generated protocol modules are unavailable in unit tests."""
+        """Fallback used when generated protocol modules are unavailable in
+        unit tests."""
 
 
 class LLMProviderError(RuntimeError):

@@ -19,7 +19,8 @@ from .conversation_adapter import BracketFilter, ConversationAdapter
 
 
 class SenseNovaConversationClient(ConversationAdapter):
-    """SenseNova conversation client for streaming chat and reject operations."""
+    """SenseNova conversation client for streaming chat and reject
+    operations."""
 
     AVAILABLE_FOR_STREAM = True
     AVAILABLE_FOR_REJECT = True
@@ -104,9 +105,7 @@ class SenseNovaConversationClient(ConversationAdapter):
             dag_start_time = task_space["dag_start_time"]
             style_list = task_space["style_list"]
             node_name = task_space["node_name"]
-            downstream_instances = {
-                node.name: node.payload for node in dag.get_node(node_name).downstreams
-            }
+            downstream_instances = {node.name: node.payload for node in dag.get_node(node_name).downstreams}
 
             bracket_filter = BracketFilter(self.bracket_pairs) if self.enable_bracket_filter else None
             chat_rsp = ""
@@ -199,9 +198,7 @@ class SenseNovaConversationClient(ConversationAdapter):
             dag = task_space["dag"]
             dag_start_time = task_space["dag_start_time"]
             node_name = task_space["node_name"]
-            downstream_instances = {
-                node.name: node.payload for node in dag.get_node(node_name).downstreams
-            }
+            downstream_instances = {node.name: node.payload for node in dag.get_node(node_name).downstreams}
 
             bracket_filter = BracketFilter(self.bracket_pairs) if self.enable_bracket_filter else None
             reject_rsp = ""

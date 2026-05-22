@@ -270,9 +270,7 @@ async def test_openai_audio_client_stream_pcm_16khz(
     """
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not openai_api_key:
-        pytest.skip(
-            "OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_16khz"
-        )
+        pytest.skip("OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_16khz")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_audio_client_stream_pcm_16khz")
 
@@ -380,9 +378,7 @@ async def test_openai_audio_client_stream_pcm_24khz(mongodb_memory_client: Mongo
     """
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not openai_api_key:
-        pytest.skip(
-            "OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_24khz"
-        )
+        pytest.skip("OPENAI_API_KEY not set, skipping test_openai_audio_client_stream_pcm_24khz")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_audio_client_stream_pcm_24khz")
 

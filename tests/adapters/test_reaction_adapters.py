@@ -101,9 +101,7 @@ async def test_openai_reaction_client_stream(
     """
     openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not openai_api_key:
-        pytest.skip(
-            "OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream"
-        )
+        pytest.skip("OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_reaction_client_stream")
 
@@ -207,9 +205,7 @@ async def test_xai_reaction_client_stream(
     """
     xai_api_key = os.environ.get("XAI_API_KEY")
     if not xai_api_key:
-        pytest.skip(
-            "XAI_API_KEY is not set, skipping test_xai_reaction_client_stream"
-        )
+        pytest.skip("XAI_API_KEY is not set, skipping test_xai_reaction_client_stream")
 
     if not xai_api_key:
         pytest.skip("XAI_API_KEY is not available")
@@ -315,9 +311,7 @@ async def test_gemini_reaction_client_stream(
     """
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
     if not gemini_api_key:
-        pytest.skip(
-            "GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream"
-        )
+        pytest.skip("GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream")
 
     if not gemini_api_key:
         pytest.skip("GEMINI_API_KEY is not available")
@@ -623,9 +617,7 @@ async def test_sensechat_reaction_client_stream(
     sensechat_ak = os.environ.get("SENSECHAT_AK")
     sensechat_sk = os.environ.get("SENSECHAT_SK")
     if not sensechat_ak or not sensechat_sk:
-        pytest.skip(
-            "SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_reaction_client_stream"
-        )
+        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensechat_reaction_client_stream")
 
@@ -731,9 +723,7 @@ async def test_deepseek_reaction_client_stream(
     """
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not deepseek_api_key:
-        pytest.skip(
-            "DEEPSEEK_API_KEY is not set, skipping test_deepseek_reaction_client_stream"
-        )
+        pytest.skip("DEEPSEEK_API_KEY is not set, skipping test_deepseek_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_reaction_client_stream")
 

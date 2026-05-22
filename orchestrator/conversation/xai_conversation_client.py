@@ -7,8 +7,8 @@ from typing import Any, Dict, Union
 from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
-from ..utils.executor_registry import ExecutorRegistry
 from ..llm.openai_chat import OpenAIChatProviderConfig, create_client, stream
+from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
 

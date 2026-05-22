@@ -27,4 +27,3 @@ class LLMStreamChunk:
 
 def normalize_messages(messages: List[LLMMessage]) -> List[LLMMessage]:
     return [dict(message) for message in messages]
-

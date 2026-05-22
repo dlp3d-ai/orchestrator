@@ -73,14 +73,16 @@ def test_complete_normalizes_text_blocks_and_usage():
     messages = FakeMessages(completion_response=response)
     config = AnthropicMessagesProviderConfig(api_key_field="anthropic_api_key", model_name="claude-test")
 
-    result = asyncio.run(complete(
-        api_keys=None,
-        client=FakeClient(messages),
-        config=config,
-        system="system",
-        messages=[{"role": "user", "content": "hi"}],
-        model_override="claude-override",
-    ))
+    result = asyncio.run(
+        complete(
+            api_keys=None,
+            client=FakeClient(messages),
+            config=config,
+            system="system",
+            messages=[{"role": "user", "content": "hi"}],
+            model_override="claude-override",
+        )
+    )
 
     assert result.content == "hello"
     assert result.usage.prompt_tokens == 2
@@ -116,19 +118,23 @@ def test_stream_yields_text_and_final_usage():
 def test_anthropic_errors_are_wrapped_and_empty_content_is_rejected():
     config = AnthropicMessagesProviderConfig(api_key_field="anthropic_api_key", model_name="claude-test")
     with pytest.raises(LLMProviderCallError):
-        asyncio.run(complete(
-            api_keys=None,
-            client=FakeClient(FakeMessages(error=RuntimeError("boom"))),
-            config=config,
-            system="system",
-            messages=[],
-        ))
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(FakeMessages(error=RuntimeError("boom"))),
+                config=config,
+                system="system",
+                messages=[],
+            )
+        )
 
     with pytest.raises(LLMEmptyResponseError):
-        asyncio.run(complete(
-            api_keys=None,
-            client=FakeClient(FakeMessages(completion_response=SimpleNamespace(content=[], usage=None))),
-            config=config,
-            system="system",
-            messages=[],
-        ))
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(FakeMessages(completion_response=SimpleNamespace(content=[], usage=None))),
+                config=config,
+                system="system",
+                messages=[],
+            )
+        )

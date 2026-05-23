@@ -7,10 +7,71 @@ from typing import Any, Dict, Union
 from prometheus_client import Histogram
 
 from ..data_structures.conversation import ConversationChunkBody, RejectChunkBody
-from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, MINIMAX_EXTRA_BODY, build_minimax_config
 from ..llm.openai_chat import create_client, stream
 from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import BracketFilter, ConversationAdapter
+
+
+_THINK_OPEN_TAG = "<think>"
+_THINK_CLOSE_TAG = "</think>"
+
+
+def _longest_suffix_matching_tag_prefix(text: str, tag: str) -> int:
+    max_len = min(len(text), len(tag) - 1)
+    lower_text = text.lower()
+    for size in range(max_len, 0, -1):
+        if tag.startswith(lower_text[-size:]):
+            return size
+    return 0
+
+
+class MiniMaxThinkingStreamFilter:
+    """Remove MiniMax <think> blocks from streaming content."""
+
+    def __init__(self) -> None:
+        self._buffer = ""
+        self._inside_thinking = False
+
+    def feed(self, text: str) -> str:
+        self._buffer += text
+        visible_parts = []
+
+        while self._buffer:
+            lower_buffer = self._buffer.lower()
+            if self._inside_thinking:
+                close_index = lower_buffer.find(_THINK_CLOSE_TAG)
+                if close_index == -1:
+                    keep_len = _longest_suffix_matching_tag_prefix(self._buffer, _THINK_CLOSE_TAG)
+                    self._buffer = self._buffer[-keep_len:] if keep_len else ""
+                    break
+                self._buffer = self._buffer[close_index + len(_THINK_CLOSE_TAG) :]
+                self._inside_thinking = False
+                continue
+
+            open_index = lower_buffer.find(_THINK_OPEN_TAG)
+            if open_index == -1:
+                keep_len = _longest_suffix_matching_tag_prefix(self._buffer, _THINK_OPEN_TAG)
+                emit_len = len(self._buffer) - keep_len
+                if emit_len > 0:
+                    visible_parts.append(self._buffer[:emit_len])
+                self._buffer = self._buffer[emit_len:]
+                break
+
+            if open_index > 0:
+                visible_parts.append(self._buffer[:open_index])
+            self._buffer = self._buffer[open_index + len(_THINK_OPEN_TAG) :]
+            self._inside_thinking = True
+
+        return "".join(visible_parts)
+
+    def flush(self) -> str:
+        if self._inside_thinking:
+            self._buffer = ""
+            return ""
+        remaining = self._buffer
+        self._buffer = ""
+        return remaining
 
 
 class MiniMaxConversationClient(ConversationAdapter):
@@ -202,6 +263,7 @@ class MiniMaxConversationClient(ConversationAdapter):
             # Start conversation
             chat_rsp = ""
             first_body_trunk = True
+            thinking_filter = MiniMaxThinkingStreamFilter()
             model_name_override = task_space["conversation_model_override"]
             system_chat = self.agent_prompts["system_chat"].format(style_list=style_list)
             conversation_prompt = task_space["user_prompt"] + "\n" + system_chat
@@ -229,13 +291,14 @@ class MiniMaxConversationClient(ConversationAdapter):
                 ],
                 temperature=1,
                 stream_options={"include_usage": True},
+                extra_body=MINIMAX_EXTRA_BODY,
             )
             input_token_number = 0
             output_token_number = 0
             loop = asyncio.get_event_loop()
             async for chunk in chat_rsp_stream:
                 if chunk.text_delta:
-                    text_seg = chunk.text_delta
+                    text_seg = thinking_filter.feed(chunk.text_delta)
 
                     # Apply bracket filter
                     if bracket_filter is not None and text_seg:
@@ -269,6 +332,22 @@ class MiniMaxConversationClient(ConversationAdapter):
                 if chunk.usage:
                     input_token_number += chunk.usage.prompt_tokens
                     output_token_number += chunk.usage.completion_tokens
+            text_seg = thinking_filter.flush()
+            if text_seg:
+                if bracket_filter is not None:
+                    text_seg = await loop.run_in_executor(self.executor, bracket_filter.filter_text_segment, text_seg)
+                if len(text_seg) > 0:
+                    chat_rsp += text_seg
+                    style = await loop.run_in_executor(self.executor, self.extract_style_tag, chat_rsp)
+                    coroutines = list()
+                    for next_node_name, payload in downstream_instances.items():
+                        body_trunk = ConversationChunkBody(
+                            request_id=request_id,
+                            text_segment=text_seg,
+                            style=style,
+                        )
+                        coroutines.append(payload.feed_stream(body_trunk))
+                    asyncio.gather(*coroutines)
             if self.input_token_number_histogram:
                 self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
             if self.output_token_number_histogram:
@@ -323,6 +402,7 @@ class MiniMaxConversationClient(ConversationAdapter):
             # Process reject
             reject_rsp = ""
             first_body_trunk = True
+            thinking_filter = MiniMaxThinkingStreamFilter()
             model_name_override = task_space["conversation_model_override"]
             reject_prompt = self.agent_prompts["system_reject"]
             llm_client = task_space.get("llm_client", None)
@@ -342,6 +422,7 @@ class MiniMaxConversationClient(ConversationAdapter):
                 temperature=1,
                 max_tokens=1000,
                 stream_options={"include_usage": True},
+                extra_body=MINIMAX_EXTRA_BODY,
             )
             input_token_number = 0
             output_token_number = 0
@@ -349,7 +430,7 @@ class MiniMaxConversationClient(ConversationAdapter):
             loop = asyncio.get_event_loop()
             async for chunk in reject_rsp_stream:
                 if chunk.text_delta:
-                    text_seg = chunk.text_delta
+                    text_seg = thinking_filter.feed(chunk.text_delta)
 
                     # Apply bracket filter
                     if bracket_filter is not None and text_seg:
@@ -381,6 +462,20 @@ class MiniMaxConversationClient(ConversationAdapter):
                 if chunk.usage:
                     input_token_number += chunk.usage.prompt_tokens
                     output_token_number += chunk.usage.completion_tokens
+            text_seg = thinking_filter.flush()
+            if text_seg:
+                if bracket_filter is not None:
+                    text_seg = await loop.run_in_executor(self.executor, bracket_filter.filter_text_segment, text_seg)
+                if len(text_seg) > 0:
+                    coroutines = list()
+                    for next_node_name, payload in downstream_instances.items():
+                        body_trunk = RejectChunkBody(
+                            request_id=request_id,
+                            text_segment=text_seg,
+                        )
+                        coroutines.append(payload.feed_stream(body_trunk))
+                    asyncio.gather(*coroutines)
+                    reject_rsp += text_seg
             if self.input_token_number_histogram:
                 self.input_token_number_histogram.labels(adapter=self.name, user_id=user_id).observe(input_token_number)
             if self.output_token_number_histogram:

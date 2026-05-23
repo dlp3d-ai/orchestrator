@@ -297,4 +297,125 @@ def test_minimax_conversation_stream_uses_common_openai_chat_layer(monkeypatch):
     assert len(calls) == 1
     assert calls[0]["config"] is adapter.llm_provider_config
     assert calls[0]["stream_options"] == {"include_usage": True}
-    assert "extra_body" not in calls[0]
+    assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY
+
+
+def test_minimax_conversation_chat_filters_thinking_from_single_chunk(monkeypatch):
+    async def fake_stream(**kwargs):
+        yield LLMStreamChunk(text_delta="<think>hidden</think>hello")
+
+    monkeypatch.setattr(
+        "orchestrator.conversation.minimax_conversation_client.stream",
+        fake_stream,
+    )
+
+    fed_bodies = []
+
+    class FakePayload:
+        async def feed_stream(self, body):
+            fed_bodies.append(body)
+
+    fake_node = SimpleNamespace(name="downstream", payload=FakePayload())
+    fake_dag_node = SimpleNamespace(downstreams=[fake_node])
+    fake_dag = SimpleNamespace(get_node=lambda _: fake_dag_node)
+
+    adapter = MiniMaxConversationClient(name="conversation", agent_prompts_file="configs/agent_prompts.yaml")
+    adapter.input_buffer["request-1"] = {
+        "chat_task": {
+            "dag": fake_dag,
+            "dag_start_time": None,
+            "style_list": [],
+            "node_name": "conversation",
+            "conversation_model_override": "",
+            "user_prompt": "user prompt",
+            "llm_client": object(),
+            "user_id": "user-1",
+        }
+    }
+
+    result = asyncio.run(adapter._llm_stream_chat("message", "context", [], "zh", "request-1"))
+
+    assert result == "hello"
+    assert [body.text_segment for body in fed_bodies] == ["hello"]
+
+
+def test_minimax_conversation_chat_filters_thinking_across_chunks(monkeypatch):
+    async def fake_stream(**kwargs):
+        yield LLMStreamChunk(text_delta="<thi")
+        yield LLMStreamChunk(text_delta="nk>hidden")
+        yield LLMStreamChunk(text_delta="</think>hello")
+
+    monkeypatch.setattr(
+        "orchestrator.conversation.minimax_conversation_client.stream",
+        fake_stream,
+    )
+
+    fed_bodies = []
+
+    class FakePayload:
+        async def feed_stream(self, body):
+            fed_bodies.append(body)
+
+    fake_node = SimpleNamespace(name="downstream", payload=FakePayload())
+    fake_dag_node = SimpleNamespace(downstreams=[fake_node])
+    fake_dag = SimpleNamespace(get_node=lambda _: fake_dag_node)
+
+    adapter = MiniMaxConversationClient(name="conversation", agent_prompts_file="configs/agent_prompts.yaml")
+    adapter.input_buffer["request-1"] = {
+        "chat_task": {
+            "dag": fake_dag,
+            "dag_start_time": None,
+            "style_list": [],
+            "node_name": "conversation",
+            "conversation_model_override": "",
+            "user_prompt": "user prompt",
+            "llm_client": object(),
+            "user_id": "user-1",
+        }
+    }
+
+    result = asyncio.run(adapter._llm_stream_chat("message", "context", [], "zh", "request-1"))
+
+    assert result == "hello"
+    assert [body.text_segment for body in fed_bodies] == ["hello"]
+
+
+def test_minimax_conversation_reject_filters_thinking(monkeypatch):
+    calls = []
+
+    async def fake_stream(**kwargs):
+        calls.append(kwargs)
+        yield LLMStreamChunk(text_delta="<think>hidden reject reasoning</think>sorry")
+
+    monkeypatch.setattr(
+        "orchestrator.conversation.minimax_conversation_client.stream",
+        fake_stream,
+    )
+
+    fed_bodies = []
+
+    class FakePayload:
+        async def feed_stream(self, body):
+            fed_bodies.append(body)
+
+    fake_node = SimpleNamespace(name="downstream", payload=FakePayload())
+    fake_dag_node = SimpleNamespace(downstreams=[fake_node])
+    fake_dag = SimpleNamespace(get_node=lambda _: fake_dag_node)
+
+    adapter = MiniMaxConversationClient(name="conversation", agent_prompts_file="configs/agent_prompts.yaml")
+    adapter.input_buffer["request-1"] = {
+        "reject_task": {
+            "dag": fake_dag,
+            "dag_start_time": None,
+            "node_name": "conversation",
+            "conversation_model_override": "",
+            "llm_client": object(),
+            "user_id": "user-1",
+        }
+    }
+
+    result = asyncio.run(adapter._llm_stream_reject("message", "zh", "request-1"))
+
+    assert result == "sorry"
+    assert [body.text_segment for body in fed_bodies] == ["sorry"]
+    assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY

@@ -11,7 +11,7 @@ __logger_cfg__ = dict(
     aws_level=10,
     file_level=10,
     console_level=20,
-    logger_path="logs/server.log",
+    logger_path=None,
 )
 server = dict(
     type="OrchestratorProxyServer",

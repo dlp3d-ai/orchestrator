@@ -160,6 +160,38 @@ def test_sensenova_memory_uses_common_openai_chat_layer_and_preserves_output_ext
     assert calls[0]["extra_body"] == SENSENOVA_EXTRA_BODY
 
 
+def test_sensenova_memory_preserves_text_fallback_after_response_format_downgrade(monkeypatch):
+    calls = []
+
+    async def fake_complete(**kwargs):
+        calls.append(kwargs)
+        return LLMCompletionResult(
+            content="<output>fallback memory</output>",
+            usage=LLMUsage(prompt_tokens=3, completion_tokens=4, total_tokens=7),
+        )
+
+    monkeypatch.setattr(
+        "orchestrator.memory.sensenova_memory_client.complete",
+        fake_complete,
+    )
+
+    adapter = SenseNovaMemoryClient(name="memory", db_client=object())
+    result = asyncio.run(
+        adapter.call_llm(
+            system_prompt="memory",
+            user_input="conversation",
+            max_tokens=64,
+            response_format={"type": "json_schema"},
+            api_keys={SENSENOVA_API_KEY_FIELD: "test-key"},
+        )
+    )
+
+    assert result == "fallback memory"
+    assert len(calls) == 1
+    assert calls[0]["response_format"] == {"type": "json_schema"}
+    assert calls[0]["extra_body"] == SENSENOVA_EXTRA_BODY
+
+
 def test_sensenova_conversation_stream_uses_common_openai_chat_layer(monkeypatch):
     calls = []
 

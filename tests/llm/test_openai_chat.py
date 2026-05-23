@@ -4,7 +4,13 @@ from types import SimpleNamespace
 import pytest
 
 from orchestrator.llm.errors import LLMEmptyResponseError, LLMProviderCallError, MissingAPIKeyException
-from orchestrator.llm.openai_chat import OpenAIChatProviderConfig, complete, create_client, stream
+from orchestrator.llm.openai_chat import (
+    _RESPONSE_FORMAT_UNSUPPORTED_CACHE,
+    OpenAIChatProviderConfig,
+    complete,
+    create_client,
+    stream,
+)
 
 
 class FakeCompletions:
@@ -21,6 +27,19 @@ class FakeCompletions:
         if kwargs.get("stream"):
             return FakeAsyncIterator(self.stream_chunks)
         return self.response
+
+
+class FakeSequenceCompletions:
+    def __init__(self, outcomes):
+        self.outcomes = list(outcomes)
+        self.calls = []
+
+    async def create(self, **kwargs):
+        self.calls.append(kwargs)
+        outcome = self.outcomes.pop(0)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
 
 
 class FakeAsyncIterator:
@@ -54,6 +73,13 @@ def make_response(content="ok", prompt_tokens=3, completion_tokens=4):
 def make_stream_chunk(text="", usage=None):
     delta = SimpleNamespace(content=text)
     return SimpleNamespace(choices=[SimpleNamespace(delta=delta)] if text else [], usage=usage)
+
+
+@pytest.fixture(autouse=True)
+def clear_response_format_cache():
+    _RESPONSE_FORMAT_UNSUPPORTED_CACHE.clear()
+    yield
+    _RESPONSE_FORMAT_UNSUPPORTED_CACHE.clear()
 
 
 def test_complete_normalizes_content_usage_and_request_kwargs():
@@ -145,3 +171,155 @@ def test_create_client_requires_configured_api_key():
     config = OpenAIChatProviderConfig(provider_name="XAI", api_key_field="xai_api_key", model_name="grok")
     with pytest.raises(MissingAPIKeyException):
         create_client({}, config)
+
+
+def test_complete_retries_without_response_format_for_guided_grammar_errors():
+    completions = FakeSequenceCompletions(
+        [
+            RuntimeError("guided_grammar has compile_grammar_error: Unsupported tokenizer type"),
+            make_response(content="<output>fallback text</output>"),
+        ]
+    )
+    client = FakeClient(completions)
+    config = OpenAIChatProviderConfig(
+        provider_name="SenseNova",
+        api_key_field="sensenova_api_key",
+        model_name="sensenova-6.7-flash-lite",
+        base_url="https://token.sensenova.cn/v1",
+    )
+
+    result = asyncio.run(
+        complete(
+            api_keys=None,
+            client=client,
+            config=config,
+            messages=[{"role": "user", "content": "hello"}],
+            response_format={"type": "json_schema"},
+        )
+    )
+
+    assert result.content == "<output>fallback text</output>"
+    assert len(completions.calls) == 2
+    assert completions.calls[0]["response_format"] == {"type": "json_schema"}
+    assert "response_format" not in completions.calls[1]
+
+
+def test_complete_skips_response_format_after_unsupported_format_is_cached():
+    config = OpenAIChatProviderConfig(
+        provider_name="SenseNova",
+        api_key_field="sensenova_api_key",
+        model_name="sensenova-6.7-flash-lite",
+        base_url="https://token.sensenova.cn/v1",
+    )
+    response_format = {"type": "json_schema"}
+
+    first_completions = FakeSequenceCompletions(
+        [
+            RuntimeError("response_format json_schema guided_grammar compile_grammar_error"),
+            make_response(content="accept"),
+        ]
+    )
+    asyncio.run(
+        complete(
+            api_keys=None,
+            client=FakeClient(first_completions),
+            config=config,
+            messages=[{"role": "user", "content": "hello"}],
+            response_format=response_format,
+        )
+    )
+
+    second_completions = FakeSequenceCompletions([make_response(content="accept")])
+    result = asyncio.run(
+        complete(
+            api_keys=None,
+            client=FakeClient(second_completions),
+            config=config,
+            messages=[{"role": "user", "content": "hello"}],
+            response_format=response_format,
+        )
+    )
+
+    assert result.content == "accept"
+    assert len(second_completions.calls) == 1
+    assert "response_format" not in second_completions.calls[0]
+
+
+def test_complete_does_not_retry_unrelated_errors_with_response_format():
+    completions = FakeSequenceCompletions([RuntimeError("401 invalid api key")])
+    config = OpenAIChatProviderConfig(provider_name="OpenAI", api_key_field="openai_api_key", model_name="gpt-test")
+
+    with pytest.raises(LLMProviderCallError):
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(completions),
+                config=config,
+                messages=[{"role": "user", "content": "hello"}],
+                response_format={"type": "json_schema"},
+            )
+        )
+
+    assert len(completions.calls) == 1
+    assert completions.calls[0]["response_format"] == {"type": "json_schema"}
+    assert not _RESPONSE_FORMAT_UNSUPPORTED_CACHE
+
+
+def test_complete_does_not_retry_without_response_format_even_when_error_mentions_json_schema():
+    completions = FakeSequenceCompletions([RuntimeError("json_schema compile_grammar_error")])
+    config = OpenAIChatProviderConfig(provider_name="OpenAI", api_key_field="openai_api_key", model_name="gpt-test")
+
+    with pytest.raises(LLMProviderCallError):
+        asyncio.run(
+            complete(
+                api_keys=None,
+                client=FakeClient(completions),
+                config=config,
+                messages=[{"role": "user", "content": "hello"}],
+            )
+        )
+
+    assert len(completions.calls) == 1
+    assert "response_format" not in completions.calls[0]
+    assert not _RESPONSE_FORMAT_UNSUPPORTED_CACHE
+
+
+def test_complete_response_format_cache_isolated_by_model_override():
+    config = OpenAIChatProviderConfig(
+        provider_name="SenseNova",
+        api_key_field="sensenova_api_key",
+        model_name="sensenova-default",
+        base_url="https://token.sensenova.cn/v1",
+    )
+    response_format = {"type": "json_schema"}
+    first_completions = FakeSequenceCompletions(
+        [
+            RuntimeError("guided_grammar compile_grammar_error"),
+            make_response(content="fallback"),
+        ]
+    )
+    asyncio.run(
+        complete(
+            api_keys=None,
+            client=FakeClient(first_completions),
+            config=config,
+            model_override="sensenova-6.7-flash-lite",
+            messages=[{"role": "user", "content": "hello"}],
+            response_format=response_format,
+        )
+    )
+
+    second_completions = FakeSequenceCompletions([make_response(content="structured")])
+    asyncio.run(
+        complete(
+            api_keys=None,
+            client=FakeClient(second_completions),
+            config=config,
+            model_override="different-model",
+            messages=[{"role": "user", "content": "hello"}],
+            response_format=response_format,
+        )
+    )
+
+    assert len(second_completions.calls) == 1
+    assert second_completions.calls[0]["response_format"] == response_format

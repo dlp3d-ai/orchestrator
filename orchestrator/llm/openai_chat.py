@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, AsyncIterator, Dict, List, Optional
+from typing import Any, AsyncIterator, Dict, List, Optional, Tuple
 
 import httpx
 
@@ -15,6 +15,30 @@ class OpenAIChatProviderConfig:
     base_url: Optional[str] = None
     timeout: Optional[float] = None
     proxy_url: Optional[str] = None
+
+
+_RESPONSE_FORMAT_UNSUPPORTED_CACHE: set[Tuple[str, Optional[str], str, str]] = set()
+_RESPONSE_FORMAT_UNSUPPORTED_SIGNALS = (
+    "guided_grammar",
+    "compile_grammar_error",
+    "Unsupported tokenizer type",
+    "json_schema",
+    "response_format",
+)
+
+
+def _response_format_cache_key(
+    config: OpenAIChatProviderConfig,
+    model_name: str,
+    response_format: Dict[str, Any],
+) -> Tuple[str, Optional[str], str, str]:
+    response_format_type = response_format.get("type", "unknown")
+    return (config.provider_name, config.base_url, model_name, str(response_format_type))
+
+
+def _is_response_format_unsupported_error(exc: Exception) -> bool:
+    error_text = str(exc)
+    return any(signal in error_text for signal in _RESPONSE_FORMAT_UNSUPPORTED_SIGNALS)
 
 
 def _get_api_key(api_keys: Optional[Dict[str, Any]], config: OpenAIChatProviderConfig) -> str:
@@ -71,19 +95,35 @@ async def complete(
 ) -> LLMCompletionResult:
     owned_client = client is None
     llm_client = client or create_client(api_keys, config)
+    model_name = model_override or config.model_name
+    response_format_cache_key = (
+        _response_format_cache_key(config, model_name, response_format) if response_format is not None else None
+    )
+    should_send_response_format = (
+        response_format is not None and response_format_cache_key not in _RESPONSE_FORMAT_UNSUPPORTED_CACHE
+    )
     kwargs: Dict[str, Any] = {
-        "model": model_override or config.model_name,
+        "model": model_name,
         "messages": normalize_messages(messages),
         "temperature": temperature,
     }
     if max_tokens is not None:
         kwargs["max_tokens"] = max_tokens
-    if response_format is not None:
+    if should_send_response_format:
         kwargs["response_format"] = response_format
     if extra_body is not None:
         kwargs["extra_body"] = extra_body
     try:
-        response = await llm_client.chat.completions.create(**kwargs)
+        try:
+            response = await llm_client.chat.completions.create(**kwargs)
+        except Exception as exc:
+            if not should_send_response_format or not _is_response_format_unsupported_error(exc):
+                raise
+            if response_format_cache_key is not None:
+                _RESPONSE_FORMAT_UNSUPPORTED_CACHE.add(response_format_cache_key)
+            retry_kwargs = dict(kwargs)
+            retry_kwargs.pop("response_format", None)
+            response = await llm_client.chat.completions.create(**retry_kwargs)
     except Exception as exc:
         raise LLMProviderCallError(f"{config.provider_name} chat completion failed: {exc}") from exc
     finally:

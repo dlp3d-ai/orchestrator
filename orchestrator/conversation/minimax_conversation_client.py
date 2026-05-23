@@ -12,7 +12,6 @@ from ..llm.openai_chat import create_client, stream
 from ..utils.executor_registry import ExecutorRegistry
 from .conversation_adapter import BracketFilter, ConversationAdapter
 
-
 _THINK_OPEN_TAG = "<think>"
 _THINK_CLOSE_TAG = "</think>"
 

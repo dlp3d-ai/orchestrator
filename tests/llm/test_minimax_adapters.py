@@ -341,8 +341,8 @@ def test_minimax_conversation_chat_filters_thinking_from_single_chunk(monkeypatc
 
 def test_minimax_conversation_chat_filters_thinking_across_chunks(monkeypatch):
     async def fake_stream(**kwargs):
-        yield LLMStreamChunk(text_delta="<thi")
-        yield LLMStreamChunk(text_delta="nk>hidden")
+        yield LLMStreamChunk(text_delta="<t")
+        yield LLMStreamChunk(text_delta="hink>hidden")
         yield LLMStreamChunk(text_delta="</think>hello")
 
     monkeypatch.setattr(

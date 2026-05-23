@@ -6,7 +6,13 @@ from typing import Any, Dict, Optional, Union
 from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
-from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.minimax import (
+    MINIMAX_DEFAULT_BASE_URL,
+    MINIMAX_DEFAULT_MODEL,
+    MINIMAX_EXTRA_BODY,
+    build_minimax_config,
+    strip_minimax_thinking,
+)
 from ..llm.openai_chat import complete, create_client
 from ..utils.executor_registry import ExecutorRegistry
 from .reaction_adapter import ReactionAdapter
@@ -165,8 +171,10 @@ class MiniMaxReactionClient(ReactionAdapter):
                 ],
                 temperature=1,
                 max_tokens=2000,
+                response_format=response_format,
+                extra_body=MINIMAX_EXTRA_BODY,
             )
-            response_text = response.content
+            response_text = strip_minimax_thinking(response.content)
 
             def extract_value(pattern, default=0):
                 match = re.search(pattern, response_text)

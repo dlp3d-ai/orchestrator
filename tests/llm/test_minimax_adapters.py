@@ -7,7 +7,12 @@ from orchestrator.classification.minimax_classification_client import MiniMaxCla
 from orchestrator.conversation.minimax_conversation_client import MiniMaxConversationClient
 from orchestrator.data_structures.classification import ClassificationType
 from orchestrator.llm.errors import MissingAPIKeyException
-from orchestrator.llm.minimax import MINIMAX_API_KEY_FIELD, MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL
+from orchestrator.llm.minimax import (
+    MINIMAX_API_KEY_FIELD,
+    MINIMAX_DEFAULT_BASE_URL,
+    MINIMAX_DEFAULT_MODEL,
+    MINIMAX_EXTRA_BODY,
+)
 from orchestrator.llm.openai_chat import create_client
 from orchestrator.llm.types import LLMCompletionResult, LLMStreamChunk, LLMUsage
 from orchestrator.memory.minimax_memory_client import MiniMaxMemoryClient
@@ -69,13 +74,36 @@ def test_minimax_classification_uses_common_openai_chat_layer(monkeypatch):
         "api_keys": {MINIMAX_API_KEY_FIELD: "test-key"},
     }
 
-    result = asyncio.run(adapter.classify("request-1", "classify", "hello"))
+    response_format = {"type": "json_schema"}
+    result = asyncio.run(adapter.classify("request-1", "classify", "hello", response_format=response_format))
 
     assert result is ClassificationType.REJECT
     assert len(calls) == 1
     assert calls[0]["config"] is adapter.llm_provider_config
     assert calls[0]["model_override"] == MINIMAX_DEFAULT_MODEL
-    assert "extra_body" not in calls[0]
+    assert calls[0]["response_format"] == response_format
+    assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY
+
+
+def test_minimax_classification_strips_thinking_before_parsing(monkeypatch):
+    async def fake_complete(**kwargs):
+        return LLMCompletionResult(content="<think>reject would be wrong</think>leave", usage=LLMUsage())
+
+    monkeypatch.setattr(
+        "orchestrator.classification.minimax_classification_client.complete",
+        fake_complete,
+    )
+
+    adapter = MiniMaxClassificationClient(name="classification", motion_keywords=[])
+    adapter.input_buffer["request-1"] = {
+        "llm_client": object(),
+        "classification_model_override": "",
+        "api_keys": {MINIMAX_API_KEY_FIELD: "test-key"},
+    }
+
+    result = asyncio.run(adapter.classify("request-1", "classify", "hello"))
+
+    assert result is ClassificationType.LEAVE
 
 
 def test_minimax_reaction_uses_common_openai_chat_layer(monkeypatch):
@@ -104,6 +132,52 @@ def test_minimax_reaction_uses_common_openai_chat_layer(monkeypatch):
         "api_keys": {MINIMAX_API_KEY_FIELD: "test-key"},
     }
 
+    response_format = {"type": "json_schema"}
+    result = asyncio.run(
+        adapter.get_reaction_delta(
+            "request-1",
+            prompt="reaction",
+            text="agent text",
+            tag="",
+            user_input="hello",
+            response_format=response_format,
+        )
+    )
+
+    assert result.emotion_delta.happiness_delta == 1
+    assert result.relationship_delta == 2
+    assert result.motion[0].speech_keywords == "hello"
+    assert result.motion[0].motion_keywords == "wave"
+    assert len(calls) == 1
+    assert calls[0]["config"] is adapter.llm_provider_config
+    assert calls[0]["response_format"] == response_format
+    assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY
+
+
+def test_minimax_reaction_strips_thinking_before_parsing(monkeypatch):
+    content = """
+    <think><relationship_delta>99</relationship_delta></think>
+    <happiness_delta>3</happiness_delta>
+    <relationship_delta>1</relationship_delta>
+    <speech_keywords>hello</speech_keywords>
+    <motion_keywords>wave</motion_keywords>
+    """
+
+    async def fake_complete(**kwargs):
+        return LLMCompletionResult(content=content, usage=LLMUsage())
+
+    monkeypatch.setattr(
+        "orchestrator.reaction.minimax_reaction_client.complete",
+        fake_complete,
+    )
+
+    adapter = MiniMaxReactionClient(name="reaction", motion_keywords=[])
+    adapter.input_buffer["request-1"] = {
+        "llm_client": object(),
+        "reaction_model_override": "",
+        "api_keys": {MINIMAX_API_KEY_FIELD: "test-key"},
+    }
+
     result = asyncio.run(
         adapter.get_reaction_delta(
             "request-1",
@@ -114,13 +188,9 @@ def test_minimax_reaction_uses_common_openai_chat_layer(monkeypatch):
         )
     )
 
-    assert result.emotion_delta.happiness_delta == 1
-    assert result.relationship_delta == 2
-    assert result.motion[0].speech_keywords == "hello"
+    assert result.emotion_delta.happiness_delta == 3
+    assert result.relationship_delta == 1
     assert result.motion[0].motion_keywords == "wave"
-    assert len(calls) == 1
-    assert calls[0]["config"] is adapter.llm_provider_config
-    assert "extra_body" not in calls[0]
 
 
 def test_minimax_memory_uses_common_openai_chat_layer_and_preserves_output_extraction(monkeypatch):
@@ -139,6 +209,38 @@ def test_minimax_memory_uses_common_openai_chat_layer_and_preserves_output_extra
     )
 
     adapter = MiniMaxMemoryClient(name="memory", db_client=object())
+    response_format = {"type": "json_schema"}
+    result = asyncio.run(
+        adapter.call_llm(
+            system_prompt="memory",
+            user_input="conversation",
+            max_tokens=64,
+            response_format=response_format,
+            api_keys={MINIMAX_API_KEY_FIELD: "test-key"},
+        )
+    )
+
+    assert result == "condensed memory"
+    assert len(calls) == 1
+    assert calls[0]["config"] is adapter.llm_provider_config
+    assert calls[0]["max_tokens"] == 64
+    assert calls[0]["response_format"] == response_format
+    assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY
+
+
+def test_minimax_memory_strips_thinking_before_output_extraction(monkeypatch):
+    async def fake_complete(**kwargs):
+        return LLMCompletionResult(
+            content="<think>analysis</think><output>clean memory</output>",
+            usage=LLMUsage(prompt_tokens=3, completion_tokens=4, total_tokens=7),
+        )
+
+    monkeypatch.setattr(
+        "orchestrator.memory.minimax_memory_client.complete",
+        fake_complete,
+    )
+
+    adapter = MiniMaxMemoryClient(name="memory", db_client=object())
     result = asyncio.run(
         adapter.call_llm(
             system_prompt="memory",
@@ -148,11 +250,7 @@ def test_minimax_memory_uses_common_openai_chat_layer_and_preserves_output_extra
         )
     )
 
-    assert result == "condensed memory"
-    assert len(calls) == 1
-    assert calls[0]["config"] is adapter.llm_provider_config
-    assert calls[0]["max_tokens"] == 64
-    assert "extra_body" not in calls[0]
+    assert result == "clean memory"
 
 
 def test_minimax_conversation_stream_uses_common_openai_chat_layer(monkeypatch):

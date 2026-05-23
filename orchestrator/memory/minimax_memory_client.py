@@ -4,7 +4,13 @@ from typing import Any, Dict, Optional, Union
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..llm.minimax import MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL, build_minimax_config
+from ..llm.minimax import (
+    MINIMAX_DEFAULT_BASE_URL,
+    MINIMAX_DEFAULT_MODEL,
+    MINIMAX_EXTRA_BODY,
+    build_minimax_config,
+    strip_minimax_thinking,
+)
 from ..llm.openai_chat import complete
 from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
@@ -140,6 +146,8 @@ class MiniMaxMemoryClient(BaseMemoryAdapter):
                 ],
                 temperature=1,
                 max_tokens=max_tokens,
+                response_format=response_format,
+                extra_body=MINIMAX_EXTRA_BODY,
             )
 
             if self.input_token_number_histogram:
@@ -147,12 +155,13 @@ class MiniMaxMemoryClient(BaseMemoryAdapter):
             if self.output_token_number_histogram:
                 self.output_token_number_histogram.labels(adapter=self.name).observe(response.usage.completion_tokens)
 
-            match = re.search(r"<output>(.*?)</output>", response.content, re.DOTALL)
+            content = strip_minimax_thinking(response.content)
+            match = re.search(r"<output>(.*?)</output>", content, re.DOTALL)
             if match:
                 output = match.group(1)
             else:
-                self.logger.warning(f"Failed to extract <output> tag from content: {response.content}")
-                output = response.content
+                self.logger.warning(f"Failed to extract <output> tag from content: {content}")
+                output = content
             return output
         except Exception as e:
             exception_type = type(e).__name__

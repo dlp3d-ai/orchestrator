@@ -9,6 +9,23 @@ from .types import LLMCompletionResult, LLMMessage, LLMStreamChunk, LLMUsage, no
 
 @dataclass
 class OpenAIChatProviderConfig:
+    """Configuration for an OpenAI-compatible chat completions provider.
+
+    Attributes:
+        provider_name (str):
+            Human-readable provider name used in errors and cache keys.
+        api_key_field (str):
+            Field name used to read the provider API key from user settings.
+        model_name (str):
+            Default model name for this provider.
+        base_url (Optional[str]):
+            Optional OpenAI-compatible API base URL.
+        timeout (Optional[float]):
+            Optional request timeout in seconds.
+        proxy_url (Optional[str]):
+            Optional HTTP proxy URL for provider requests.
+    """
+
     provider_name: str
     api_key_field: str
     model_name: str
@@ -32,16 +49,57 @@ def _response_format_cache_key(
     model_name: str,
     response_format: Dict[str, Any],
 ) -> Tuple[str, Optional[str], str, str]:
+    """Build the in-process capability cache key for response formats.
+
+    Args:
+        config (OpenAIChatProviderConfig):
+            Provider configuration.
+        model_name (str):
+            Resolved model name for the current request.
+        response_format (Dict[str, Any]):
+            Response format requested by the business adapter.
+
+    Returns:
+        Tuple[str, Optional[str], str, str]:
+            Provider/model/format tuple used to cache unsupported formats.
+    """
     response_format_type = response_format.get("type", "unknown")
     return (config.provider_name, config.base_url, model_name, str(response_format_type))
 
 
 def _is_response_format_unsupported_error(exc: Exception) -> bool:
+    """Check whether a provider error clearly rejects structured output.
+
+    Args:
+        exc (Exception):
+            Provider exception raised by the SDK call.
+
+    Returns:
+        bool:
+            True when the error text matches a conservative structured-output
+            failure signal.
+    """
     error_text = str(exc)
     return any(signal in error_text for signal in _RESPONSE_FORMAT_UNSUPPORTED_SIGNALS)
 
 
 def _get_api_key(api_keys: Optional[Dict[str, Any]], config: OpenAIChatProviderConfig) -> str:
+    """Read the provider API key from user settings.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (OpenAIChatProviderConfig):
+            Provider configuration containing the key field name.
+
+    Returns:
+        str:
+            API key value.
+
+    Raises:
+        MissingAPIKeyException:
+            Raised when the configured key field is absent or empty.
+    """
     api_key = (api_keys or {}).get(config.api_key_field, "")
     if not api_key:
         raise MissingAPIKeyException(f"{config.provider_name} API key is not found in the API keys.")
@@ -49,12 +107,35 @@ def _get_api_key(api_keys: Optional[Dict[str, Any]], config: OpenAIChatProviderC
 
 
 def _build_http_client(config: OpenAIChatProviderConfig) -> Optional[httpx.AsyncClient]:
+    """Create a proxied HTTP client when a provider proxy is configured.
+
+    Args:
+        config (OpenAIChatProviderConfig):
+            Provider configuration.
+
+    Returns:
+        Optional[httpx.AsyncClient]:
+            A proxied HTTP client, or None to let the SDK create its default
+            client.
+    """
     if config.proxy_url is None:
         return None
     return httpx.AsyncClient(proxy=config.proxy_url)
 
 
 def create_client(api_keys: Optional[Dict[str, Any]], config: OpenAIChatProviderConfig) -> Any:
+    """Create an OpenAI SDK client for an OpenAI-compatible provider.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (OpenAIChatProviderConfig):
+            Provider configuration.
+
+    Returns:
+        Any:
+            Async OpenAI-compatible client instance.
+    """
     import openai
 
     kwargs: Dict[str, Any] = {
@@ -69,6 +150,16 @@ def create_client(api_keys: Optional[Dict[str, Any]], config: OpenAIChatProvider
 
 
 def usage_from_openai(raw_usage: Any) -> LLMUsage:
+    """Normalize OpenAI-compatible usage metadata.
+
+    Args:
+        raw_usage (Any):
+            Provider usage object returned by the SDK.
+
+    Returns:
+        LLMUsage:
+            Normalized token usage. Missing values default to zero.
+    """
     if raw_usage is None:
         return LLMUsage()
     prompt_tokens = int(getattr(raw_usage, "prompt_tokens", 0) or 0)
@@ -93,6 +184,39 @@ async def complete(
     extra_body: Optional[Dict[str, Any]] = None,
     client: Optional[Any] = None,
 ) -> LLMCompletionResult:
+    """Run a non-streaming OpenAI-compatible chat completion.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (OpenAIChatProviderConfig):
+            Provider configuration.
+        messages (List[LLMMessage]):
+            Chat messages to send to the provider.
+        model_override (Optional[str], optional):
+            Per-request model override. Defaults to None.
+        temperature (float, optional):
+            Sampling temperature. Defaults to 1.
+        max_tokens (Optional[int], optional):
+            Maximum completion token count. Defaults to None.
+        response_format (Optional[Dict[str, Any]], optional):
+            Optional structured-output request. Unsupported formats are
+            conservatively retried without this field and cached in memory.
+        extra_body (Optional[Dict[str, Any]], optional):
+            Provider-specific request body fields. Defaults to None.
+        client (Optional[Any], optional):
+            Existing SDK client to reuse. Defaults to None.
+
+    Returns:
+        LLMCompletionResult:
+            Normalized completion content, usage, and raw response.
+
+    Raises:
+        LLMProviderCallError:
+            Raised when the provider SDK call fails after any allowed retry.
+        LLMEmptyResponseError:
+            Raised when the provider returns no text content.
+    """
     owned_client = client is None
     llm_client = client or create_client(api_keys, config)
     model_name = model_override or config.model_name
@@ -151,6 +275,36 @@ async def stream(
     extra_body: Optional[Dict[str, Any]] = None,
     client: Optional[Any] = None,
 ) -> AsyncIterator[LLMStreamChunk]:
+    """Run a streaming OpenAI-compatible chat completion.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (OpenAIChatProviderConfig):
+            Provider configuration.
+        messages (List[LLMMessage]):
+            Chat messages to send to the provider.
+        model_override (Optional[str], optional):
+            Per-request model override. Defaults to None.
+        temperature (float, optional):
+            Sampling temperature. Defaults to 1.
+        max_tokens (Optional[int], optional):
+            Maximum completion token count. Defaults to None.
+        stream_options (Optional[Dict[str, Any]], optional):
+            Provider stream options, such as usage inclusion. Defaults to None.
+        extra_body (Optional[Dict[str, Any]], optional):
+            Provider-specific request body fields. Defaults to None.
+        client (Optional[Any], optional):
+            Existing SDK client to reuse. Defaults to None.
+
+    Yields:
+        LLMStreamChunk:
+            Normalized text deltas and optional usage chunks.
+
+    Raises:
+        LLMProviderCallError:
+            Raised when the provider SDK streaming call fails.
+    """
     owned_client = client is None
     llm_client = client or create_client(api_keys, config)
     kwargs: Dict[str, Any] = {

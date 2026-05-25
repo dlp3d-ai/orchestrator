@@ -1,5 +1,4 @@
 import asyncio
-import json
 import re
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -214,7 +213,7 @@ class SenseChatReactionClient(ReactionAdapter):
                 },
                 {
                     "role": "user",
-                    "content": f"<user_input>: {text}",
+                    "content": user_message,
                 },
             ]
 

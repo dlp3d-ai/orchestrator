@@ -78,8 +78,8 @@ async def test_tts_reaction_aggregator_basic_flow():
 
     # Run aggregator and Profile
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     # Wait for DAG status to become COMPLETED
     start_time = time.time()
@@ -196,8 +196,8 @@ async def test_tts_reaction_aggregator_misaligned_chunks():
 
     # Run aggregator and Profile
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     # Wait for DAG status to become COMPLETED
     start_time = time.time()

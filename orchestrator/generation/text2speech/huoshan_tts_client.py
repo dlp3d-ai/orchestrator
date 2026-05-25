@@ -320,7 +320,7 @@ class HuoshanTTSClient(TextToSpeechAdapter):
                 self.logger.error(f"Received an error message: {error_msg}")
                 return True
             elif message_type == 0xC:
-                msg_size = int.from_bytes(payload[:4], "big", signed=False)
+                # Skip the 4-byte payload length prefix before decoding the body.
                 payload = payload[4:]
                 if message_compression == 1:
                     payload = gzip.decompress(payload)

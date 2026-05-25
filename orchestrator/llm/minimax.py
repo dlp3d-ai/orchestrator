@@ -11,6 +11,16 @@ _MINIMAX_THINKING_PATTERN = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGN
 
 
 def strip_minimax_thinking(content: str) -> str:
+    """Remove MiniMax inline thinking blocks from provider content.
+
+    Args:
+        content (str):
+            Text returned by MiniMax.
+
+    Returns:
+        str:
+            Text with ``<think>...</think>`` blocks removed.
+    """
     return _MINIMAX_THINKING_PATTERN.sub("", content).strip()
 
 
@@ -21,6 +31,22 @@ def build_minimax_config(
     timeout: Optional[float],
     proxy_url: Optional[str],
 ) -> OpenAIChatProviderConfig:
+    """Build the OpenAI-compatible provider config for MiniMax.
+
+    Args:
+        model_name (str):
+            MiniMax model name.
+        base_url (Optional[str]):
+            OpenAI-compatible MiniMax base URL.
+        timeout (Optional[float]):
+            Request timeout in seconds.
+        proxy_url (Optional[str]):
+            Optional HTTP proxy URL.
+
+    Returns:
+        OpenAIChatProviderConfig:
+            Provider config consumed by the shared OpenAI-compatible layer.
+    """
     return OpenAIChatProviderConfig(
         provider_name="MiniMax",
         api_key_field=MINIMAX_API_KEY_FIELD,

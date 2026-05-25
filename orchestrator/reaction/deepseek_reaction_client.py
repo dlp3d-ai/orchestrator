@@ -7,7 +7,6 @@ from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
 from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
-from ..utils.executor_registry import ExecutorRegistry
 from .reaction_adapter import ReactionAdapter
 
 

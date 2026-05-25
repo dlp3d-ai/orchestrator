@@ -17,6 +17,18 @@ _THINK_CLOSE_TAG = "</think>"
 
 
 def _longest_suffix_matching_tag_prefix(text: str, tag: str) -> int:
+    """Find the longest text suffix that can become the start of a tag.
+
+    Args:
+        text (str):
+            Buffered streaming text.
+        tag (str):
+            Tag that may be split across chunks.
+
+    Returns:
+        int:
+            Number of trailing characters to keep for the next chunk.
+    """
     max_len = min(len(text), len(tag) - 1)
     lower_text = text.lower()
     for size in range(max_len, 0, -1):
@@ -33,6 +45,16 @@ class MiniMaxThinkingStreamFilter:
         self._inside_thinking = False
 
     def feed(self, text: str) -> str:
+        """Filter one streaming chunk and return visible text.
+
+        Args:
+            text (str):
+                New text delta from MiniMax.
+
+        Returns:
+            str:
+                Text outside ``<think>...</think>`` blocks.
+        """
         self._buffer += text
         visible_parts = []
 
@@ -65,6 +87,12 @@ class MiniMaxThinkingStreamFilter:
         return "".join(visible_parts)
 
     def flush(self) -> str:
+        """Flush any visible buffered text after the stream ends.
+
+        Returns:
+            str:
+                Remaining visible text. Buffered thinking content is discarded.
+        """
         if self._inside_thinking:
             self._buffer = ""
             return ""

@@ -15,6 +15,22 @@ def build_sensenova_config(
     timeout: Optional[float],
     proxy_url: Optional[str],
 ) -> OpenAIChatProviderConfig:
+    """Build the OpenAI-compatible provider config for SenseNova.
+
+    Args:
+        model_name (str):
+            SenseNova model name.
+        base_url (Optional[str]):
+            OpenAI-compatible SenseNova base URL.
+        timeout (Optional[float]):
+            Request timeout in seconds.
+        proxy_url (Optional[str]):
+            Optional HTTP proxy URL.
+
+    Returns:
+        OpenAIChatProviderConfig:
+            Provider config consumed by the shared OpenAI-compatible layer.
+    """
     return OpenAIChatProviderConfig(
         provider_name="SenseNova",
         api_key_field=SENSENOVA_API_KEY_FIELD,

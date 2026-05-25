@@ -12,7 +12,6 @@ from ..llm.minimax import (
     strip_minimax_thinking,
 )
 from ..llm.openai_chat import complete, create_client
-from ..utils.executor_registry import ExecutorRegistry
 from .classification_adapter import ClassificationAdapter
 
 

@@ -79,10 +79,17 @@ class SenseNovaConversationClient(ConversationAdapter):
         self.executor_external = True if thread_pool_executor is not None else False
 
     def __del__(self) -> None:
+        """Destructor, cleanup owned thread pool executor."""
         if not self.executor_external:
             self.executor.shutdown(wait=True)
 
     async def _init_llm_client(self, request_id: str) -> None:
+        """Initialize the SenseNova LLM client for chat and reject tasks.
+
+        Args:
+            request_id (str):
+                The request id.
+        """
         llm_client = create_client(
             self.input_buffer[request_id]["chat_task"].get("api_keys", {}),
             self.llm_provider_config,
@@ -98,6 +105,24 @@ class SenseNovaConversationClient(ConversationAdapter):
         language: str,
         request_id: str,
     ) -> str:
+        """Stream a SenseNova chat response to downstream conversation nodes.
+
+        Args:
+            message (str):
+                Latest user message.
+            conversation_context (str):
+                Rendered conversation context.
+            conversation_history (list[Any]):
+                Previous conversation messages.
+            language (str):
+                Requested response language.
+            request_id (str):
+                The request id.
+
+        Returns:
+            str:
+                Full accumulated chat response.
+        """
         try:
             start_time = time.time()
             task_space = self.input_buffer[request_id]["chat_task"]
@@ -192,6 +217,20 @@ class SenseNovaConversationClient(ConversationAdapter):
             return ""
 
     async def _llm_stream_reject(self, message: str, language: str, request_id: str) -> str:
+        """Stream a SenseNova reject response to downstream conversation nodes.
+
+        Args:
+            message (str):
+                User message to reject.
+            language (str):
+                Requested response language.
+            request_id (str):
+                The request id.
+
+        Returns:
+            str:
+                Full accumulated reject response.
+        """
         try:
             start_time = time.time()
             task_space = self.input_buffer[request_id]["reject_task"]

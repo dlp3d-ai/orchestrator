@@ -51,6 +51,12 @@ class SenseNovaClassificationClient(ClassificationAdapter):
         )
 
     async def _init_llm_client(self, request_id: str) -> None:
+        """Initialize the SenseNova LLM client for a request.
+
+        Args:
+            request_id (str):
+                The request id.
+        """
         self.input_buffer[request_id]["llm_client"] = create_client(
             self.input_buffer[request_id]["api_keys"],
             self.llm_provider_config,
@@ -64,6 +70,25 @@ class SenseNovaClassificationClient(ClassificationAdapter):
         response_format: Optional[Dict[str, Any]] = None,
         tag_prompt: Optional[str] = None,
     ) -> ClassificationType:
+        """Classify the response type according to the user's text input.
+
+        Args:
+            request_id (str):
+                The request id.
+            prompt (str):
+                System prompt used for classification.
+            text (str):
+                User text to classify.
+            response_format (Optional[Dict[str, Any]], optional):
+                Optional structured-output format. Defaults to None.
+            tag_prompt (Optional[str], optional):
+                Extra tag prompt appended to the system prompt. Defaults to
+                None.
+
+        Returns:
+            ClassificationType:
+                Classification result parsed as accept, reject, or leave.
+        """
         llm_client = self.input_buffer[request_id].get("llm_client", None)
         while llm_client is None:
             await asyncio.sleep(self.sleep_time)

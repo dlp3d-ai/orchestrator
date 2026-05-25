@@ -53,6 +53,12 @@ class SenseNovaReactionClient(ReactionAdapter):
         )
 
     async def _init_llm_client(self, request_id: str) -> None:
+        """Initialize the SenseNova LLM client for a request.
+
+        Args:
+            request_id (str):
+                The request id.
+        """
         self.input_buffer[request_id]["llm_client"] = create_client(
             self.input_buffer[request_id]["api_keys"],
             self.llm_provider_config,
@@ -70,6 +76,33 @@ class SenseNovaReactionClient(ReactionAdapter):
         response_format: Optional[Dict[str, Any]] = None,
         tag_prompt: Optional[str] = None,
     ) -> ReactionDelta:
+        """Get the reaction delta according to user and agent text.
+
+        Args:
+            request_id (str):
+                The request id.
+            prompt (str):
+                System prompt for reaction analysis.
+            text (str):
+                Agent response text.
+            tag (str):
+                Response tag.
+            user_input (str):
+                User input text.
+            current_emotion (Dict[str, int] | None, optional):
+                Current emotion state. Defaults to None.
+            current_relationship (Dict[str, Any] | None, optional):
+                Current relationship state. Defaults to None.
+            response_format (Optional[Dict[str, Any]], optional):
+                Optional structured-output format. Defaults to None.
+            tag_prompt (Optional[str], optional):
+                Extra tag prompt appended to the system prompt. Defaults to
+                None.
+
+        Returns:
+            ReactionDelta:
+                Parsed emotion, relationship, and motion deltas.
+        """
         llm_client = self.input_buffer[request_id].get("llm_client", None)
         while llm_client is None:
             await asyncio.sleep(self.sleep_time)

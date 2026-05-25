@@ -9,6 +9,19 @@ from .types import LLMCompletionResult, LLMMessage, LLMStreamChunk, LLMUsage, no
 
 @dataclass
 class AnthropicMessagesProviderConfig:
+    """Configuration for Anthropic Messages API calls.
+
+    Attributes:
+        api_key_field (str):
+            Field name used to read the Anthropic API key from user settings.
+        model_name (str):
+            Default Anthropic model name.
+        timeout (Optional[float]):
+            Optional request timeout in seconds.
+        proxy_url (Optional[str]):
+            Optional HTTP proxy URL for provider requests.
+    """
+
     api_key_field: str
     model_name: str
     timeout: Optional[float] = None
@@ -16,6 +29,22 @@ class AnthropicMessagesProviderConfig:
 
 
 def _get_api_key(api_keys: Optional[Dict[str, Any]], config: AnthropicMessagesProviderConfig) -> str:
+    """Read the Anthropic API key from user settings.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (AnthropicMessagesProviderConfig):
+            Anthropic provider configuration.
+
+    Returns:
+        str:
+            API key value.
+
+    Raises:
+        MissingAPIKeyException:
+            Raised when the configured key field is absent or empty.
+    """
     api_key = (api_keys or {}).get(config.api_key_field, "")
     if not api_key:
         raise MissingAPIKeyException("Anthropic API key is not found in the API keys.")
@@ -23,12 +52,35 @@ def _get_api_key(api_keys: Optional[Dict[str, Any]], config: AnthropicMessagesPr
 
 
 def _build_http_client(config: AnthropicMessagesProviderConfig) -> Optional[httpx.AsyncClient]:
+    """Create a proxied HTTP client when a proxy is configured.
+
+    Args:
+        config (AnthropicMessagesProviderConfig):
+            Anthropic provider configuration.
+
+    Returns:
+        Optional[httpx.AsyncClient]:
+            A proxied HTTP client, or None to let the SDK create its default
+            client.
+    """
     if config.proxy_url is None:
         return None
     return httpx.AsyncClient(proxy=config.proxy_url)
 
 
 def create_client(api_keys: Optional[Dict[str, Any]], config: AnthropicMessagesProviderConfig) -> Any:
+    """Create an Anthropic async client.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (AnthropicMessagesProviderConfig):
+            Anthropic provider configuration.
+
+    Returns:
+        Any:
+            Async Anthropic client instance.
+    """
     import anthropic
 
     kwargs: Dict[str, Any] = {
@@ -41,6 +93,16 @@ def create_client(api_keys: Optional[Dict[str, Any]], config: AnthropicMessagesP
 
 
 def usage_from_anthropic(raw_usage: Any) -> LLMUsage:
+    """Normalize Anthropic usage metadata.
+
+    Args:
+        raw_usage (Any):
+            Anthropic usage object returned by the SDK.
+
+    Returns:
+        LLMUsage:
+            Normalized token usage. Missing values default to zero.
+    """
     if raw_usage is None:
         return LLMUsage()
     prompt_tokens = int(getattr(raw_usage, "input_tokens", 0) or 0)
@@ -63,6 +125,34 @@ async def stream(
     temperature: float = 1,
     client: Optional[Any] = None,
 ) -> AsyncIterator[LLMStreamChunk]:
+    """Run a streaming Anthropic Messages API call.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (AnthropicMessagesProviderConfig):
+            Anthropic provider configuration.
+        system (str):
+            System prompt content.
+        messages (List[LLMMessage]):
+            Conversation messages.
+        model_override (Optional[str], optional):
+            Per-request model override. Defaults to None.
+        max_tokens (int, optional):
+            Maximum completion token count. Defaults to 1000.
+        temperature (float, optional):
+            Sampling temperature. Defaults to 1.
+        client (Optional[Any], optional):
+            Existing SDK client to reuse. Defaults to None.
+
+    Yields:
+        LLMStreamChunk:
+            Normalized text deltas and final usage metadata.
+
+    Raises:
+        LLMProviderCallError:
+            Raised when the Anthropic streaming call fails.
+    """
     owned_client = client is None
     llm_client = client or create_client(api_keys, config)
     try:
@@ -96,6 +186,36 @@ async def complete(
     temperature: float = 1,
     client: Optional[Any] = None,
 ) -> LLMCompletionResult:
+    """Run a non-streaming Anthropic Messages API call.
+
+    Args:
+        api_keys (Optional[Dict[str, Any]]):
+            User-provided API key mapping.
+        config (AnthropicMessagesProviderConfig):
+            Anthropic provider configuration.
+        system (str):
+            System prompt content.
+        messages (List[LLMMessage]):
+            Conversation messages.
+        model_override (Optional[str], optional):
+            Per-request model override. Defaults to None.
+        max_tokens (int, optional):
+            Maximum completion token count. Defaults to 1000.
+        temperature (float, optional):
+            Sampling temperature. Defaults to 1.
+        client (Optional[Any], optional):
+            Existing SDK client to reuse. Defaults to None.
+
+    Returns:
+        LLMCompletionResult:
+            Normalized completion content, usage, and raw response.
+
+    Raises:
+        LLMProviderCallError:
+            Raised when the Anthropic call fails.
+        LLMEmptyResponseError:
+            Raised when the provider returns no text content.
+    """
     owned_client = client is None
     llm_client = client or create_client(api_keys, config)
     try:

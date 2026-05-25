@@ -5,7 +5,6 @@ from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
 from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
-from ..utils.executor_registry import ExecutorRegistry
 from .classification_adapter import ClassificationAdapter
 
 

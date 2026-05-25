@@ -12,7 +12,6 @@ from ..llm.minimax import (
     strip_minimax_thinking,
 )
 from ..llm.openai_chat import complete
-from ..utils.executor_registry import ExecutorRegistry
 from .memory_adapter import BaseMemoryAdapter
 
 

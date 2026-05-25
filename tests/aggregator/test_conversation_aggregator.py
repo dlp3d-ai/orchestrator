@@ -127,8 +127,8 @@ async def test_conversation_aggregator_accept(mongodb_memory_client: MongoDBMemo
     await aggregator.feed_stream(ConversationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     start_time = time.time()
     while dag.status != DAGStatus.COMPLETED:
@@ -226,8 +226,8 @@ async def test_conversation_aggregator_reject(mongodb_memory_client: MongoDBMemo
     await aggregator.feed_stream(ClassificationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     start_time = time.time()
     while dag.status != DAGStatus.COMPLETED:
@@ -292,7 +292,7 @@ async def test_conversation_aggregator_leave(mongodb_memory_client: MongoDBMemor
     await aggregator.feed_stream(ClassificationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
+    _agg_task = asyncio.create_task(aggregator.run())
 
     start_time = time.time()
     while request_id in aggregator.input_buffer:

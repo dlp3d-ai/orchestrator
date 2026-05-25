@@ -69,6 +69,7 @@ class SenseNovaMemoryClient(BaseMemoryAdapter):
         self.executor_external = True if thread_pool_executor is not None else False
 
     def __del__(self) -> None:
+        """Destructor, cleanup owned thread pool executor."""
         if not self.executor_external:
             self.executor.shutdown(wait=True)
 
@@ -82,6 +83,30 @@ class SenseNovaMemoryClient(BaseMemoryAdapter):
         api_keys: Optional[Dict[str, Any]] = None,
         model_override: Optional[str] = None,
     ) -> str:
+        """Call SenseNova to generate or compress memory content.
+
+        Args:
+            system_prompt (str):
+                System prompt for the memory task.
+            user_input (str):
+                User input or memory context to process.
+            max_tokens (int):
+                Maximum completion token count.
+            response_format (Optional[Dict[str, Any]], optional):
+                Optional structured-output format. Defaults to None.
+            tag_prompt (Optional[str], optional):
+                Extra tag prompt appended to the system prompt. Defaults to
+                None.
+            api_keys (Optional[Dict[str, Any]], optional):
+                User-provided API key mapping. Defaults to None.
+            model_override (Optional[str], optional):
+                Per-request model override. Defaults to None.
+
+        Returns:
+            str:
+                Parsed memory output, or text fallback when structured parsing
+                is unavailable.
+        """
         try:
             model_name = model_override if model_override else self.sensenova_model_name
             system_content = system_prompt + "\n" + tag_prompt if tag_prompt else system_prompt

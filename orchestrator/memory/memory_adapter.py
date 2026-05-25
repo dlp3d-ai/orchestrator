@@ -131,7 +131,9 @@ class BaseMemoryAdapter(Super):
                 Provider call completion token budget.
         """
         del memory_kind
-        return max(summary_max_length * DEFAULT_MEMORY_COMPLETION_TOKEN_MULTIPLIER, DEFAULT_MIN_MEMORY_COMPLETION_TOKENS)
+        return max(
+            summary_max_length * DEFAULT_MEMORY_COMPLETION_TOKEN_MULTIPLIER, DEFAULT_MIN_MEMORY_COMPLETION_TOKENS
+        )
 
     async def build_chat_history(self, cascade_memories: Union[None, Dict[str, Any]]):
         """Build chat history from cascade memories.

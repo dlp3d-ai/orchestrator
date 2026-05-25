@@ -347,7 +347,8 @@ async def test_minimax_classification_client_stream():
     This test verifies that the MiniMax classification adapter can process text
     chunks in streaming mode and correctly classify motion keywords.
 
-    The test will be skipped if MINIMAX_API_KEY environment variable is not set.
+    The test will be skipped if MINIMAX_API_KEY environment variable is not
+    set.
     """
     minimax_api_key = os.environ.get("MINIMAX_API_KEY")
     if not minimax_api_key:

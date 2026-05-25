@@ -596,7 +596,10 @@ class MemoryProcessor(Super):
         response = await self.memory_adapter.call_llm(
             system_prompt=SHORT_AND_MEDIUM_TERM_SUMMARY_PROMPT,
             user_input=user_input,
-            max_tokens=self.medium_term_char_threshold,
+            max_tokens=self.memory_adapter.get_completion_max_tokens(
+                summary_max_length=self.medium_term_char_threshold,
+                memory_kind="medium",
+            ),
             response_format=MEDIUM_TERM_MEMORY_CONTENT_FORMAT,
             tag_prompt=TAG_PROMPT,
             api_keys=api_keys,
@@ -641,7 +644,10 @@ class MemoryProcessor(Super):
         response = await self.memory_adapter.call_llm(
             system_prompt=PROFILE_MEMORY_UPDATE_PROMPT,
             user_input=user_input,
-            max_tokens=self.profile_memory_char_threshold,
+            max_tokens=self.memory_adapter.get_completion_max_tokens(
+                summary_max_length=self.profile_memory_char_threshold,
+                memory_kind="profile",
+            ),
             response_format=PROFILE_MEMORY_UPDATE_FORMAT,
             tag_prompt=TAG_PROMPT,
             api_keys=api_keys,
@@ -680,7 +686,10 @@ class MemoryProcessor(Super):
         response = await self.memory_adapter.call_llm(
             system_prompt=LONG_AND_MEDIUM_TERM_SUMMARY_PROMPT,
             user_input=user_input,
-            max_tokens=self.long_term_char_threshold,
+            max_tokens=self.memory_adapter.get_completion_max_tokens(
+                summary_max_length=self.long_term_char_threshold,
+                memory_kind="long",
+            ),
             response_format=LONG_TERM_MEMORY_CONTENT_FORMAT,
             tag_prompt=TAG_PROMPT,
             api_keys=api_keys,

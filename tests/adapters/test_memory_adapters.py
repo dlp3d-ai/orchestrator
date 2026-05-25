@@ -4,10 +4,12 @@ import time
 import pytest
 
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
+from orchestrator.llm.minimax import MINIMAX_API_KEY_FIELD
 from orchestrator.llm.sensenova import SENSENOVA_API_KEY_FIELD
 from orchestrator.memory.deepseek_memory_client import DeepSeekMemoryClient
 from orchestrator.memory.gemini_memory_client import GeminiMemoryClient
 from orchestrator.memory.memory_processor import MemoryProcessor
+from orchestrator.memory.minimax_memory_client import MiniMaxMemoryClient
 from orchestrator.memory.openai_memory_client import OpenAIMemoryClient
 from orchestrator.memory.sensechat_memory_client import SenseChatMemoryClient
 from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
@@ -87,6 +89,21 @@ def sensenova_memory_client(mongodb_memory_client: MongoDBMemoryClient):
     """
     return SenseNovaMemoryClient(
         name="test_sensenova_memory",
+        db_client=mongodb_memory_client,
+        proxy_url=os.environ.get("PROXY_URL", None),
+    )
+
+
+@pytest.fixture
+def minimax_memory_client(mongodb_memory_client: MongoDBMemoryClient):
+    """Create a MiniMaxMemoryClient instance for testing.
+
+    Returns:
+        MiniMaxMemoryClient:
+            Configured MiniMax memory client instance for test database.
+    """
+    return MiniMaxMemoryClient(
+        name="test_minimax_memory",
         db_client=mongodb_memory_client,
         proxy_url=os.environ.get("PROXY_URL", None),
     )
@@ -321,6 +338,67 @@ async def test_sensenova_memory_client_call_llm(sensenova_memory_client: SenseNo
 
     print(f"SenseNova Memory Client call_llm test completed in {duration:.2f} seconds")
     print(f"Result: {result}")
+
+
+@pytest.mark.asyncio
+async def test_minimax_memory_client_call_llm(minimax_memory_client: MiniMaxMemoryClient):
+    """Test MiniMax memory client call_llm method.
+
+    This test verifies that the MiniMax memory client can successfully call the
+    LLM to merge short-term and medium-term memories. The test creates a
+    MemoryProcessor instance with test conversation data and validates that the
+    memory merging operation completes within 30 seconds and returns a non-empty
+    string result.
+
+    Args:
+        minimax_memory_client (MiniMaxMemoryClient):
+            MiniMax memory client fixture for testing.
+    """
+    minimax_api_key = os.environ.get("MINIMAX_API_KEY")
+    if not minimax_api_key:
+        pytest.skip("MINIMAX_API_KEY is not set, skipping test_minimax_memory_client_call_llm")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_minimax_memory_client_call_llm")
+
+    logger_cfg = dict(
+        logger_name="test_minimax_memory_call_llm", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
+
+    short_term_memories = [
+        {"role": "user", "content": "你好，我叫小周", "relationship": "Stranger"},
+        {"role": "assistant", "content": "你好小周，很高兴认识你！"},
+    ]
+
+    latest_medium_term_memory = {"content": "关系阶段：陌生人，主要话题：用户询问我的姓名和职责。"}
+
+    task_manager = TaskManager(logger_cfg=logger_cfg)
+    memory_processor = MemoryProcessor(
+        db_client=minimax_memory_client.db_client,
+        task_manager=task_manager,
+        memory_adapter=minimax_memory_client,
+        medium_term_char_threshold=100,
+        logger_cfg=logger_cfg,
+    )
+
+    start_time = time.time()
+    result = await memory_processor._merge_short_and_medium_term(
+        short_term_memories=short_term_memories,
+        latest_medium_term_memory=latest_medium_term_memory,
+        api_keys={
+            MINIMAX_API_KEY_FIELD: minimax_api_key,
+        },
+    )
+
+    end_time = time.time()
+    duration = end_time - start_time
+
+    assert result is not None
+    assert isinstance(result, str)
+    assert len(result) > 0
+    assert duration < 30
+
+    print(f"MiniMax Memory Client call_llm test completed in {duration:.2f} seconds")
+    print(f"Result length: {len(result)}")
 
 
 @pytest.mark.asyncio

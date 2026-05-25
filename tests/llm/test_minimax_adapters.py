@@ -12,6 +12,7 @@ from orchestrator.llm.minimax import (
     MINIMAX_DEFAULT_BASE_URL,
     MINIMAX_DEFAULT_MODEL,
     MINIMAX_EXTRA_BODY,
+    MINIMAX_MIN_MEMORY_COMPLETION_TOKENS,
 )
 from orchestrator.llm.openai_chat import create_client
 from orchestrator.llm.types import LLMCompletionResult, LLMStreamChunk, LLMUsage
@@ -53,6 +54,15 @@ def test_minimax_config_requires_minimax_api_key():
                 api_keys={},
             )
         )
+
+
+def test_minimax_memory_completion_budget_keeps_provider_specific_floor():
+    adapter = MiniMaxMemoryClient(name="memory", db_client=object())
+
+    assert adapter.get_completion_max_tokens(summary_max_length=100, memory_kind="medium") == (
+        MINIMAX_MIN_MEMORY_COMPLETION_TOKENS
+    )
+    assert adapter.get_completion_max_tokens(summary_max_length=500, memory_kind="profile") == 2000
 
 
 def test_minimax_classification_uses_common_openai_chat_layer(monkeypatch):
@@ -226,6 +236,32 @@ def test_minimax_memory_uses_common_openai_chat_layer_and_preserves_output_extra
     assert calls[0]["max_tokens"] == 64
     assert calls[0]["response_format"] == response_format
     assert calls[0]["extra_body"] == MINIMAX_EXTRA_BODY
+
+
+def test_minimax_memory_extracts_json_output_when_response_format_is_used(monkeypatch):
+    async def fake_complete(**kwargs):
+        return LLMCompletionResult(
+            content='{"output":"json memory"}',
+            usage=LLMUsage(prompt_tokens=3, completion_tokens=4, total_tokens=7),
+        )
+
+    monkeypatch.setattr(
+        "orchestrator.memory.minimax_memory_client.complete",
+        fake_complete,
+    )
+
+    adapter = MiniMaxMemoryClient(name="memory", db_client=object())
+    result = asyncio.run(
+        adapter.call_llm(
+            system_prompt="memory",
+            user_input="conversation",
+            max_tokens=64,
+            response_format={"type": "json_schema"},
+            api_keys={MINIMAX_API_KEY_FIELD: "test-key"},
+        )
+    )
+
+    assert result == "json memory"
 
 
 def test_minimax_memory_strips_thinking_before_output_extraction(monkeypatch):

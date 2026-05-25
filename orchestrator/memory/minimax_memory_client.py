@@ -1,3 +1,4 @@
+import json
 import re
 from typing import Any, Dict, Optional, Union
 
@@ -8,6 +9,7 @@ from ..llm.minimax import (
     MINIMAX_DEFAULT_BASE_URL,
     MINIMAX_DEFAULT_MODEL,
     MINIMAX_EXTRA_BODY,
+    MINIMAX_MIN_MEMORY_COMPLETION_TOKENS,
     build_minimax_config,
     strip_minimax_thinking,
 )
@@ -98,6 +100,24 @@ class MiniMaxMemoryClient(BaseMemoryAdapter):
             proxy_url=proxy_url,
         )
 
+    def get_completion_max_tokens(self, summary_max_length: int, memory_kind: str) -> int:
+        """Return MiniMax memory completion token budget.
+
+        Args:
+            summary_max_length (int):
+                Desired final memory length in characters.
+            memory_kind (str):
+                Memory task type, such as "medium", "long", or "profile".
+
+        Returns:
+            int:
+                MiniMax completion token budget.
+        """
+        return max(
+            super().get_completion_max_tokens(summary_max_length, memory_kind),
+            MINIMAX_MIN_MEMORY_COMPLETION_TOKENS,
+        )
+
     async def call_llm(
         self,
         system_prompt: str,
@@ -155,6 +175,14 @@ class MiniMaxMemoryClient(BaseMemoryAdapter):
                 self.output_token_number_histogram.labels(adapter=self.name).observe(response.usage.completion_tokens)
 
             content = strip_minimax_thinking(response.content)
+            if response_format:
+                try:
+                    parsed = json.loads(content)
+                    if isinstance(parsed, dict) and "output" in parsed:
+                        return parsed["output"]
+                except json.JSONDecodeError:
+                    pass
+
             match = re.search(r"<output>(.*?)</output>", content, re.DOTALL)
             if match:
                 output = match.group(1)

@@ -9,6 +9,7 @@ import pytest
 from orchestrator.classification.builder import build_classification_adapter
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
+from orchestrator.llm.minimax import MINIMAX_API_KEY_FIELD, MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL
 from orchestrator.llm.sensenova import SENSENOVA_API_KEY_FIELD, SENSENOVA_DEFAULT_BASE_URL, SENSENOVA_DEFAULT_MODEL
 from orchestrator.profile.classification_stream_profile import ClassificationStreamProfile
 from orchestrator.utils.log import logging
@@ -334,6 +335,87 @@ async def test_sensenova_classification_client_stream():
         await asyncio.sleep(0.1)
         if time.time() - start_time > 10:
             raise TimeoutError("Classification stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
+async def test_minimax_classification_client_stream():
+    """Test MiniMax classification client streaming functionality.
+
+    This test verifies that the MiniMax classification adapter can process text
+    chunks in streaming mode and correctly classify motion keywords.
+
+    The test will be skipped if MINIMAX_API_KEY environment variable is not set.
+    """
+    minimax_api_key = os.environ.get("MINIMAX_API_KEY")
+    if not minimax_api_key:
+        pytest.skip("MINIMAX_API_KEY is not set, skipping test_minimax_classification_client_stream")
+
+    logger_cfg = dict(
+        logger_name="test_minimax_classification_client_stream",
+        file_level=logging.DEBUG,
+        logger_path="logs/pytest.log",
+    )
+    classification_client_cfg = dict(
+        type="MiniMaxClassificationClient",
+        name="minimax_classification_client",
+        motion_keywords=motion_keywords,
+        minimax_model_name=MINIMAX_DEFAULT_MODEL,
+        minimax_url=MINIMAX_DEFAULT_BASE_URL,
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    adapter = build_classification_adapter(classification_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = ClassificationStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_minimax_classification_stream",
+        conf=dict(
+            language="zh",
+            user_settings=dict(
+                **{MINIMAX_API_KEY_FIELD: minimax_api_key},
+            ),
+        ),
+        logger_cfg=logger_cfg,
+    )
+    classification_node = DAGNode(
+        name="classification_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(classification_node)
+    graph.add_node(profile_node)
+    graph.add_edge(classification_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(
+        request_id=request_id,
+        dag=graph,
+        node_name=classification_node.name,
+    )
+    await adapter.feed_stream(start_chunk)
+    text = "请唱个歌"
+    for char in text:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 30:
+            raise TimeoutError("MiniMax classification stream timeout")
     await adapter.interrupt()
     await profile.interrupt()
     await asyncio.sleep(adapter.sleep_time * 5)

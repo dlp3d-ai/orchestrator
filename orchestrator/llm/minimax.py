@@ -7,6 +7,7 @@ MINIMAX_DEFAULT_MODEL = "MiniMax-M2.7"
 MINIMAX_DEFAULT_BASE_URL = "https://api.minimaxi.com/v1"
 MINIMAX_API_KEY_FIELD = "minimax_api_key"
 MINIMAX_EXTRA_BODY = {"reasoning_split": True}
+MINIMAX_MIN_MEMORY_COMPLETION_TOKENS = 1024
 _MINIMAX_THINKING_PATTERN = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 
 

@@ -51,6 +51,8 @@ class MiniMaxMemoryClient(BaseMemoryAdapter):
                 Database client for memory operations.
             minimax_model_name (str, optional):
                 Default MiniMax model name to use. Defaults to MINIMAX_DEFAULT_MODEL.
+            minimax_url (str, optional):
+                OpenAI-compatible MiniMax base URL. Defaults to MINIMAX_DEFAULT_BASE_URL.
             proxy_url (Union[None, str], optional):
                 Proxy URL for API requests. Defaults to None.
             timeout (float, optional):

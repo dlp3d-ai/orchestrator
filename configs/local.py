@@ -55,16 +55,17 @@ proxy = dict(
             xai_model_name="grok-3",
             proxy_url=__proxy_url__,
         ),
-        sensenovaomni_memory=dict(
-            type="SenseNovaOmniMemoryClient",
-            name="sensenovaomni_memory_client",
-            wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
+        minimax_memory=dict(
+            type="MiniMaxMemoryClient",
+            name="minimax_memory_client",
+            minimax_model_name="MiniMax-M2.7",
+            minimax_url="https://api.minimaxi.com/v1",
         ),
         sensenova_memory=dict(
             type="SenseNovaMemoryClient",
             name="sensenova_memory_client",
-            sensenova_model_name="SenseNova-V6-5-Pro",
-            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            sensenova_model_name="sensenova-6.7-flash-lite",
+            sensenova_url="https://token.sensenova.cn/v1",
         ),
         sensechat_memory=dict(
             type="SenseChatMemoryClient",
@@ -122,11 +123,12 @@ proxy = dict(
             xai_model_name="grok-3",
             proxy_url=__proxy_url__,
         ),
-        sensenovaomni_agent=dict(
-            type="SenseNovaOmniConversationClient",
-            name="sensenovaomni_agent_client",
+        minimax_agent=dict(
+            type="MiniMaxConversationClient",
+            name="minimax_agent_client",
             agent_prompts_file="configs/agent_prompts.yaml",
-            wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
+            minimax_model_name="MiniMax-M2.7",
+            minimax_url="https://api.minimaxi.com/v1",
         ),
         sensechat_agent=dict(
             type="SenseChatConversationClient",
@@ -139,8 +141,8 @@ proxy = dict(
             type="SenseNovaConversationClient",
             name="sensenova_agent_client",
             agent_prompts_file="configs/agent_prompts.yaml",
-            sensenova_model_name="SenseNova-V6-5-Pro",
-            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            sensenova_model_name="sensenova-6.7-flash-lite",
+            sensenova_url="https://token.sensenova.cn/v1",
         ),
         openai_audio_agent=dict(
             type="OpenAIAudioClient",
@@ -172,18 +174,19 @@ proxy = dict(
             proxy_url=__proxy_url__,
             gemini_model_name="gemini-2.5-flash-lite",
         ),
-        sensenovaomni_classification=dict(
-            type="SenseNovaOmniClassificationClient",
-            name="sensenovaomni_classification_client",
+        minimax_classification=dict(
+            type="MiniMaxClassificationClient",
+            name="minimax_classification_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
-            wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
+            minimax_model_name="MiniMax-M2.7",
+            minimax_url="https://api.minimaxi.com/v1",
         ),
         sensenova_classification=dict(
             type="SenseNovaClassificationClient",
             name="sensenova_classification_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
-            sensenova_model_name="SenseNova-V6-5-Pro",
-            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            sensenova_model_name="sensenova-6.7-flash-lite",
+            sensenova_url="https://token.sensenova.cn/v1",
         ),
         sensechat_classification=dict(
             type="SenseChatClassificationClient",
@@ -222,18 +225,19 @@ proxy = dict(
             proxy_url=__proxy_url__,
             gemini_model_name="gemini-2.5-flash-lite",
         ),
-        sensenovaomni_reaction=dict(
-            type="SenseNovaOmniReactionClient",
-            name="sensenovaomni_reaction_client",
+        minimax_reaction=dict(
+            type="MiniMaxReactionClient",
+            name="minimax_reaction_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
-            wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
+            minimax_model_name="MiniMax-M2.7",
+            minimax_url="https://api.minimaxi.com/v1",
         ),
         sensenova_reaction=dict(
             type="SenseNovaReactionClient",
             name="sensenova_reaction_client",
             motion_keywords="http://127.0.0.1:18080/api/v1/motion_keywords",
-            sensenova_model_name="SenseNova-V6-5-Pro",
-            sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+            sensenova_model_name="sensenova-6.7-flash-lite",
+            sensenova_url="https://token.sensenova.cn/v1",
         ),
         sensechat_reaction=dict(
             type="SenseChatReactionClient",

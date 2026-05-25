@@ -2,12 +2,10 @@ import asyncio
 import json
 from typing import Any, Dict, Optional, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..data_structures.classification import ClassificationType
-from ..utils.exception import MissingAPIKeyException
+from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
 from .classification_adapter import ClassificationAdapter
 
 
@@ -59,11 +57,13 @@ class XAIClassificationClient(ClassificationAdapter):
         self.xai_model_name = xai_model_name
         self.proxy_url = proxy_url
         self.xai_base_url = "https://api.x.ai/v1"
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="XAI",
+            api_key_field="xai_api_key",
+            model_name=xai_model_name,
+            base_url=self.xai_base_url,
+            proxy_url=proxy_url,
+        )
 
     async def _init_llm_client(self, request_id: str) -> None:
         """Initialize the LLM client.
@@ -72,16 +72,9 @@ class XAIClassificationClient(ClassificationAdapter):
             request_id (str):
                 The request id.
         """
-
-        xai_api_key = self.input_buffer[request_id]["api_keys"].get("xai_api_key", "")
-        if not xai_api_key:
-            msg = "XAI API key is not found in the API keys."
-            self.logger.error(msg)
-            raise MissingAPIKeyException(msg)
-        self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
-            api_key=xai_api_key,
-            http_client=self.http_client,
-            base_url=self.xai_base_url,
+        self.input_buffer[request_id]["llm_client"] = create_client(
+            self.input_buffer[request_id]["api_keys"],
+            self.llm_provider_config,
         )
 
     async def classify(
@@ -118,8 +111,11 @@ class XAIClassificationClient(ClassificationAdapter):
         model_name_override = self.input_buffer[request_id]["classification_model_override"]
         xai_model_name = model_name_override if model_name_override else self.xai_model_name
         try:
-            response = await llm_client.chat.completions.create(
-                model=xai_model_name,
+            response = await complete(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=xai_model_name,
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": f"<user_input>: {text}"},
@@ -128,7 +124,7 @@ class XAIClassificationClient(ClassificationAdapter):
                 max_tokens=1000,
                 response_format=response_format,  # type: ignore
             )
-            response = json.loads(response.choices[0].message.content)["type"]  # type: ignore
+            response = json.loads(response.content)["type"]
             self.logger.debug(f"Classification response: {response}")
             return ClassificationType(response)
         except Exception as e:

@@ -14,8 +14,10 @@ from orchestrator.data_structures.conversation import (
 )
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
+from orchestrator.llm.minimax import MINIMAX_API_KEY_FIELD, MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL
+from orchestrator.llm.sensenova import SENSENOVA_API_KEY_FIELD, SENSENOVA_DEFAULT_BASE_URL, SENSENOVA_DEFAULT_MODEL
 from orchestrator.memory.memory_adapter import INITIAL_EMOTION_STATE, INITIAL_RELATIONSHIP_STATE
-from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
+from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
 from orchestrator.profile.reaction_stream_profile import ReactionStreamProfile
 from orchestrator.reaction.builder import build_reaction_adapter
 from orchestrator.utils.log import logging
@@ -39,6 +41,8 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
         MongoDBMemoryClient:
             Configured MongoDB memory client instance for test database.
     """
+    if not MONGODB_HOST or not MONGODB_MEMORY_DB:
+        pytest.skip("MongoDB memory test environment is not configured")
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
@@ -52,17 +56,17 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
 
 @pytest.fixture
 def test_memory_adapter(mongodb_memory_client: MongoDBMemoryClient):
-    """Create a SenseNovaOmniMemoryClient instance for testing.
+    """Create a SenseNovaMemoryClient instance for testing.
 
     Args:
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client fixture for database operations.
 
     Returns:
-        SenseNovaOmniMemoryClient:
-            Configured SenseNova Omni memory client instance for testing.
+        SenseNovaMemoryClient:
+            Configured SenseNova memory client instance for testing.
     """
-    return SenseNovaOmniMemoryClient(
+    return SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -82,7 +86,7 @@ print(f"Loaded {len(motion_keywords)} motion keywords")
 
 @pytest.mark.asyncio
 async def test_openai_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test OpenAI reaction client streaming functionality.
@@ -91,18 +95,14 @@ async def test_openai_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream"
-        )
+    if not openai_api_key:
+        pytest.skip("OPENAI_API_KEY is not set, skipping test_openai_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_reaction_client_stream")
 
@@ -139,8 +139,6 @@ async def test_openai_reaction_client_stream(
             "language": "zh",
             "user_settings": dict(
                 openai_api_key=openai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -192,7 +190,7 @@ async def test_openai_reaction_client_stream(
 
 @pytest.mark.asyncio
 async def test_xai_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test XAI reaction client streaming functionality.
@@ -201,18 +199,14 @@ async def test_xai_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_xai_reaction_client_stream"
-        )
+    if not xai_api_key:
+        pytest.skip("XAI_API_KEY is not set, skipping test_xai_reaction_client_stream")
 
     if not xai_api_key:
         pytest.skip("XAI_API_KEY is not available")
@@ -251,8 +245,6 @@ async def test_xai_reaction_client_stream(
             "language": "zh",
             "user_settings": dict(
                 xai_api_key=xai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -304,7 +296,7 @@ async def test_xai_reaction_client_stream(
 
 @pytest.mark.asyncio
 async def test_gemini_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test Gemini reaction client streaming functionality.
@@ -313,18 +305,14 @@ async def test_gemini_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not gemini_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream"
-        )
+    if not gemini_api_key:
+        pytest.skip("GEMINI_API_KEY is not set, skipping test_gemini_reaction_client_stream")
 
     if not gemini_api_key:
         pytest.skip("GEMINI_API_KEY is not available")
@@ -363,8 +351,6 @@ async def test_gemini_reaction_client_stream(
             "language": "en",
             "user_settings": dict(
                 gemini_api_key=gemini_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -415,119 +401,8 @@ async def test_gemini_reaction_client_stream(
 
 
 @pytest.mark.asyncio
-async def test_sensenova_omni_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
-    mongodb_memory_client: MongoDBMemoryClient,
-):
-    """Test SenseNova Omni reaction client streaming functionality.
-
-    This test verifies that the SenseNova Omni reaction adapter can process
-    classified text chunks in streaming mode and generate appropriate emotional
-    reactions.
-
-    Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            Memory adapter fixture for handling conversation memory.
-        mongodb_memory_client (MongoDBMemoryClient):
-            MongoDB client fixture for database operations.
-    """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK is not set, skipping test_sensenova_omni_reaction_client_stream"
-        )
-    if not MONGODB_HOST:
-        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_reaction_client_stream")
-
-    logger_cfg = dict(
-        logger_name="test_sensenova_omni_reaction_client_stream",
-        file_level=logging.DEBUG,
-        logger_path="logs/pytest.log",
-    )
-    reaction_client_cfg = dict(
-        type="SenseNovaOmniReactionClient",
-        name="sensenova_omni_reaction_client",
-        motion_keywords=motion_keywords,
-        wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
-        proxy_url=os.environ.get("PROXY_URL", None),
-        logger_cfg=logger_cfg,
-    )
-    relationship = await mongodb_memory_client.get_relationship(
-        character_id=TEST_CHARACTER_ID,
-    )
-    emotion = await mongodb_memory_client.get_emotion(
-        character_id=TEST_CHARACTER_ID,
-    )
-    if relationship is None:
-        relationship = (INITIAL_RELATIONSHIP_STATE["stage"], INITIAL_RELATIONSHIP_STATE["value"])
-    if emotion is None:
-        emotion = INITIAL_EMOTION_STATE
-
-    adapter = build_reaction_adapter(reaction_client_cfg)
-    asyncio.create_task(adapter.run())
-    profile = ReactionStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
-    asyncio.create_task(profile.run())
-    graph = DirectedAcyclicGraph(
-        name="test_reaction_stream",
-        conf={
-            "character_id": TEST_CHARACTER_ID,
-            "language": "zh",
-            "user_settings": dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
-            ),
-            "relationship": relationship,
-            "emotion": emotion,
-            "memory_adapter": test_memory_adapter,
-            "memory_db_client": mongodb_memory_client,
-        },
-        logger_cfg=logger_cfg,
-    )
-    reaction_node = DAGNode(
-        name="reaction_node",
-        payload=adapter,
-    )
-    profile_node = DAGNode(
-        name="profile_node",
-        payload=profile,
-    )
-    graph.add_node(reaction_node)
-    graph.add_node(profile_node)
-    graph.add_edge(reaction_node.name, profile_node.name)
-    graph.set_status(DAGStatus.RUNNING)
-    request_id = str(uuid.uuid4())
-    start_chunk = ClassifiedTextChunkStart(
-        request_id=request_id,
-        dag=graph,
-        node_name=reaction_node.name,
-        classification_result=ClassificationType.ACCEPT,
-        client_name=test_client_name,
-        user_input="我为你准备了一个小礼物，期不期待？",
-    )
-    await adapter.feed_stream(start_chunk)
-    text = "<style>惊讶</style>你居然给我准备礼物？这让我有点意外呢……说吧到底是什么别让我等太久一定要记住！记住。"
-    for char in text:
-        body_chunk = ClassifiedTextChunkBody(
-            request_id=request_id,
-            text_segment=char,
-        )
-        await adapter.feed_stream(body_chunk)
-    end_chunk = ClassifiedTextChunkEnd(request_id=request_id)
-    await adapter.feed_stream(end_chunk)
-    start_time = time.time()
-    while graph.status != DAGStatus.COMPLETED:
-        await asyncio.sleep(0.1)
-        if time.time() - start_time > 10:
-            raise TimeoutError("Gemini reaction stream timeout")
-    await adapter.interrupt()
-    await profile.interrupt()
-    await asyncio.sleep(adapter.sleep_time * 5)
-
-
-@pytest.mark.asyncio
 async def test_dummy_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test dummy reaction client streaming functionality.
@@ -537,7 +412,7 @@ async def test_dummy_reaction_client_stream(
     API calls.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
@@ -621,7 +496,7 @@ async def test_dummy_reaction_client_stream(
 
 @pytest.mark.asyncio
 async def test_sensenova_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test SenseNova reaction client streaming functionality.
@@ -630,19 +505,14 @@ async def test_sensenova_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not sensenova_ak or not sensenova_sk:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_reaction_client_stream"
-        )
+    sensenova_api_key = os.environ.get("SENSENOVA_API_KEY")
+    if not sensenova_api_key:
+        pytest.skip("SENSENOVA_API_KEY is not set, skipping test_sensenova_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_reaction_client_stream")
 
@@ -653,8 +523,8 @@ async def test_sensenova_reaction_client_stream(
         type="SenseNovaReactionClient",
         name="sensenova_reaction_client",
         motion_keywords=motion_keywords,
-        sensenova_model_name="SenseNova-V6-5-Pro",
-        sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        sensenova_model_name=SENSENOVA_DEFAULT_MODEL,
+        sensenova_url=SENSENOVA_DEFAULT_BASE_URL,
         proxy_url=os.environ.get("PROXY_URL", None),
         logger_cfg=logger_cfg,
     )
@@ -679,10 +549,7 @@ async def test_sensenova_reaction_client_stream(
             "character_id": TEST_CHARACTER_ID,
             "language": "zh",
             "user_settings": dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                **{SENSENOVA_API_KEY_FIELD: sensenova_api_key},
             ),
             "relationship": relationship,
             "emotion": emotion,
@@ -733,8 +600,113 @@ async def test_sensenova_reaction_client_stream(
 
 
 @pytest.mark.asyncio
+async def test_minimax_reaction_client_stream(
+    test_memory_adapter: SenseNovaMemoryClient,
+    mongodb_memory_client: MongoDBMemoryClient,
+):
+    """Test MiniMax reaction client streaming functionality.
+
+    This test verifies that the MiniMax reaction adapter can process classified
+    text chunks in streaming mode and generate appropriate emotional reactions.
+
+    Args:
+        test_memory_adapter (SenseNovaMemoryClient):
+            Memory adapter fixture for handling conversation memory.
+        mongodb_memory_client (MongoDBMemoryClient):
+            MongoDB client fixture for database operations.
+    """
+    minimax_api_key = os.environ.get("MINIMAX_API_KEY")
+    if not minimax_api_key:
+        pytest.skip("MINIMAX_API_KEY is not set, skipping test_minimax_reaction_client_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_minimax_reaction_client_stream")
+
+    logger_cfg = dict(
+        logger_name="test_minimax_reaction_client_stream", file_level=logging.DEBUG, logger_path="logs/pytest.log"
+    )
+    reaction_client_cfg = dict(
+        type="MiniMaxReactionClient",
+        name="minimax_reaction_client",
+        motion_keywords=motion_keywords,
+        minimax_model_name=MINIMAX_DEFAULT_MODEL,
+        minimax_url=MINIMAX_DEFAULT_BASE_URL,
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    relationship = await mongodb_memory_client.get_relationship(
+        character_id=TEST_CHARACTER_ID,
+    )
+    emotion = await mongodb_memory_client.get_emotion(
+        character_id=TEST_CHARACTER_ID,
+    )
+    if relationship is None:
+        relationship = (INITIAL_RELATIONSHIP_STATE["stage"], INITIAL_RELATIONSHIP_STATE["value"])
+    if emotion is None:
+        emotion = INITIAL_EMOTION_STATE
+
+    adapter = build_reaction_adapter(reaction_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = ReactionStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_minimax_reaction_stream",
+        conf={
+            "character_id": TEST_CHARACTER_ID,
+            "language": "zh",
+            "user_settings": dict(
+                **{MINIMAX_API_KEY_FIELD: minimax_api_key},
+            ),
+            "relationship": relationship,
+            "emotion": emotion,
+            "memory_adapter": test_memory_adapter,
+            "memory_db_client": mongodb_memory_client,
+        },
+        logger_cfg=logger_cfg,
+    )
+    reaction_node = DAGNode(
+        name="reaction_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(reaction_node)
+    graph.add_node(profile_node)
+    graph.add_edge(reaction_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = ClassifiedTextChunkStart(
+        request_id=request_id,
+        dag=graph,
+        node_name=reaction_node.name,
+        classification_result=ClassificationType.ACCEPT,
+        client_name=test_client_name,
+        user_input="我给你准备了一个小礼物，期不期待？",
+    )
+    await adapter.feed_stream(start_chunk)
+    text = "<style>惊讶</style>你居然给我准备礼物？这让我有点意外呢……说吧，到底是什么？别让我等太久！"
+    for char in text:
+        body_chunk = ClassifiedTextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = ClassifiedTextChunkEnd(request_id=request_id)
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 30:
+            raise TimeoutError("MiniMax reaction stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
 async def test_sensechat_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test SenseChat reaction client streaming functionality.
@@ -743,19 +715,15 @@ async def test_sensechat_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     sensechat_ak = os.environ.get("SENSECHAT_AK")
     sensechat_sk = os.environ.get("SENSECHAT_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not sensechat_ak or not sensechat_sk:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_reaction_client_stream"
-        )
+    if not sensechat_ak or not sensechat_sk:
+        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensechat_reaction_client_stream")
 
@@ -792,8 +760,6 @@ async def test_sensechat_reaction_client_stream(
             "character_id": TEST_CHARACTER_ID,
             "language": "zh",
             "user_settings": dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
                 sensechat_ak=sensechat_ak,
                 sensechat_sk=sensechat_sk,
             ),
@@ -847,7 +813,7 @@ async def test_sensechat_reaction_client_stream(
 
 @pytest.mark.asyncio
 async def test_deepseek_reaction_client_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test DeepSeek reaction client streaming functionality.
@@ -856,18 +822,14 @@ async def test_deepseek_reaction_client_stream(
     text chunks in streaming mode and generate appropriate emotional reactions.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
+        test_memory_adapter (SenseNovaMemoryClient):
             Memory adapter fixture for handling conversation memory.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB client fixture for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not deepseek_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_reaction_client_stream"
-        )
+    if not deepseek_api_key:
+        pytest.skip("DEEPSEEK_API_KEY is not set, skipping test_deepseek_reaction_client_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_reaction_client_stream")
 
@@ -903,8 +865,6 @@ async def test_deepseek_reaction_client_stream(
             "character_id": TEST_CHARACTER_ID,
             "language": "zh",
             "user_settings": dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
                 deepseek_api_key=deepseek_api_key,
             ),
             "relationship": relationship,

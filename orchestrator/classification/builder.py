@@ -1,17 +1,17 @@
 from .classification_adapter import ClassificationAdapter
 from .deepseek_classification_client import DeepSeekClassificationClient
 from .gemini_classification_client import GeminiClassificationClient
+from .minimax_classification_client import MiniMaxClassificationClient
 from .openai_classification_client import OpenAIClassificationClient
 from .sensechat_classification_client import SenseChatClassificationClient
 from .sensenova_classification_client import SenseNovaClassificationClient
-from .sensenova_omni_classification_client import SenseNovaOmniClassificationClient
 from .xai_classification_client import XAIClassificationClient
 
 _CLASSIFICATION_ADAPTERS = dict(
     OpenAIClassificationClient=OpenAIClassificationClient,
     XAIClassificationClient=XAIClassificationClient,
     GeminiClassificationClient=GeminiClassificationClient,
-    SenseNovaOmniClassificationClient=SenseNovaOmniClassificationClient,
+    MiniMaxClassificationClient=MiniMaxClassificationClient,
     SenseNovaClassificationClient=SenseNovaClassificationClient,
     SenseChatClassificationClient=SenseChatClassificationClient,
     DeepSeekClassificationClient=DeepSeekClassificationClient,

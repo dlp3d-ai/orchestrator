@@ -18,8 +18,10 @@ from orchestrator.data_structures.classification import (
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.data_structures.text_chunk import TextChunkBody, TextChunkEnd, TextChunkStart
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
+from orchestrator.llm.minimax import MINIMAX_API_KEY_FIELD, MINIMAX_DEFAULT_BASE_URL, MINIMAX_DEFAULT_MODEL
+from orchestrator.llm.sensenova import SENSENOVA_API_KEY_FIELD, SENSENOVA_DEFAULT_BASE_URL, SENSENOVA_DEFAULT_MODEL
 from orchestrator.memory.memory_adapter import INITIAL_EMOTION_STATE
-from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
+from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
 from orchestrator.profile.text_stream_profile import TextStreamProfile
 
 # Test character ID
@@ -41,6 +43,8 @@ def mongodb_memory_client() -> MongoDBMemoryClient:
         MongoDBMemoryClient:
             Configured MongoDB memory client instance for test database.
     """
+    if not MONGODB_HOST or not MONGODB_MEMORY_DB:
+        pytest.skip("MongoDB memory test environment is not configured")
     return MongoDBMemoryClient(
         host=MONGODB_HOST,
         port=MONGODB_PORT,
@@ -158,11 +162,11 @@ def test_memory_adapter(mongodb_memory_client: MongoDBMemoryClient):
             MongoDB memory client instance for database operations.
 
     Returns:
-        SenseNovaOmniMemoryClient:
-            Configured SenseNova Omni memory client for testing.
+        SenseNovaMemoryClient:
+            Configured SenseNova memory client for testing.
     """
-    return SenseNovaOmniMemoryClient(
-        name="test_sensenova_omni_memory",
+    return SenseNovaMemoryClient(
+        name="test_sensenova_memory",
         db_client=mongodb_memory_client,
     )
 
@@ -174,22 +178,20 @@ with open(agent_prompts_file_path, "r", encoding="utf-8") as file:
 
 @pytest.mark.asyncio
 async def test_openai_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test OpenAI conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
-        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not openai_api_key:
+        pytest.skip("OPENAI_API_KEY is not set, skipping test_openai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_openai_stream")
 
@@ -217,8 +219,6 @@ async def test_openai_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 openai_api_key=openai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             profile_memory=None,
             cascade_memories=cascade_memories,
@@ -267,22 +267,20 @@ async def test_openai_stream(
 
 @pytest.mark.asyncio
 async def test_gemini_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test Gemini conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not gemini_api_key:
-        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or GEMINI_API_KEY is not set, skipping test_gemini_stream")
+    if not gemini_api_key:
+        pytest.skip("GEMINI_API_KEY is not set, skipping test_gemini_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_gemini_stream")
 
@@ -312,8 +310,6 @@ async def test_gemini_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 gemini_api_key=gemini_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             profile_memory=profile_memory,
@@ -363,24 +359,20 @@ async def test_gemini_stream(
 
 @pytest.mark.asyncio
 async def test_deepseek_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test DeepSeek conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     deepseek_api_key = os.environ.get("DEEPSEEK_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not deepseek_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream"
-        )
+    if not deepseek_api_key:
+        pytest.skip("DEEPSEEK_API_KEY is not set, skipping test_deepseek_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_deepseek_stream")
 
@@ -407,8 +399,6 @@ async def test_deepseek_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 deepseek_api_key=deepseek_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -457,22 +447,20 @@ async def test_deepseek_stream(
 
 @pytest.mark.asyncio
 async def test_xai_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test XAI conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
-        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_xai_stream")
+    if not xai_api_key:
+        pytest.skip("XAI_API_KEY is not set, skipping test_xai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_xai_stream")
 
@@ -499,8 +487,6 @@ async def test_xai_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 xai_api_key=xai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -549,24 +535,20 @@ async def test_xai_stream(
 
 @pytest.mark.asyncio
 async def test_anthropic_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test Anthropic conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     anthropic_api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not anthropic_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream"
-        )
+    if not anthropic_api_key:
+        pytest.skip("ANTHROPIC_API_KEY is not set, skipping test_anthropic_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_anthropic_stream")
 
@@ -593,8 +575,6 @@ async def test_anthropic_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 anthropic_api_key=anthropic_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -642,117 +622,22 @@ async def test_anthropic_stream(
 
 
 @pytest.mark.asyncio
-async def test_sensenova_omni_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
-    mongodb_memory_client: MongoDBMemoryClient,
-):
-    """Test SenseNova Omni conversation streaming functionality.
-
-    Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
-        mongodb_memory_client (MongoDBMemoryClient):
-            MongoDB memory client for database operations.
-    """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk:
-        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK is not set, skipping test_sensenova_omni_stream")
-    if not MONGODB_HOST:
-        pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_omni_stream")
-
-    logger_cfg = dict(
-        logger_name="test_sensenova_omni_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log"
-    )
-    sensenova_omni_client_cfg = dict(
-        type="SenseNovaOmniConversationClient",
-        name="sensenovaomni_client",
-        agent_prompts_file="configs/agent_prompts.yaml",
-        wss_url="wss://api-gai.sensetime.com/agent-5o/duplex/ws2",
-        logger_cfg=logger_cfg,
-    )
-    cascade_memories = await test_memory_adapter.db_client.get_cascade_memories(
-        character_id=TEST_CHARACTER_ID,
-    )
-    adapter = build_conversation_adapter(sensenova_omni_client_cfg)
-    asyncio.create_task(adapter.run())
-    profile = TextStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
-    asyncio.create_task(profile.run())
-    graph = DirectedAcyclicGraph(
-        name="test_sensenova_omni_streaming",
-        conf=dict(
-            user_prompt=agent_prompts["keqing_default"],
-            character_id=TEST_CHARACTER_ID,
-            user_settings=dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
-            ),
-            language="zh",
-            cascade_memories=cascade_memories,
-            relationship=("Lover", 100),
-            emotion=INITIAL_EMOTION_STATE,
-            memory_adapter=test_memory_adapter,
-            memory_db_client=mongodb_memory_client,
-        ),
-        logger_cfg=logger_cfg,
-    )
-    chat_node = DAGNode(
-        name="chat_node",
-        payload=adapter,
-    )
-    profile_node = DAGNode(
-        name="profile_node",
-        payload=profile,
-    )
-    graph.add_node(chat_node)
-    graph.add_node(profile_node)
-    graph.add_edge(chat_node.name, profile_node.name)
-    graph.set_status(DAGStatus.RUNNING)
-    request_id = str(uuid.uuid4())
-    start_chunk = TextChunkStart(request_id=request_id, dag=graph, node_name=chat_node.name)
-    await adapter.feed_stream(start_chunk)
-    message = "你喜欢吃什么"
-    for char in message:
-        body_chunk = TextChunkBody(
-            request_id=request_id,
-            text_segment=char,
-        )
-        await adapter.feed_stream(body_chunk)
-    end_chunk = TextChunkEnd(
-        request_id=request_id,
-    )
-    await adapter.feed_stream(end_chunk)
-    start_time = time.time()
-    while graph.status != DAGStatus.COMPLETED:
-        await asyncio.sleep(0.1)
-        if time.time() - start_time > 10:
-            raise TimeoutError("SenseNova Omni stream timeout")
-    await adapter.interrupt()
-    await profile.interrupt()
-    await asyncio.sleep(adapter.sleep_time * 5)
-
-
-@pytest.mark.asyncio
 async def test_sensechat_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test SenseChat conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     sensechat_ak = os.environ.get("SENSECHAT_AK")
     sensechat_sk = os.environ.get("SENSECHAT_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not sensechat_ak or not sensechat_sk:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream"
-        )
+    if not sensechat_ak or not sensechat_sk:
+        pytest.skip("SENSECHAT_AK or SENSECHAT_SK is not set, skipping test_sensechat_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensechat_stream")
 
@@ -779,8 +664,6 @@ async def test_sensechat_stream(
             user_prompt=agent_prompts["keqing_default"],
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
                 sensechat_ak=sensechat_ak,
                 sensechat_sk=sensechat_sk,
             ),
@@ -831,25 +714,20 @@ async def test_sensechat_stream(
 
 @pytest.mark.asyncio
 async def test_sensenova_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test SenseNova conversation streaming functionality.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
-    sensenova_ak = os.environ.get("SENSENOVA_AK")
-    sensenova_sk = os.environ.get("SENSENOVA_SK")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not sensenova_ak or not sensenova_sk:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or SENSENOVA_AK or SENSENOVA_SK is not set, skipping test_sensenova_stream"
-        )
+    sensenova_api_key = os.environ.get("SENSENOVA_API_KEY")
+    if not sensenova_api_key:
+        pytest.skip("SENSENOVA_API_KEY is not set, skipping test_sensenova_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_sensenova_stream")
 
@@ -858,8 +736,8 @@ async def test_sensenova_stream(
         type="SenseNovaConversationClient",
         name="sensenova_client",
         agent_prompts_file="configs/agent_prompts.yaml",
-        sensenova_model_name="SenseNova-V6-5-Pro",
-        sensenova_url="https://api.sensenova.cn/v1/llm/chat-completions",
+        sensenova_model_name=SENSENOVA_DEFAULT_MODEL,
+        sensenova_url=SENSENOVA_DEFAULT_BASE_URL,
         proxy_url=os.environ.get("PROXY_URL", None),
         logger_cfg=logger_cfg,
     )
@@ -876,10 +754,7 @@ async def test_sensenova_stream(
             user_prompt=agent_prompts["keqing_default"],
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
-                sensenova_ak=sensenova_ak,
-                sensenova_sk=sensenova_sk,
+                **{SENSENOVA_API_KEY_FIELD: sensenova_api_key},
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -927,23 +802,110 @@ async def test_sensenova_stream(
 
 
 @pytest.mark.asyncio
+async def test_minimax_stream(
+    test_memory_adapter: SenseNovaMemoryClient,
+    mongodb_memory_client: MongoDBMemoryClient,
+):
+    """Test MiniMax conversation streaming functionality.
+
+    Args:
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
+        mongodb_memory_client (MongoDBMemoryClient):
+            MongoDB memory client for database operations.
+    """
+    minimax_api_key = os.environ.get("MINIMAX_API_KEY")
+    if not minimax_api_key:
+        pytest.skip("MINIMAX_API_KEY is not set, skipping test_minimax_stream")
+    if not MONGODB_HOST:
+        pytest.skip("MONGODB_HOST is not set, skipping test_minimax_stream")
+
+    logger_cfg = dict(logger_name="test_minimax_streaming", file_level=logging.DEBUG, logger_path="logs/pytest.log")
+    minimax_client_cfg = dict(
+        type="MiniMaxConversationClient",
+        name="minimax_client",
+        agent_prompts_file="configs/agent_prompts.yaml",
+        minimax_model_name=MINIMAX_DEFAULT_MODEL,
+        minimax_url=MINIMAX_DEFAULT_BASE_URL,
+        proxy_url=os.environ.get("PROXY_URL", None),
+        logger_cfg=logger_cfg,
+    )
+    cascade_memories = await test_memory_adapter.db_client.get_cascade_memories(
+        character_id=TEST_CHARACTER_ID,
+    )
+    adapter = build_conversation_adapter(minimax_client_cfg)
+    asyncio.create_task(adapter.run())
+    profile = TextStreamProfile(mark_status_on_end=True, logger_cfg=logger_cfg)
+    asyncio.create_task(profile.run())
+    graph = DirectedAcyclicGraph(
+        name="test_minimax_streaming",
+        conf=dict(
+            user_prompt=agent_prompts["keqing_default"],
+            character_id=TEST_CHARACTER_ID,
+            user_settings=dict(
+                **{MINIMAX_API_KEY_FIELD: minimax_api_key},
+            ),
+            language="zh",
+            cascade_memories=cascade_memories,
+            relationship=("Lover", 100),
+            emotion=INITIAL_EMOTION_STATE,
+            memory_adapter=test_memory_adapter,
+            memory_db_client=mongodb_memory_client,
+        ),
+        logger_cfg=logger_cfg,
+    )
+    chat_node = DAGNode(
+        name="chat_node",
+        payload=adapter,
+    )
+    profile_node = DAGNode(
+        name="profile_node",
+        payload=profile,
+    )
+    graph.add_node(chat_node)
+    graph.add_node(profile_node)
+    graph.add_edge(chat_node.name, profile_node.name)
+    graph.set_status(DAGStatus.RUNNING)
+    request_id = str(uuid.uuid4())
+    start_chunk = TextChunkStart(request_id=request_id, dag=graph, node_name=chat_node.name)
+    await adapter.feed_stream(start_chunk)
+    message = "你好呀"
+    for char in message:
+        body_chunk = TextChunkBody(
+            request_id=request_id,
+            text_segment=char,
+        )
+        await adapter.feed_stream(body_chunk)
+    end_chunk = TextChunkEnd(
+        request_id=request_id,
+    )
+    await adapter.feed_stream(end_chunk)
+    start_time = time.time()
+    while graph.status != DAGStatus.COMPLETED:
+        await asyncio.sleep(0.1)
+        if time.time() - start_time > 30:
+            raise TimeoutError("MiniMax stream timeout")
+    await adapter.interrupt()
+    await profile.interrupt()
+    await asyncio.sleep(adapter.sleep_time * 5)
+
+
+@pytest.mark.asyncio
 async def test_blank_input_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test conversation streaming with blank input.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     openai_api_key = os.environ.get("OPENAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not openai_api_key:
-        pytest.skip("SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or OPENAI_API_KEY is not set, skipping test_openai_stream")
+    if not openai_api_key:
+        pytest.skip("OPENAI_API_KEY is not set, skipping test_openai_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_blank_input_stream")
 
@@ -970,8 +932,6 @@ async def test_blank_input_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 openai_api_key=openai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,
@@ -1020,24 +980,20 @@ async def test_blank_input_stream(
 
 @pytest.mark.asyncio
 async def test_classification_input_stream(
-    test_memory_adapter: SenseNovaOmniMemoryClient,
+    test_memory_adapter: SenseNovaMemoryClient,
     mongodb_memory_client: MongoDBMemoryClient,
 ):
     """Test conversation streaming with classification input.
 
     Args:
-        test_memory_adapter (SenseNovaOmniMemoryClient):
-            SenseNova Omni memory client for conversation testing.
+        test_memory_adapter (SenseNovaMemoryClient):
+            SenseNova memory client for conversation testing.
         mongodb_memory_client (MongoDBMemoryClient):
             MongoDB memory client for database operations.
     """
-    sensenovaomni_ak = os.environ.get("SENSENOVAOMNI_AK")
-    sensenovaomni_sk = os.environ.get("SENSENOVAOMNI_SK")
     xai_api_key = os.environ.get("XAI_API_KEY")
-    if not sensenovaomni_ak or not sensenovaomni_sk or not xai_api_key:
-        pytest.skip(
-            "SENSENOVAOMNI_AK or SENSENOVAOMNI_SK or XAI_API_KEY is not set, skipping test_classification_input_stream"
-        )
+    if not xai_api_key:
+        pytest.skip("XAI_API_KEY is not set, skipping test_classification_input_stream")
     if not MONGODB_HOST:
         pytest.skip("MONGODB_HOST is not set, skipping test_classification_input_stream")
 
@@ -1065,8 +1021,6 @@ async def test_classification_input_stream(
             character_id=TEST_CHARACTER_ID,
             user_settings=dict(
                 xai_api_key=xai_api_key,
-                sensenovaomni_ak=sensenovaomni_ak,
-                sensenovaomni_sk=sensenovaomni_sk,
             ),
             language="zh",
             cascade_memories=cascade_memories,

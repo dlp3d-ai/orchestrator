@@ -1,13 +1,10 @@
 import re
 from typing import Any, Dict, Optional, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..io.memory.database_memory_client import DatabaseMemoryClient
-from ..utils.exception import MissingAPIKeyException
-from ..utils.executor_registry import ExecutorRegistry
+from ..llm.openai_chat import OpenAIChatProviderConfig, complete
 from .memory_adapter import BaseMemoryAdapter
 
 
@@ -86,11 +83,14 @@ class DeepSeekMemoryClient(BaseMemoryAdapter):
         self.deepseek_base_url = "https://api.deepseek.com"
         self.proxy_url = proxy_url
         self.timeout = timeout
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="DeepSeek",
+            api_key_field="deepseek_api_key",
+            model_name=deepseek_model_name,
+            base_url=self.deepseek_base_url,
+            timeout=timeout,
+            proxy_url=proxy_url,
+        )
 
     async def call_llm(
         self,
@@ -127,25 +127,14 @@ class DeepSeekMemoryClient(BaseMemoryAdapter):
         try:
             if not api_keys:
                 raise ValueError("api_keys is required for DeepSeek LLM calls")
-            deepseek_api_key = api_keys.get("deepseek_api_key", "")
-            if not deepseek_api_key:
-                msg = "DeepSeek API key is not found in the API keys."
-                self.logger.error(msg)
-                raise MissingAPIKeyException(msg)
-
-            deepseek_client = openai.AsyncOpenAI(
-                api_key=deepseek_api_key,
-                base_url=self.deepseek_base_url,
-                http_client=self.http_client,
-                timeout=self.timeout,
-            )
-
             deepseek_model_name = model_override if model_override else self.deepseek_model_name
 
             system_content = system_prompt + "\n" + tag_prompt if tag_prompt else system_prompt
 
-            response = await deepseek_client.chat.completions.create(
-                model=deepseek_model_name,
+            response = await complete(
+                api_keys=api_keys,
+                config=self.llm_provider_config,
+                model_override=deepseek_model_name,
                 messages=[
                     {"role": "system", "content": system_content},
                     {"role": "user", "content": user_input},
@@ -154,33 +143,20 @@ class DeepSeekMemoryClient(BaseMemoryAdapter):
                 max_tokens=max_tokens,
             )
 
-            content = response.choices[0].message.content
-            if content is None:
-                raise ValueError("LLM returned None content")
-
             if self.input_token_number_histogram:
-                input_token_number = response.usage.prompt_tokens if response.usage else 0
-                self.input_token_number_histogram.labels(adapter=self.name).observe(input_token_number)
+                self.input_token_number_histogram.labels(adapter=self.name).observe(response.usage.prompt_tokens)
             if self.output_token_number_histogram:
-                output_token_number = response.usage.completion_tokens if response.usage else 0
-                self.output_token_number_histogram.labels(adapter=self.name).observe(output_token_number)
+                self.output_token_number_histogram.labels(adapter=self.name).observe(response.usage.completion_tokens)
 
-            match = re.search(r"<output>(.*?)</output>", content, re.DOTALL)
+            match = re.search(r"<output>(.*?)</output>", response.content, re.DOTALL)
             if match:
                 output = match.group(1)
             else:
-                self.logger.warning(f"Failed to extract <output> tag from content: {content}")
-                output = content
+                self.logger.warning(f"Failed to extract <output> tag from content: {response.content}")
+                output = response.content
             return output
         except Exception as e:
             exception_type = type(e).__name__
             error_msg = f"DeepSeek LLM call failed: {exception_type}: {e}"
-            if "response" in locals() and response is not None:
-                try:
-                    response_content = response.choices[0].message.content if response.choices else None
-                    if response_content:
-                        error_msg += f" | LLM response content: {response_content[:500]}"
-                except Exception:
-                    pass
             self.logger.error(error_msg)
             raise e

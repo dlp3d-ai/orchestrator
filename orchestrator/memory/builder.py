@@ -1,19 +1,19 @@
 from .deepseek_memory_client import DeepSeekMemoryClient
 from .gemini_memory_client import GeminiMemoryClient
 from .memory_adapter import BaseMemoryAdapter
+from .minimax_memory_client import MiniMaxMemoryClient
 from .openai_memory_client import OpenAIMemoryClient
 from .sensechat_memory_client import SenseChatMemoryClient
 from .sensenova_memory_client import SenseNovaMemoryClient
-from .sensenova_omni_memory_client import SenseNovaOmniMemoryClient
 from .xai_memory_client import XAIMemoryClient
 
 _MEMORY_ADAPTERS = dict(
     OpenAIMemoryClient=OpenAIMemoryClient,
-    SenseNovaOmniMemoryClient=SenseNovaOmniMemoryClient,
     XAIMemoryClient=XAIMemoryClient,
     SenseNovaMemoryClient=SenseNovaMemoryClient,
     SenseChatMemoryClient=SenseChatMemoryClient,
     GeminiMemoryClient=GeminiMemoryClient,
+    MiniMaxMemoryClient=MiniMaxMemoryClient,
     DeepSeekMemoryClient=DeepSeekMemoryClient,
 )
 

@@ -1,6 +1,7 @@
 aioboto3
 httpx
 fastapi==0.110.3
+pydantic==2.12.2
 jinja2
 python-multipart
 uvicorn

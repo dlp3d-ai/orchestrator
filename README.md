@@ -25,7 +25,7 @@ Main application scenarios: personalized role-playing, customized virtual compan
 ### Technical Features
 - **Multimodal Interaction**: Voice interaction, text conversation, 3D animation generation
 - **Real-time Streaming Processing**: Real-time data stream processing with low-latency response
-- **Multi-AI Service Provider Support**: Integration with mainstream AI services including SenseNova, OpenAI, Anthropic, Gemini, xAI, DeepSeek, ElevenLabs, Volcano Engine, etc.
+- **Multi-AI Service Provider Support**: Integration with mainstream AI services including SenseNova, OpenAI, Anthropic, Gemini, xAI, DeepSeek, MiniMax, ElevenLabs, Volcano Engine, etc.
 - **Intelligent Memory Management**: Multi-level conversation memory, relationship status, and emotional state management
 - **Emotional Intelligence Analysis**: Real-time analysis of character emotional changes, relationship changes, and triggered actions
 - **Highly Scalable Architecture**: Modular design, easy to add new AI services and custom features
@@ -56,7 +56,7 @@ orchestrator/
 │   ├── deepseek_conversation_client.py # DeepSeek conversation client
 │   ├── sensechat_conversation_client.py # SenseChat conversation client
 │   ├── sensenova_conversation_client.py # SenseNova conversation client
-│   └── sensenova_omni_conversation_client.py  # SenseNova real-time conversation client
+│   └── minimax_conversation_client.py # MiniMax conversation client
 ├── generation/                # Generation management module
 │   ├── speech_recognition/    # Speech Recognition (ASR)
 │   │   ├── asr_adapter.py     # ASR adapter base class
@@ -85,18 +85,21 @@ orchestrator/
 │   ├── task_manager.py       # Task manager
 |   ├── openai_memory_client.py  # OpenAI memory client
 │   ├── xai_memory_client.py  # xAI memory client
-│   └── sensenova_omni_memory_client.py # SenseNova real-time memory client
+│   ├── sensenova_memory_client.py # SenseNova memory client
+│   └── minimax_memory_client.py # MiniMax memory client
 ├── classification/           # Classification module
 │   ├── classification_adapter.py # Classification adapter base class
-│   ├── sensenova_omni_classification_client.py # SenseNova real-time classification client
 │   ├── openai_classification_client.py # OpenAI classification client
 │   ├── gemini_classification_client.py # Gemini classification client
+│   ├── sensenova_classification_client.py # SenseNova classification client
+│   ├── minimax_classification_client.py # MiniMax classification client
 │   └── xai_classification_client.py    # xAI classification client
 ├── reaction/                # Reaction module
 │   ├── reaction_adapter.py   # Reaction adapter base class
-│   ├── sensenova_omni_reaction_client.py # SenseNova real-time reaction client
 │   ├── openai_reaction_client.py # OpenAI reaction client
 │   ├── gemini_reaction_client.py # Gemini reaction client
+│   ├── sensenova_reaction_client.py # SenseNova reaction client
+│   ├── minimax_reaction_client.py # MiniMax reaction client
 │   └── xai_reaction_client.py    # xAI reaction client
 ├── aggregator/              # Data aggregators
 │   ├── conversation_aggregator.py # Conversation aggregator
@@ -123,7 +126,7 @@ orchestrator/
 - **Core Components**:
   - `ConversationAdapter`: Text conversation adapter base class, handles streaming text conversations
   - `AudioConversationAdapter`: Audio conversation adapter base class, handles real-time voice interactions
-  - Supported providers: SenseNova, OpenAI, Anthropic, Gemini, xAI, DeepSeek, etc.
+  - Supported providers: SenseNova, OpenAI, Anthropic, Gemini, xAI, DeepSeek, MiniMax, etc.
 - **Features**: Streaming output support, long context, multimodal conversations
 
 #### 2. Text-to-Speech Module (TTS)
@@ -251,10 +254,12 @@ python main.py --config_path configs/local.py
 | Google | `GeminiConversationClient` | `gemini-2.5-flash-lite` |
 | DeepSeek | `DeepSeekConversationClient` | `deepseek-chat` |
 | xAI | `XAIConversationClient` | `grok-3` |
+| MiniMax | `MiniMaxConversationClient` | `MiniMax-M2.7` |
 | SenseNova | `SenseChatConversationClient` | `SenseChat-5-1202` (Large Language Model) |
-| SenseNova | `SenseNovaConversationClient` | `SenseNova-V6-5-Pro` (Multimodal Model) |
-| SenseNova | `SenseNovaOmniConversationClient` | `SenseNova-V6-5-Omni` (Real-time Interactive Multimodal Model) |
+| SenseNova | `SenseNovaConversationClient` | `sensenova-6.7-flash-lite` |
 | OpenAI | `OpenAIAudioClient` | `gpt-4o-mini-realtime-preview-2024-12-17` |
+
+OpenAI-compatible LLM credentials are read from user settings. MiniMax uses `minimax_api_key` and the default base URL `https://api.minimaxi.com/v1`; SenseNova uses `sensenova_api_key` and the default base URL `https://token.sensenova.cn/v1`.
 
 ### ASR
 | Provider | Adapter Class |
@@ -279,7 +284,8 @@ python main.py --config_path configs/local.py
 |----------|---------------|---------------|
 | OpenAI | `OpenAIMemoryClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIMemoryClient` | `Grok-3` |
-| SenseNova | `SenseNovaOmniMemoryClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxMemoryClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaMemoryClient` | `sensenova-6.7-flash-lite` |
 
 ### Classification
 | Provider | Adapter Class | Default Model |
@@ -287,7 +293,8 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIClassificationClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIClassificationClient` | `grok-3` |
 | Gemini | `GeminiClassificationClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniClassificationClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxClassificationClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaClassificationClient` | `sensenova-6.7-flash-lite` |
 
 ### Reaction
 | Provider | Adapter Class | Default Model |
@@ -295,7 +302,8 @@ python main.py --config_path configs/local.py
 | OpenAI | `OpenAIReactionClient` | `gpt-4.1-mini-2025-04-14` |
 | xAI | `XAIReactionClient` | `grok-3` |
 | Gemini | `GeminiReactionClient` | `gemini-2.5-flash-lite` |
-| SenseNova | `SenseNovaOmniReactionClient` | `SenseNova-V6-5-Omni` |
+| MiniMax | `MiniMaxReactionClient` | `MiniMax-M2.7` |
+| SenseNova | `SenseNovaReactionClient` | `sensenova-6.7-flash-lite` |
 
 ## Documentation
 

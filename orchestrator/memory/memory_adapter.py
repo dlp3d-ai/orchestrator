@@ -24,6 +24,9 @@ INITIAL_RELATIONSHIP_STATE = {
     "value": 0,
 }
 
+DEFAULT_MEMORY_COMPLETION_TOKEN_MULTIPLIER = 4
+DEFAULT_MIN_MEMORY_COMPLETION_TOKENS = 512
+
 
 class BaseMemoryAdapter(Super):
     """Base memory adapter that defines common methods for all memory-related
@@ -112,6 +115,25 @@ class BaseMemoryAdapter(Super):
         if self.memory_manager is None:
             raise RuntimeError("Memory manager not initialized. Call set_memory_manager() first.")
         return self.memory_manager
+
+    def get_completion_max_tokens(self, summary_max_length: int, memory_kind: str) -> int:
+        """Return the completion token budget for a memory-generation task.
+
+        Args:
+            summary_max_length (int):
+                Desired final memory length in characters, as passed to the
+                prompt's summary_max_length field.
+            memory_kind (str):
+                Memory task type, such as "medium", "long", or "profile".
+
+        Returns:
+            int:
+                Provider call completion token budget.
+        """
+        del memory_kind
+        return max(
+            summary_max_length * DEFAULT_MEMORY_COMPLETION_TOKEN_MULTIPLIER, DEFAULT_MIN_MEMORY_COMPLETION_TOKENS
+        )
 
     async def build_chat_history(self, cascade_memories: Union[None, Dict[str, Any]]):
         """Build chat history from cascade memories.

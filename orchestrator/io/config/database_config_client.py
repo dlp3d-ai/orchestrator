@@ -61,11 +61,10 @@ class DatabaseConfigClient(Super, ABC):
         "anthropic_api_key",
         "gemini_api_key",
         "deepseek_api_key",
+        "minimax_api_key",
         "sensenova_api_key",
         "sensenova_ak",
         "sensenova_sk",
-        "sensenovaomni_ak",
-        "sensenovaomni_sk",
         "sensechat_ak",
         "sensechat_sk",
         "softsugar_app_id",
@@ -211,11 +210,10 @@ class DatabaseConfigClient(Super, ABC):
                 - anthropic_api_key (str): Anthropic API key
                 - gemini_api_key (str): Gemini API key
                 - deepseek_api_key (str): DeepSeek API key
+                - minimax_api_key (str): MiniMax API key
                 - sensenova_api_key (str): Sensenova API key
                 - sensenova_ak (str): Sensenova AK
                 - sensenova_sk (str): Sensenova SK
-                - sensenovaomni_ak (str): SenseNova Omni AK
-                - sensenovaomni_sk (str): SenseNova Omni SK
                 - sensechat_ak (str): SenseChat AK
                 - sensechat_sk (str): SenseChat SK
                 - softsugar_app_id (str): SoftSugar App ID

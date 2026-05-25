@@ -23,7 +23,7 @@ from orchestrator.data_structures.conversation import (
 from orchestrator.data_structures.process_flow import DAGNode, DAGStatus, DirectedAcyclicGraph
 from orchestrator.io.memory.mongodb_memory_client import MongoDBMemoryClient
 from orchestrator.memory.memory_adapter import INITIAL_EMOTION_STATE
-from orchestrator.memory.sensenova_omni_memory_client import SenseNovaOmniMemoryClient
+from orchestrator.memory.sensenova_memory_client import SenseNovaMemoryClient
 from orchestrator.profile.classified_text_stream_profile import ClassifiedStreamProfile
 
 # Test character ID
@@ -67,7 +67,7 @@ async def test_conversation_aggregator_accept(mongodb_memory_client: MongoDBMemo
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_accept", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -127,8 +127,8 @@ async def test_conversation_aggregator_accept(mongodb_memory_client: MongoDBMemo
     await aggregator.feed_stream(ConversationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     start_time = time.time()
     while dag.status != DAGStatus.COMPLETED:
@@ -154,7 +154,7 @@ async def test_conversation_aggregator_reject(mongodb_memory_client: MongoDBMemo
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_reject", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -226,8 +226,8 @@ async def test_conversation_aggregator_reject(mongodb_memory_client: MongoDBMemo
     await aggregator.feed_stream(ClassificationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
-    profile_task = asyncio.create_task(profile.run())
+    _agg_task = asyncio.create_task(aggregator.run())
+    _profile_task = asyncio.create_task(profile.run())
 
     start_time = time.time()
     while dag.status != DAGStatus.COMPLETED:
@@ -253,7 +253,7 @@ async def test_conversation_aggregator_leave(mongodb_memory_client: MongoDBMemor
     logger_cfg = dict(
         logger_name="test_conversation_aggregator_leave", file_level=logging.DEBUG, logger_path="logs/pytest.log"
     )
-    memory = SenseNovaOmniMemoryClient(
+    memory = SenseNovaMemoryClient(
         name="test_memory_adapter",
         db_client=mongodb_memory_client,
     )
@@ -292,7 +292,7 @@ async def test_conversation_aggregator_leave(mongodb_memory_client: MongoDBMemor
     await aggregator.feed_stream(ClassificationChunkEnd(request_id=request_id))
 
     dag.set_status(DAGStatus.RUNNING)
-    agg_task = asyncio.create_task(aggregator.run())
+    _agg_task = asyncio.create_task(aggregator.run())
 
     start_time = time.time()
     while request_id in aggregator.input_buffer:

@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 # Install apt packages
 RUN apt-get update && \
     apt-get install -y \
-        wget curl git vim unzip \
+        ca-certificates curl git vim unzip \
         gcc g++ make \
     && \
     apt-get autoclean
@@ -16,37 +16,10 @@ RUN apt-get update && \
     ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     apt-get autoclean
 
-# Install Python 3.10 from source
-RUN apt-get update && \
-    apt-get install -y \
-        build-essential \
-        zlib1g-dev \
-        libncurses5-dev \
-        libgdbm-dev \
-        libnss3-dev \
-        libssl-dev \
-        libreadline-dev \
-        libffi-dev \
-        libsqlite3-dev \
-        wget \
-        libbz2-dev && \
-    cd /tmp && \
-    wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz && \
-    tar -xf Python-3.10.12.tgz && \
-    cd Python-3.10.12 && \
-    ./configure --enable-optimizations --prefix=/usr/local && \
-    make -j $(nproc) && \
-    make altinstall && \
-    cd / && \
-    rm -rf /tmp/Python-3.10.12* && \
-    apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create symlinks for python3.10
-RUN ln -sf /usr/local/bin/python3.10 /usr/local/bin/python3 && \
-    ln -sf /usr/local/bin/python3.10 /usr/local/bin/python && \
-    ln -sf /usr/local/bin/pip3.10 /usr/local/bin/pip3 && \
-    ln -sf /usr/local/bin/pip3.10 /usr/local/bin/pip
+# Install uv and managed Python 3.10.12
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+ENV UV_PYTHON_INSTALL_DIR=/opt/uv-python
+RUN uv python install 3.10.12
 
 # Download protoc
 RUN mkdir -p /opt/protoc && cd /opt/protoc && \
@@ -57,25 +30,25 @@ RUN mkdir -p /opt/protoc && cd /opt/protoc && \
     ln -s /opt/protoc/bin/protoc /usr/bin/protoc
 
 # Create virtual environment
-RUN /usr/local/bin/python3.10 -m venv /opt/venv && \
-    /opt/venv/bin/pip install --upgrade pip setuptools wheel && \
-    /opt/venv/bin/pip cache purge
+RUN uv venv --python 3.10.12 /opt/venv && \
+    uv pip install --python /opt/venv/bin/python --upgrade pip setuptools wheel && \
+    uv cache clean
 
 # Update PATH to use virtual environment
 ENV PATH="/opt/venv/bin:$PATH"
 
 # COPY orchestrator's requirements
 COPY requirements.txt /opt/requirements.txt
-RUN /opt/venv/bin/pip install -r /opt/requirements.txt && \
-    /opt/venv/bin/pip install pytest && \
-    /opt/venv/bin/pip cache purge
+RUN uv pip install --python /opt/venv/bin/python -r /opt/requirements.txt && \
+    uv pip install --python /opt/venv/bin/python pytest && \
+    uv cache clean
 
 # COPY code
 COPY . /workspace/orchestrator
 # Install code
 RUN cd /workspace/orchestrator && \
-    /opt/venv/bin/pip install . && \
-    /opt/venv/bin/pip cache purge
+    uv pip install --python /opt/venv/bin/python . && \
+    uv cache clean
 
 # required environment variables
 ENV MONGODB_HOST=

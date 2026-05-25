@@ -263,11 +263,10 @@ class MongoDBConfigClient(DatabaseConfigClient):
                 - anthropic_api_key (str): Anthropic API key
                 - gemini_api_key (str): Gemini API key
                 - deepseek_api_key (str): DeepSeek API key
+                - minimax_api_key (str): MiniMax API key
                 - sensenova_api_key (str): Sensenova API key
                 - sensenova_ak (str): Sensenova AK
                 - sensenova_sk (str): Sensenova SK
-                - sensenovaomni_ak (str): SenseNova Omni AK
-                - sensenovaomni_sk (str): SenseNova Omni SK
                 - sensechat_ak (str): SenseChat AK
                 - sensechat_sk (str): SenseChat SK
                 - softsugar_app_id (str): SoftSugar App ID

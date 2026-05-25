@@ -3,12 +3,10 @@ import json
 import time
 from typing import Any, Dict, Optional, Union
 
-import httpx
-import openai
 from prometheus_client import Histogram
 
 from ..data_structures.reaction import ReactionDelta
-from ..utils.exception import MissingAPIKeyException
+from ..llm.openai_chat import OpenAIChatProviderConfig, complete, create_client
 from .reaction_adapter import ReactionAdapter
 
 
@@ -62,11 +60,13 @@ class OpenAIReactionClient(ReactionAdapter):
         )
         self.openai_model_name = openai_model_name
         self.timeout = timeout
-
-        if self.proxy_url is not None:
-            self.http_client = httpx.AsyncClient(proxy=self.proxy_url)
-        else:
-            self.http_client = None
+        self.llm_provider_config = OpenAIChatProviderConfig(
+            provider_name="OpenAI",
+            api_key_field="openai_api_key",
+            model_name=openai_model_name,
+            timeout=timeout,
+            proxy_url=proxy_url,
+        )
 
     async def _init_llm_client(self, request_id: str) -> None:
         """Initialize the LLM client.
@@ -75,16 +75,9 @@ class OpenAIReactionClient(ReactionAdapter):
             request_id (str):
                 The request id.
         """
-        openai_api_key = self.input_buffer[request_id]["api_keys"].get("openai_api_key", "")
-        if not openai_api_key:
-            msg = "OpenAI API key is not found in the API keys."
-            self.logger.error(msg)
-            raise MissingAPIKeyException(msg)
-
-        self.input_buffer[request_id]["llm_client"] = openai.AsyncOpenAI(
-            api_key=openai_api_key,
-            http_client=self.http_client,
-            timeout=self.timeout,
+        self.input_buffer[request_id]["llm_client"] = create_client(
+            self.input_buffer[request_id]["api_keys"],
+            self.llm_provider_config,
         )
 
     async def get_reaction_delta(
@@ -164,8 +157,11 @@ class OpenAIReactionClient(ReactionAdapter):
             user_message = "\n".join(user_message_parts)
 
             start_time = time.time()
-            response = await llm_client.chat.completions.create(
-                model=openai_model_name,
+            response = await complete(
+                client=llm_client,
+                api_keys=None,
+                config=self.llm_provider_config,
+                model_override=openai_model_name,
                 messages=[
                     {"role": "system", "content": prompt},
                     {"role": "user", "content": user_message},
@@ -173,7 +169,7 @@ class OpenAIReactionClient(ReactionAdapter):
                 temperature=1,
                 response_format=response_format,  # type: ignore
             )
-            response_delta = json.loads(response.choices[0].message.content)  # type: ignore
+            response_delta = json.loads(response.content)
             response_delta["speech_text"] = text
             self.logger.debug(
                 f"openai spent {time.time() - start_time} seconds to get reaction delta: {response_delta}"
